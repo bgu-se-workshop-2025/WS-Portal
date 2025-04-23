@@ -1,0 +1,10 @@
+# Allow all crawlers access to everything
+User-agent: *
+Disallow:
+
+# Example: block a private folder
+# User-agent: *
+# Disallow: /private/
+
+# Sitemap location (if you generate one)
+# Sitemap: https://www.example.com/sitemap.xml
