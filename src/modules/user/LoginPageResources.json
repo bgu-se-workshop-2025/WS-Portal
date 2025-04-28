@@ -1,7 +1,7 @@
 {
-    "resources": {
-        "content": {
-            "loginText": "Login to Account"
+    "Resources": {
+        "Content": {
+            "LoginText": "Login to Account"
         }
     }
 }

@@ -7,7 +7,7 @@ type LoginTextFieldProps = {
     type?: string;
 };
 
-const LoginTextField: React.FC<LoginTextFieldProps> = ({ id, label, type }) => {
+function LoginTextField({ id, label, type }: LoginTextFieldProps) {
     return (
         <TextField
             id={id}
