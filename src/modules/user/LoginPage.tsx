@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
-import LoginTextField from "../components/LoginTextField";
+import LoginTextField from "./components/LoginTextField";
+import { resources } from "./LoginPageResources.json"
 
 const LoginPage: React.FC = () => {
     return (
@@ -9,9 +10,9 @@ const LoginPage: React.FC = () => {
             sx={{
                 display: "flex",
                 flexDirection: "row",
+                height: "100vh",
                 padding: 0,
                 margin: 0,
-                height: "100vh",
             }}
         >
             <Box
@@ -25,7 +26,7 @@ const LoginPage: React.FC = () => {
                     alignItems: "center",
                 }}
             >
-                <Typography variant="h2" sx={{ my: "2rem" }}>Login to Account</Typography>
+                <Typography variant="h2" sx={{ my: "2rem" }}>{resources.content.loginText}</Typography>
                 <LoginTextField id="username" label="Username" />
                 <LoginTextField id="password" label="Password" type="password" />
                 <Button variant="contained" sx={{ my: "1rem", width: "30rem", height: "3rem", borderRadius: "1rem" }}>Sign In</Button>

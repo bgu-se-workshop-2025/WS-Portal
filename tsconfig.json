@@ -5,6 +5,7 @@
         "lib": ["DOM", "ESNext"],
         "jsx": "react-jsx",
         "moduleResolution": "node",
+        "resolveJsonModule": true,
         "strict": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
