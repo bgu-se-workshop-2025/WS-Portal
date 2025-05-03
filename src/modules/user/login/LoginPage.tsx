@@ -3,7 +3,7 @@ import { Box, Typography, Button } from "@mui/material";
 
 import LoginTextField from "./components/LoginTextField";
 
-import { SharedResources } from "../../shared/Resources.json";
+import { SharedResources } from "../../../shared/Resources.json";
 import { Resources } from "./LoginPageResources.json";
 
 const LoginPage: React.FC = () => {
