@@ -1,7 +1,38 @@
 {
-    "resources": {
-        "content": {
-            "loginText": "Login to Account"
+  "Resources": {
+    "Content": {
+      "LoginTitle": "Login to Account",
+      "SignupTitle": "New Here?",
+      "SignupDescription": "Sign up and discover the greatest workshop project in the world!",
+      "LoginButton": "Sign In",
+      "SignupButton": "Create Account",
+      "Fields": {
+        "User": {
+          "id": "username",
+          "label": "Username"
+        },
+        "Password": {
+          "id": "password",
+          "label": "Password",
+          "type": "password"
         }
+      }
+    },
+    "Styles": {
+      "MainContainer": {
+        "width": "60%"
+      },
+      "SideContainer": {
+        "width": "40%",
+        "backgroundColor": "#3f51b5",
+        "color": "white"
+      },
+      "Button": {
+        "my": "1rem",
+        "width": "30rem",
+        "height": "3rem",
+        "borderRadius": "1rem"
+      }
     }
+  }
 }

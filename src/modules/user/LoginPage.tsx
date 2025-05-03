@@ -1,55 +1,50 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
+
 import LoginTextField from "./components/LoginTextField";
-import { resources } from "./LoginPageResources.json"
+
+import { SharedResources } from "../../shared/Resources.json";
+import { Resources } from "./LoginPageResources.json";
 
 const LoginPage: React.FC = () => {
-    return (
-        <Box
-            id="LoginPage"
-            sx={{
-                display: "flex",
-                flexDirection: "row",
-                height: "100vh",
-                padding: 0,
-                margin: 0,
-            }}
-        >
-            <Box
-                sx={{
-                    width: "60%",
-                    backgroundColor: "white",
-                    color: "black",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}
-            >
-                <Typography variant="h2" sx={{ my: "2rem" }}>{resources.content.loginText}</Typography>
-                <LoginTextField id="username" label="Username" />
-                <LoginTextField id="password" label="Password" type="password" />
-                <Button variant="contained" sx={{ my: "1rem", width: "30rem", height: "3rem", borderRadius: "1rem" }}>Sign In</Button>
-            </Box>
-            <Box
-                sx={{
-                    width: "40%",
-                    backgroundColor: "#3f51b5",
-                    color: "white",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                }}
-            >
-                <Typography variant="h2" sx={{ my: "1rem" }}>New Here?</Typography>
-                <Typography variant="body1">
-                    Sign up and discover the greatest workshop project in the world!
-                </Typography>
-                <Button variant="contained" color="inherit" sx={{ my: "1rem", width: "15rem", height: "3rem", borderRadius: "1rem", color: "#3f51b5" }}>Sign Up</Button>
-            </Box>
-        </Box>
-    );
+  return (
+    <Box
+      sx={{
+        ...SharedResources.Styles.FlexboxRow,
+        ...SharedResources.Styles.FullScreenHeight,
+      }}
+    >
+      <Box
+        sx={{
+          ...Resources.Styles.MainContainer,
+          ...SharedResources.Styles.FlexboxCol,
+          ...SharedResources.Styles.AlignCenter,
+        }}
+      >
+        <Typography variant="h2">{Resources.Content.LoginTitle}</Typography>
+        <LoginTextField {...Resources.Content.Fields.User} />
+        <LoginTextField {...Resources.Content.Fields.Password} />
+        <Button variant="contained" sx={Resources.Styles.Button}>
+          {Resources.Content.LoginButton}
+        </Button>
+      </Box>
+      <Box
+        sx={{
+          ...Resources.Styles.SideContainer,
+          ...SharedResources.Styles.FlexboxCol,
+          ...SharedResources.Styles.AlignCenter,
+        }}
+      >
+        <Typography variant="h2">{Resources.Content.SignupTitle}</Typography>
+        <Typography variant="body1">
+          {Resources.Content.SignupDescription}
+        </Typography>
+        <Button variant="outlined" color="inherit" sx={Resources.Styles.Button}>
+          {Resources.Content.SignupButton}
+        </Button>
+      </Box>
+    </Box>
+  );
 };
 
 export default LoginPage;

@@ -1,6 +1,8 @@
 import React from "react";
 import { TextField } from "@mui/material";
 
+import { Resources } from "./LoginTextFieldResources.json"
+
 type LoginTextFieldProps = {
     id: string;
     label: string;
@@ -13,7 +15,7 @@ const LoginTextField: React.FC<LoginTextFieldProps> = ({ id, label, type }) => {
             id={id}
             label={label}
             type={type}
-            sx={{ margin: "0.5rem", width: "30rem" }}
+            sx={Resources.Styles.TextField}
             slotProps={{ input: { style: { borderRadius: "1rem" } } }}
         />
     );

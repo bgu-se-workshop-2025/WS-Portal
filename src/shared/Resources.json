@@ -1,0 +1,21 @@
+{
+  "SharedResources": {
+    "Styles": {
+      "FlexboxRow": {
+        "display": "flex",
+        "flexDirection": "row"
+      },
+      "FlexboxCol": {
+        "display": "flex",
+        "flexDirection": "column"
+      },
+      "FullScreenHeight": {
+        "height": "100vh"
+      },
+      "AlignCenter": {
+        "justifyContent": "center",
+        "alignItems": "center"
+      }
+    }
+  }
+}
