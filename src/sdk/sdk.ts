@@ -1,3 +1,5 @@
+import * as auth from "./modules/auth/auth";
+
 import * as order from "./modules/order/order";
 import * as publicOrder from "./modules/order/publicOrder";
 
@@ -14,6 +16,8 @@ import * as message from "./modules/user/message";
 import * as publicUser from "./modules/user/publicUser";
 import * as user from "./modules/user/user";
 
+import { getCookie } from "../shared/utils/cookies";
+
 export interface SDKOptions {
   baseUrl: string;
 }
@@ -25,6 +29,8 @@ export class SDK {
     this.options = options;
 
     Object.assign(this, {
+      ...auth,
+
       ...order,
       ...publicOrder,
 
@@ -43,21 +49,8 @@ export class SDK {
     });
   }
 
-  private getCookie(name: string): string | null {
-    const match = document.cookie.match(
-      new RegExp(
-        "(?:^|; )" + name.replace(/([.*+?^${}()|[\]\\])/g, "\\$1") + "=([^;]*)"
-      )
-    );
-    return match ? decodeURIComponent(match[1]) : null;
-  }
-
-  public getToken(): string | null {
-    return this.getCookie("token");
-  }
-
   public getHeaders(): { [key: string]: string } {
-    const token = this.getToken();
+    const token = getCookie("token");
     return {
       "Content-Type": "application/json",
       Authorization: token ? `Bearer ${token}` : "",
@@ -68,3 +61,7 @@ export class SDK {
     return this.options;
   }
 }
+
+export const sdkInstance: SDK = new SDK({
+  baseUrl: "https://localhost:5000",
+});
