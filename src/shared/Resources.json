@@ -3,7 +3,8 @@
     "Styles": {
       "FlexboxRow": {
         "display": "flex",
-        "flexDirection": "row"
+        "flexDirection": "row",
+        "alignItems": "center"
       },
       "FlexboxCol": {
         "display": "flex",

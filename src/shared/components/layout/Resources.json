@@ -1,0 +1,35 @@
+{
+    "Resources": {
+        "Content": {
+            "Header": {
+                "HeaderTitle": "Kaj-Kadir"
+            },
+            "Footer": {
+                "FooterText": "Copyright © 2025 Kaj-Kadir. All rights reserved."
+            }
+        },
+        "Styles": {
+            "Header": {
+                "height": "5rem",
+                "width": "100%",
+                "position": "absolute",
+                "top": 0,
+                "justifyContent": "space-between",
+                "alignItems": "center"
+            },
+            "HeaderSection": {
+                "padding": "0 1rem"
+            },
+            "HeaderIcon": {
+                "width": "1.75rem",
+                "height": "1.75rem"
+            },
+            "Footer": {
+                "height": "3rem",
+                "width": "100%",
+                "position": "absolute",
+                "bottom": 0
+            }
+        }
+    }
+}
