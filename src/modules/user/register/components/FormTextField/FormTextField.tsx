@@ -26,7 +26,9 @@ const FormTextField = ({
 
     const handleChange = validation ? (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
-        setError(!validation(value));
+        if (validation) {
+            setError(!validation(value));
+        }
     } : undefined;
 
     return <Box>
