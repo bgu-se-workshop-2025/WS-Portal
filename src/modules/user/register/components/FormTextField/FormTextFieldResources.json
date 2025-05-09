@@ -1,0 +1,17 @@
+{
+    "Styles": {
+        "LabelContainer": {
+            "display": "flex",
+            "alignItems": "center",
+            "gap": 0.5
+        },
+        "PopIcon": {
+            "color": "action.active",
+            "cursor": "pointer"
+        },
+        "Field": {
+            "margin": "0.5rem",
+            "width": "30rem"
+        }
+    }
+}
