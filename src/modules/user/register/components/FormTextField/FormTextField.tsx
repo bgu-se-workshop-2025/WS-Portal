@@ -1,4 +1,4 @@
-import { Box, FormControl, InputLabel, TextField, Tooltip } from "@mui/material";
+import { Box, InputLabel, TextField, Tooltip } from "@mui/material";
 import FormTextFieldResources from "./FormTextFieldResources.json";
 import InfoIcon from '@mui/icons-material/Info';
 import { useState } from "react";
