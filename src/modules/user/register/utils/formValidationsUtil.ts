@@ -12,7 +12,6 @@ export const MIN_PASSWORD_LENGTH = 8;
  */
 export function isValidPassword(password: string): boolean {
   return (
-    typeof password === 'string' &&
     password.trim().length >= MIN_PASSWORD_LENGTH &&
     /^(?!.*\s)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/.test(password)
   );
@@ -27,7 +26,6 @@ export function isValidStringProperty(
   maxLength = Number.MAX_SAFE_INTEGER
 ): boolean {
   return (
-    typeof property === 'string' &&
     property.trim().length >= minLength &&
     property.trim().length <= maxLength
   );
@@ -41,7 +39,6 @@ export function isValidStringProperty(
  */
 export function isValidEmailAddress(email: string): boolean {
   return (
-    typeof email === 'string' &&
     email.trim().length > 0 &&
     /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)
   );
