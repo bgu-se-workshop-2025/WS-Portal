@@ -6,7 +6,22 @@ import LoginTextField from "./components/LoginTextField";
 import { SharedResources } from "../../../shared/Resources.json";
 import { Resources } from "./LoginPageResources.json";
 
+import { sdk } from "../../../sdk/sdk";
+
 const LoginPage: React.FC = () => {
+
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+
+  const handleLogin = async () => {
+    try {
+      const { token } = await sdk.login({ username, password });
+      console.log("Login successful, token:", token);
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -22,9 +37,9 @@ const LoginPage: React.FC = () => {
         }}
       >
         <Typography variant="h2">{Resources.Content.LoginTitle}</Typography>
-        <LoginTextField {...Resources.Content.Fields.User} />
-        <LoginTextField {...Resources.Content.Fields.Password} />
-        <Button variant="contained" sx={Resources.Styles.Button}>
+        <LoginTextField {...Resources.Content.Fields.User} setState={setUsername} />
+        <LoginTextField {...Resources.Content.Fields.Password} setState={setPassword} />
+        <Button variant="contained" sx={Resources.Styles.Button} onClick={handleLogin}>
           {Resources.Content.LoginButton}
         </Button>
       </Box>
