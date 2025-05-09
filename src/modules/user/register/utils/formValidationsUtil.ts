@@ -43,3 +43,19 @@ export function isValidEmailAddress(email: string): boolean {
     /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)
   );
 }
+
+/**
+ * Validates a username:
+ * - Not null
+ * - Not blank
+ * - Matches regex (alphanumeric, dots, underscores, hyphens)
+ * - Length between 3 and 20 characters 
+ */
+export function isValidUsername(username: string): boolean {
+  return (
+    username.trim().length > 0 &&
+    /^[a-zA-Z0-9._-]+$/.test(username) &&
+    username.length >= 3 &&
+    username.length <= 20
+  );
+}
