@@ -42,6 +42,7 @@ const FormTextField = ({
         </InputLabel>
         <TextField
             id={id}
+            name={id}
             type={type}
             error={error}
             required={required}
