@@ -18,11 +18,14 @@ import * as user from "./modules/user/user";
 
 import { getCookie } from "../shared/utils/cookies";
 
-export interface SDKOptions {
+interface SDKOptions {
   baseUrl: string;
 }
 
 export class SDK {
+
+  public login!: (payload: auth.LoginPayload) => Promise<void>;
+
   private options: SDKOptions;
 
   constructor(options: SDKOptions) {
@@ -49,7 +52,7 @@ export class SDK {
     });
   }
 
-  public getHeaders(): { [key: string]: string } {
+  private getHeaders(): { [key: string]: string } {
     const token = getCookie("token");
     return {
       "Content-Type": "application/json",
@@ -57,11 +60,15 @@ export class SDK {
     };
   }
 
-  public getOptions(): SDKOptions {
-    return this.options;
+  public async post(endpoint: string, payload: any): Promise<Response> {
+    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
   }
 }
 
-export const sdkInstance: SDK = new SDK({
-  baseUrl: "https://localhost:5000",
+export const sdk: SDK = new SDK({
+  baseUrl: "http://localhost:8080",
 });
