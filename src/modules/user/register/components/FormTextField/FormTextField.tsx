@@ -1,4 +1,4 @@
-import { Box, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, FormControl, InputLabel, TextField, Tooltip } from "@mui/material";
 import FormTextFieldResources from "./FormTextFieldResources.json";
 import InfoIcon from '@mui/icons-material/Info';
 import { useState } from "react";
@@ -29,26 +29,26 @@ const FormTextField = ({
         setError(!validation(value));
     } : undefined;
 
-    return <TextField
-        id={id}
-        label={
-            <Box sx={FormTextFieldResources.Styles.LabelContainer}>
-                <Typography variant="body1">{label}</Typography>
-                {infoPop &&
-                    <Tooltip arrow title={infoPop} leaveDelay={FormTextFieldResources.Constants.PopCloseDelay}>
-                        <InfoIcon fontSize="small" sx={FormTextFieldResources.Styles.PopIcon} />
-                    </Tooltip>
-                }
-            </Box>
-        }
-        type={type}
-        error={error}
-        required={required}
-        placeholder={placeholder}
-        onChange={handleChange}
-        sx={FormTextFieldResources.Styles.Field}
-        slotProps={{ input: { style: { borderRadius: "1rem" } } }}
-    />
+    return <Box>
+        <InputLabel htmlFor={id}>
+            {label + (required ? " * " : "")}
+            {infoPop &&
+                <Tooltip arrow tabIndex={0} title={infoPop} leaveDelay={FormTextFieldResources.Constants.PopCloseDelay}>
+                    <InfoIcon fontSize="small" sx={FormTextFieldResources.Styles.PopIcon} />
+                </Tooltip>
+            }
+        </InputLabel>
+        <TextField
+            id={id}
+            type={type}
+            error={error}
+            required={required}
+            placeholder={placeholder}
+            onChange={handleChange}
+            sx={FormTextFieldResources.Styles.Field}
+            slotProps={{ input: { style: { borderRadius: "1rem" } } }}
+        />
+    </Box>
 }
 
 export default FormTextField;

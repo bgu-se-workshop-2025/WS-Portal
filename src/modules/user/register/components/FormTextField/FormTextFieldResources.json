@@ -1,10 +1,5 @@
 {
     "Styles": {
-        "LabelContainer": {
-            "display": "flex",
-            "alignItems": "center",
-            "gap": 0.5
-        },
         "PopIcon": {
             "color": "action.active",
             "cursor": "pointer"
@@ -15,6 +10,6 @@
         }
     },
     "Constants": {
-        "PopCloseDelay": 750
+        "PopCloseDelay": 300
     }
 }
