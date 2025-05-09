@@ -1,0 +1,21 @@
+{
+    "SidePanel": {
+        "Title": "Already have a user?",
+        "Body": "Login to your account to enjoy thousands of products in the greatest workshop project to ever exist.",
+        "Button": "Login to Account"
+    },
+    "Main": {},
+    "Styles": {
+        "Button": {
+            "my": "1rem",
+            "height": "3rem",
+            "borderRadius": "1rem",
+            "width": {
+                "xs": "100%",
+                "sm": "10rem",
+                "md": "20rem",
+                "lg": "30rem"
+            }
+        }
+    }
+}
