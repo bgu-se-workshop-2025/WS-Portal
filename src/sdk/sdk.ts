@@ -23,7 +23,9 @@ interface SDKOptions {
 }
 
 export class SDK {
+
   public login!: (payload: auth.LoginPayload) => Promise<auth.LoginResponse>;
+  public register!: (payload: auth.RegisterPayload) => Promise<auth.RegisterResponse>;
 
   private options: SDKOptions;
 
@@ -62,6 +64,14 @@ export class SDK {
   public async post(endpoint: string, payload: any): Promise<Response> {
     return await fetch(`${this.options.baseUrl}/${endpoint}`, {
       method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
+  }
+
+  public async patch(endpoint: string, payload: any): Promise<Response> {
+    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+      method: "PATCH",
       headers: this.getHeaders(),
       body: JSON.stringify(payload),
     });
