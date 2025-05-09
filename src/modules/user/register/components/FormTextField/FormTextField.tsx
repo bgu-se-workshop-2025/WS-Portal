@@ -35,3 +35,5 @@ const FormTextField = ({
         slotProps={{ input: { style: { borderRadius: "1rem" } } }}
     />
 }
+
+export default FormTextField;
