@@ -15,7 +15,8 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      await sdk.login({ username, password });
+      const { token } = await sdk.login({ username, password });
+      console.log("Login successful, token:", token);
     } catch (error) {
       console.error("Login failed:", error);
     }

@@ -16,15 +16,14 @@ import * as message from "./modules/user/message";
 import * as publicUser from "./modules/user/publicUser";
 import * as user from "./modules/user/user";
 
-import { getCookie } from "../shared/utils/cookies";
+import { TokenService } from "../shared/utils/token";
 
 interface SDKOptions {
   baseUrl: string;
 }
 
 export class SDK {
-
-  public login!: (payload: auth.LoginPayload) => Promise<void>;
+  public login!: (payload: auth.LoginPayload) => Promise<auth.LoginResponse>;
 
   private options: SDKOptions;
 
@@ -52,11 +51,11 @@ export class SDK {
     });
   }
 
-  private getHeaders(): { [key: string]: string } {
-    const token = getCookie("token");
+  private getHeaders(): Record<string, string> {
+    const token = TokenService.token;
     return {
       "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
   }
 
@@ -67,8 +66,18 @@ export class SDK {
       body: JSON.stringify(payload),
     });
   }
+
+  public async get(endpoint: string, params: Record<string, any>): Promise<Response> {
+    const queryString = new URLSearchParams(params).toString();
+    return await fetch(`${this.options.baseUrl}/${endpoint}?${queryString}`, {
+      method: "GET",
+      headers: this.getHeaders(),
+    });
+  }
 }
 
 export const sdk: SDK = new SDK({
   baseUrl: "http://localhost:8080",
 });
+
+export const isAuthenticated = (): boolean => TokenService.isAuthenticated;
