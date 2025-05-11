@@ -18,12 +18,19 @@ import * as user from "./modules/user/user";
 
 import { TokenService } from "../shared/utils/token";
 
+import * as dtos from "../shared/types/dtos";
+import * as responses from "../shared/types/responses";
+import * as requests from "../shared/types/requests";
+
 interface SDKOptions {
   baseUrl: string;
 }
 
 export class SDK {
-  public login!: (payload: auth.LoginPayload) => Promise<auth.LoginResponse>;
+
+  public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
+  public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
+  public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
 
   private options: SDKOptions;
 
