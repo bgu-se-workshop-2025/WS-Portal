@@ -1,4 +1,5 @@
 import { SDK } from "../../sdk.ts";
+import { AdminDetailsDto } from "../../../shared/types/dtos";
 
 const controller = "admin";
 
@@ -36,5 +37,22 @@ export async function elevateUser(this: SDK, userId: string): Promise<string> {
   }
 
   const result = await response.json() as string;
+  return result;
+}
+
+/**
+ * Checks if the current authenticated user is an admin.
+ * @param this SDK instance
+ * @returns AdminDetailsDto containing admin status
+ */
+export async function isAdmin(this: SDK): Promise<AdminDetailsDto> {
+  const response = await this.get(`${controller}`, {});
+  
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Check admin status failed: ${err}`);
+  }
+  
+  const result = await response.json() as AdminDetailsDto;
   return result;
 }
