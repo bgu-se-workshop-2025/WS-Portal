@@ -12,3 +12,9 @@ export interface UpdatePublicUserDto {
   firstName?: string;
   lastName?: string;
 }
+
+export interface MessageDto {
+    recipientId: string;
+    title: string;
+    body: string;
+}
