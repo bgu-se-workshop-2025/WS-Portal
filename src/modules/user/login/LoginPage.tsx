@@ -8,10 +8,18 @@ import { Resources } from "./LoginPageResources.json";
 
 import { sdk } from "../../../sdk/sdk";
 
+import { useEffect } from "react";
+import { connect } from "../../../sdk/modules/notification/notification";
+
 const LoginPage: React.FC = () => {
 
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
+
+  useEffect(() => {
+    console.log('use')
+    connect((msg: string) => console.log(msg));
+  }, [])
 
   const handleLogin = async () => {
     try {

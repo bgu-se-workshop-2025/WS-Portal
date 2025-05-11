@@ -2,16 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./modules/user/login/LoginPage";
-import { client, connect } from "./sdk/modules/notification/notification";
 
 const rootElement = document.getElementById("App") as HTMLElement;
 const root = ReactDOM.createRoot(rootElement);
-
-import (client,)
-
-useEffect(() => {
-  connect(msg => console.log(msg));
-})
 
 root.render(
   <React.StrictMode>
