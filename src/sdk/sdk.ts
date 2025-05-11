@@ -67,6 +67,14 @@ export class SDK {
     });
   }
 
+  public async patch(endpoint: string, payload: any): Promise<Response> {
+    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+      method: "PATCH",
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
+  }
+
   public async get(endpoint: string, params: Record<string, any>): Promise<Response> {
     const queryString = new URLSearchParams(params).toString();
     return await fetch(`${this.options.baseUrl}/${endpoint}?${queryString}`, {
