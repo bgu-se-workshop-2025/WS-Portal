@@ -1,8 +1,8 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 
-import SellerStorePage from "./seller/SellerStorePage";
-import UserStorePage from "./user/UserStorePage";
+import SellerStorePage from "./SellerStorePage";
+import UserStorePage from "./UserStorePage";
 
 const StorePage: React.FC = () => {
   const { id } = useParams();
