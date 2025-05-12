@@ -52,3 +52,15 @@ export interface MessageDto {
     title: string;
     body: string;
 }
+
+export interface Pageable {
+    page: number;
+    size: number;
+}
+
+export interface PublicUserDto {
+  id: string;
+  email: string;
+  username: string;
+  profilePictureUri: string;
+}
