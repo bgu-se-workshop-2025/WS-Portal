@@ -1,3 +1,7 @@
+export interface AdminDetailsDto {
+    id: string;
+}
+
 export interface PublicUserDto {
   id: string;
   username: string;
