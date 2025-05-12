@@ -3,6 +3,11 @@ import { SDK } from "../../sdk";
 const publicStore: string = "public/stores";
 const seller: string = "sellers";
 
+export interface pageable {
+    page: number;
+    size: number;
+}
+
 export interface publicStore {
     id: string;
     name: string;
@@ -21,8 +26,8 @@ export async function getStore(this: SDK, id: string): Promise<publicStore> {
     return result;
 }
 
-export async function getStores(this: SDK, page: number, size: number): Promise<publicStore[]> {
-    const response = await this.get(publicStore, {});
+export async function getStores(this: SDK, pageable: pageable): Promise<publicStore[]> {
+    const response = await this.get(publicStore, pageable);
     
     if(!response.ok) {
         const error = await response.text();
@@ -33,7 +38,7 @@ export async function getStores(this: SDK, page: number, size: number): Promise<
     return result;
 }
 
-export async function getStoreOfficials(this: SDK, storeId: string): Promise<publicStore[]> {
+export async function getStoreOfficials(this: SDK, storeId: string): Promise<publicStore[]> { // TODO chekc if i need to get the users in the promise
     const response = await this.get(`${publicStore}/${storeId}/${seller}`, {});
     
     if(!response.ok) {
