@@ -1,8 +1,5 @@
 import { SDK } from "../../sdk.ts";
-import { StoreDto } from "../../../shared/types/dtos.ts";
-import { ProductDto } from "../../../shared/types/dtos.ts";
-import { SellerDto } from "../../../shared/types/dtos.ts";
-
+import { StoreDto, ProductDto, SellerDto } from "../../../shared/types/dtos.ts";
 
 const storeController = "stores";
 const productController = "products";
