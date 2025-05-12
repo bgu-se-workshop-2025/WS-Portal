@@ -46,3 +46,9 @@ enum SellerType {
   MANAGER = 1,
   UNKNOWN = 2
 }
+
+export interface MessageDto {
+    recipientId: string;
+    title: string;
+    body: string;
+}

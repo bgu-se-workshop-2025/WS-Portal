@@ -1,0 +1,15 @@
+{
+    "Styles": {
+        "PopIcon": {
+            "color": "action.active",
+            "cursor": "pointer"
+        },
+        "Field": {
+            "margin": "0.5rem",
+            "width": "30rem"
+        }
+    },
+    "Constants": {
+        "PopCloseDelay": 300
+    }
+}
