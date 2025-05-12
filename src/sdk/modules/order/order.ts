@@ -1,16 +1,12 @@
 import { SDK } from "../../sdk";
+import { Pageable } from "../../../shared/types/dtos.ts";
 
 const order = "orders";
 const store = "stores";
 
-export interface pageable {
-    page: number;
-    size: number;
-}
-
 export interface UserOrderDto {
     id: string;
-    // TODO time: LocalDateTime;
+    time: string;
     buyerId: string;
     // TODO shipping address: string;
     cartSnapshot: string;
@@ -18,12 +14,12 @@ export interface UserOrderDto {
 
 export interface StoreOrderDto {
     id: string;
-    // TODO time: LocalDateTime;
+    time: string;
     storeId: string;
     storeSnapshot: string;
 }
 
-export async function getUserOrders(this: SDK, pageable: pageable): Promise<UserOrderDto[]> {
+export async function getUserOrders(this: SDK, pageable: Pageable): Promise<UserOrderDto[]> {
     const response = await this.get(`${order}`, pageable);
 
     if(!response.ok) {
@@ -35,7 +31,7 @@ export async function getUserOrders(this: SDK, pageable: pageable): Promise<User
     return result;
 }
 
-export async function getOrderById(this: SDK, id: string): Promise<UserOrderDto> {
+export async function getUserOrderById(this: SDK, id: string): Promise<UserOrderDto> {
     const response = await this.get(`${order}/${id}`, {});
 
     if(!response.ok) {
@@ -61,7 +57,7 @@ export async function getStoreOrderById(this: SDK, orderId: string, storeId: str
 
 }
 
-export async function getStoreOrders(this: SDK, storeId: string, pageable: pageable): Promise<StoreOrderDto[]> {
+export async function getStoreOrders(this: SDK, storeId: string, pageable: Pageable): Promise<StoreOrderDto[]> {
     const response = await this.get(`${order}/${store}/${storeId}`, pageable);
 
     if(!response.ok) {
