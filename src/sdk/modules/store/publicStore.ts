@@ -1,20 +1,10 @@
 import { SDK } from "../../sdk";
+import { StoreDto, Pageable, PublicUserDto } from "../../../shared/types/dtos.ts";
 
 const publicStore: string = "public/stores";
 const seller: string = "sellers";
 
-export interface pageable {
-    page: number;
-    size: number;
-}
-
-export interface publicStore {
-    id: string;
-    name: string;
-    description: string;
-}
-
-export async function getStore(this: SDK, id: string): Promise<publicStore> {
+export async function getStore(this: SDK, id: string): Promise<StoreDto> {
     const response = await this.get(`${publicStore}/${id}`, {});
     
     if(!response.ok) {
@@ -22,11 +12,11 @@ export async function getStore(this: SDK, id: string): Promise<publicStore> {
         throw new Error(`Error fetching store: ${error}`);
     }
 
-    const result = (await response.json()) as publicStore;
+    const result = (await response.json()) as StoreDto;
     return result;
 }
 
-export async function getStores(this: SDK, pageable: pageable): Promise<publicStore[]> {
+export async function getStores(this: SDK, pageable: Pageable): Promise<StoreDto[]> {
     const response = await this.get(publicStore, pageable);
     
     if(!response.ok) {
@@ -34,11 +24,11 @@ export async function getStores(this: SDK, pageable: pageable): Promise<publicSt
         throw new Error(`Error fetching stores: ${error}`);
     }
 
-    const result = (await response.json()) as publicStore[];
+    const result = (await response.json()) as StoreDto[];
     return result;
 }
 
-export async function getStoreOfficials(this: SDK, storeId: string): Promise<publicStore[]> { // TODO chekc if i need to get the users in the promise
+export async function getStoreOfficials(this: SDK, storeId: string): Promise<PublicUserDto[]> { // TODO chekc if i need to get the users in the promise
     const response = await this.get(`${publicStore}/${storeId}/${seller}`, {});
     
     if(!response.ok) {
@@ -46,6 +36,6 @@ export async function getStoreOfficials(this: SDK, storeId: string): Promise<pub
         throw new Error(`Error fetching store officials: ${error}`);
     }
 
-    const result = (await response.json()) as publicStore[];
+    const result = (await response.json()) as PublicUserDto[];
     return result;
 }
