@@ -8,7 +8,6 @@ export interface StoreDto {
     id: string;
     name: string;
     description: string;
-    // TODO Add empty lists???
 }
 
 export interface ProductDto {
@@ -19,7 +18,8 @@ export interface ProductDto {
     quantity: number;
     storeId: string;
     rating: number;
-    // TODO Add empty lists???
+    categories: string[];
+    auctionEndDate: Date;
 }
 
 export interface SellerDto {
@@ -29,7 +29,7 @@ export interface SellerDto {
     // TODO seller type
     employerSellerId: string;
     employerUserId: string;
-    // TODO Add empty lists???
+    permissions: string[]; // TODO check Set
 }
 
 export async function createStore(this: SDK, store: StoreDto): Promise<StoreDto> {
