@@ -1,36 +1,13 @@
 import { SDK } from "../../sdk.ts";
+import { StoreDto } from "../../../shared/types/dtos.ts";
+import { ProductDto } from "../../../shared/types/dtos.ts";
+import { SellerDto } from "../../../shared/types/dtos.ts";
+
 
 const storeController = "stores";
 const productController = "products";
 const sellerController = "sellers";
 
-export interface StoreDto {
-    id: string;
-    name: string;
-    description: string;
-}
-
-export interface ProductDto {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    quantity: number;
-    storeId: string;
-    rating: number;
-    categories: string[];
-    auctionEndDate: Date;
-}
-
-export interface SellerDto {
-    id: string;
-    userId: string;
-    storeId: string;
-    // TODO seller type
-    employerSellerId: string;
-    employerUserId: string;
-    permissions: string[]; // TODO check Set
-}
 
 export async function createStore(this: SDK, store: StoreDto): Promise<StoreDto> {
     const response = await this.post(`${storeController}`, store);
