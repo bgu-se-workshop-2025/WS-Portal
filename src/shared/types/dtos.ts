@@ -1,3 +1,7 @@
+export interface AdminDetailsDto {
+    id: string;
+}
+
 export interface PublicUserDto {
   id: string;
   username: string;
@@ -11,4 +15,56 @@ export interface UpdatePublicUserDto {
   email?: string;
   firstName?: string;
   lastName?: string;
+}
+
+export interface StoreDto {
+    id: string;
+    name: string;
+    description: string;
+}
+
+export interface ProductDto {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    quantity: number;
+    storeId: string;
+    rating: number;
+    categories: string[];
+    auctionEndDate: string;
+}
+
+export interface SellerDto {
+    id: string;
+    userId: string;
+    storeId: string;
+    sellerType: SellerType;
+    employerSellerId: string;
+    employerUserId?: string;
+    permissions: string[];
+}
+
+enum SellerType {
+  OWNER = 0,
+  MANAGER = 1,
+  UNKNOWN = 2
+}
+
+export interface MessageDto {
+    recipientId: string;
+    title: string;
+    body: string;
+}
+
+export interface Pageable {
+    page: number;
+    size: number;
+}
+
+export interface PublicUserDto {
+  id: string;
+  email: string;
+  username: string;
+  profilePictureUri: string;
 }
