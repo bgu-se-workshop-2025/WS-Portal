@@ -1,23 +1,8 @@
 import { SDK } from "../../sdk";
-import { Pageable } from "../../../shared/types/dtos.ts";
+import { Pageable, UserOrderDto, StoreOrderDto } from "../../../shared/types/dtos.ts";
 
 const order = "orders";
 const store = "stores";
-
-export interface UserOrderDto {
-    id: string;
-    time: string;
-    buyerId: string;
-    // TODO shipping address: string;
-    cartSnapshot: string;
-}
-
-export interface StoreOrderDto {
-    id: string;
-    time: string;
-    storeId: string;
-    storeSnapshot: string;
-}
 
 export async function getUserOrders(this: SDK, pageable: Pageable): Promise<UserOrderDto[]> {
     const response = await this.get(`${order}`, pageable);
