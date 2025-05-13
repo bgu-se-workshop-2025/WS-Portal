@@ -15,6 +15,14 @@ import { NotificationsOutlined } from "@mui/icons-material";
 const NotificationMenu: React.FC = () => {
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
 
+  const notifications = [
+    { id: 1, message: "New comment on your post" },
+    { id: 2, message: "Your order has shipped" },
+    { id: 3, message: "New follower" },
+    { id: 4, message: "New like on your photo" },
+    // Add more notifications as needed
+  ];
+
   return (
     <ClickAwayListener onClickAway={() => setNotificationsOpen(false)}>
       <Box position="relative">
@@ -40,15 +48,13 @@ const NotificationMenu: React.FC = () => {
             }}
           >
             <List dense>
-              <ListItem>
-                <Typography variant="body2">
-                  New comment on your post
-                </Typography>
-              </ListItem>
-              <ListItem>
-                <Typography variant="body2">Your order has shipped</Typography>
-              </ListItem>
-              {/* …more items… */}
+              {notifications.map((notification) => (
+                <ListItem key={notification.id}>
+                  <Typography variant="body2">
+                    {notification.message}
+                  </Typography>
+                </ListItem>
+              ))}
             </List>
           </Paper>
         </Collapse>
