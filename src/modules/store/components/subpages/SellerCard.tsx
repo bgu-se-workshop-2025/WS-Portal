@@ -6,13 +6,14 @@ import {
   Stack,
   IconButton,
 } from "@mui/material";
-import { FiSettings } from "react-icons/fi";
+import { FiSettings, FiTrash2 } from "react-icons/fi";
 
 interface SellerCardProps {
   name: string;
   role: string;
   isYou?: boolean;
-  onSettingsClick?: () => void; // NEW
+  onSettingsClick?: () => void;
+  onDeleteClick?: () => void;
 }
 
 const SellerCard: React.FC<SellerCardProps> = ({
@@ -20,6 +21,7 @@ const SellerCard: React.FC<SellerCardProps> = ({
   role,
   isYou,
   onSettingsClick,
+  onDeleteClick,
 }) => {
   return (
     <Paper
@@ -30,7 +32,7 @@ const SellerCard: React.FC<SellerCardProps> = ({
         px: 3,
         py: 2,
         borderRadius: 2,
-        backgroundColor: "#f3f4ff", 
+        backgroundColor: "#f3f4ff",
       }}
     >
       <Box
@@ -39,7 +41,6 @@ const SellerCard: React.FC<SellerCardProps> = ({
         alignItems="center"
         flexWrap="wrap"
       >
-        {/* Name + (You) */}
         <Typography
           variant="subtitle1"
           fontWeight={600}
@@ -60,7 +61,6 @@ const SellerCard: React.FC<SellerCardProps> = ({
           )}
         </Typography>
 
-        {/* Role + Settings icon */}
         <Stack
           direction="row"
           spacing={1}
@@ -70,9 +70,21 @@ const SellerCard: React.FC<SellerCardProps> = ({
           <Typography variant="body2" color="text.secondary">
             {role}
           </Typography>
-          <IconButton size="small" onClick={onSettingsClick}>
-            <FiSettings />
-          </IconButton>
+          {onSettingsClick && (
+            <IconButton size="small" onClick={onSettingsClick}>
+              <FiSettings />
+            </IconButton>
+          )}
+          {onDeleteClick && (
+            <IconButton
+              size="small"
+              color="error"
+              onClick={onDeleteClick}
+              disabled={isYou}
+            >
+              <FiTrash2 />
+            </IconButton>
+          )}
         </Stack>
       </Box>
     </Paper>

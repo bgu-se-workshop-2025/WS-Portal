@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, Stack, Button } from "@mui/material";
 import SellerCard from "./SellerCard";
 import SellerPermissionsDialog from "./SellerPermissionsDialog";
-import AddSellerDialog from "./AddSellerDialog";             // ← make sure this path is correct
+import AddSellerDialog from "./AddSellerDialog";
+import RemoveSellerDialog from "./RemoveSellerDialog";
 import { sdk } from "../../../../sdk/sdk";
 import { PublicUserDto } from "../../../../shared/types/dtos";
 
@@ -22,52 +23,41 @@ interface Seller {
   permissions: PermissionObject;
 }
 
-// Fallback data in case the SDK call fails
-const fallbackSellers: Seller[] = [
-  {
-    id: "1",
-    name: "Adam",
-    role: "Manager",
-    isYou: true,
-    permissions: {
-      CanAddDiscount: true,
-      CanRemoveProduct: false,
-      CanAddProduct: true,
-      CanModifyPermissions: true,
-    },
-  },
-];
-
 const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [permDialogOpen, setPermDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
+  const [selectedSellerToRemove, setSelectedSellerToRemove] = useState<Seller | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const currentUserId = "1"; // ← replace with real logged-in seller ID
+  const currentUserId = "1"; // Replace with real current user ID
 
+
+
+  
   const fetchSellers = () => {
     if (!storeId) return;
+    setLoading(true);
     sdk.getStoreOfficials(storeId)
       .then((officials: PublicUserDto[]) => {
-        setSellers(
-          officials.map((u) => ({
-            id: u.id,
-            name: u.username,
-            role: "Manager",             // or map from u.roles if available
-            isYou: u.id === currentUserId,
-            permissions: {
-              CanAddDiscount: false,
-              CanRemoveProduct: false,
-              CanAddProduct: false,
-              CanModifyPermissions: false,
-            },
-          }))
-        );
+        const result: Seller[] = officials.map((u) => ({
+          id: u.id,
+          name: u.username,
+          role: "Manager", // You can replace with u.role if available
+          isYou: u.id === currentUserId,
+          permissions: {
+            CanAddDiscount: false,
+            CanRemoveProduct: false,
+            CanAddProduct: false,
+            CanModifyPermissions: false,
+          },
+        }));
+        setSellers(result);
       })
-      .catch(() => {
-        setSellers(fallbackSellers);
-      });
+      .catch(() => setSellers([]))
+      .finally(() => setLoading(false));
   };
 
   useEffect(fetchSellers, [storeId]);
@@ -77,23 +67,48 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
     setSelectedSeller(seller);
     setPermDialogOpen(true);
   };
+
   const handleClosePerms = () => {
     setPermDialogOpen(false);
     setSelectedSeller(null);
   };
+
   const handleSavePerms = (newPerms: PermissionObject) => {
+    if (!selectedSeller) return;
+    // Optional: update backend with new permissions here via sdk
     setSellers((prev) =>
       prev.map((s) =>
-        s.id === selectedSeller?.id ? { ...s, permissions: newPerms } : s
+        s.id === selectedSeller.id ? { ...s, permissions: newPerms } : s
       )
     );
     handleClosePerms();
   };
 
-  // After adding a seller, re-fetch and close the add‐dialog
-  const handleAddSuccess = () => {
-    fetchSellers();
+  // Add seller success
+  const handleAddSuccess = (newSeller: Seller) => {
+    setSellers((prev) => [...prev, newSeller]);
     setAddDialogOpen(false);
+  };
+
+  // Remove seller flow
+  const handleDeleteSellerClick = (seller: Seller) => {
+    setSelectedSellerToRemove(seller);
+    setRemoveDialogOpen(true);
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!selectedSellerToRemove) return;
+    try {
+      await sdk.removeSeller(storeId!, selectedSellerToRemove.id);
+      setSellers((prev) =>
+        prev.filter((s) => s.id !== selectedSellerToRemove.id)
+      );
+    } catch (err: any) {
+      alert(err.message || "Failed to remove seller");
+    } finally {
+      setRemoveDialogOpen(false);
+      setSelectedSellerToRemove(null);
+    }
   };
 
   return (
@@ -102,7 +117,6 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
         👥 Store Sellers
       </Typography>
 
-      {/* ← Your Add Seller button */}
       <Button
         variant="contained"
         onClick={() => setAddDialogOpen(true)}
@@ -119,22 +133,29 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
             role={seller.role}
             isYou={seller.isYou}
             onSettingsClick={() => handleOpenPerms(seller)}
+            onDeleteClick={() => handleDeleteSellerClick(seller)}
           />
         ))}
+
+        {!loading && sellers.length === 0 && (
+          <Typography color="textSecondary" align="center">
+            No sellers yet for this store.
+          </Typography>
+        )}
       </Stack>
 
-      {/* ← Correctly render the AddSellerDialog component */}
+      {/* Add Seller Dialog */}
       {storeId && (
         <AddSellerDialog
           open={addDialogOpen}
           onClose={() => setAddDialogOpen(false)}
           storeId={storeId}
-          employerSellerId={currentUserId}  // ← don’t forget this prop
+          employerSellerId={currentUserId}
           onSuccess={handleAddSuccess}
         />
       )}
 
-      {/* ← Your existing permissions‐editing dialog */}
+      {/* Permissions Dialog */}
       {selectedSeller && (
         <SellerPermissionsDialog
           open={permDialogOpen}
@@ -145,6 +166,14 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
           onSave={handleSavePerms}
         />
       )}
+
+      {/* Remove Seller Dialog */}
+      <RemoveSellerDialog
+        open={removeDialogOpen}
+        sellerName={selectedSellerToRemove?.name || ""}
+        onClose={() => setRemoveDialogOpen(false)}
+        onConfirm={handleConfirmRemove}
+      />
     </Box>
   );
 };

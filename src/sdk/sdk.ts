@@ -39,9 +39,8 @@ export class SDK {
   public deleteMessage!: (messageId: string) => Promise<void>;
   public getStore!: (id: string) => Promise<dtos.StoreDto>;
   public getStoreOfficials!: (storeId: string) => Promise<dtos.PublicUserDto[]>;
-  public addSeller!: (storeId: string, payload: dtos.SellerDto) => Promise<dtos.SellerDto>;
-  public removeSeller!: (storeId: string, sellerId: string) => Promise<void>;
 
+  
   private options: SDKOptions;
 
   constructor(options: SDKOptions) {

@@ -117,19 +117,26 @@ const AddSellerDialog: React.FC<Props> = ({
         isYou: false,
       });
 
+      // Reset form
       setId("");
       setUserId("");
       setSellerType(1);
       setPermissions([]);
       onClose();
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-        console.error("Failed to add seller:", err.message);
-      } else {
-        setError("An unknown error occurred.");
-        console.error("Failed to add seller:", err);
+    } catch (err: any) {
+      let msg = "An unknown error occurred.";
+      if (err?.response?.data?.message) {
+        msg = err.response.data.message;
+      } else if (typeof err === "string") {
+        msg = err;
+      } else if (err instanceof Error) {
+        msg = err.message;
+      } else if (typeof err === "object" && err?.message) {
+        msg = err.message;
       }
+
+      setError(msg);
+      console.error("Failed to add seller:", msg);
     } finally {
       setLoading(false);
     }
@@ -139,7 +146,11 @@ const AddSellerDialog: React.FC<Props> = ({
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Add Seller</DialogTitle>
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-        {error && <Typography color="error">{error}</Typography>}
+        {error && (
+          <Typography color="error" sx={{ mt: 1 }}>
+            {error}
+          </Typography>
+        )}
 
         <TextField
           label="Record ID"
