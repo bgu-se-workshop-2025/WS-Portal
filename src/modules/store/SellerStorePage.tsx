@@ -32,6 +32,7 @@ const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
   return (
     <Box minHeight="100vh" bgcolor="#f7f7f7" py={6}>
       <Container maxWidth="md">
+        <Box mt="5rem">
         <Typography variant="h4" align="center" color="textPrimary" gutterBottom>
           🏪 {store?.name || "Loading..."}
         </Typography>
@@ -45,6 +46,7 @@ const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
           {activeTab === "sellers" && <StoreSellers storeId={id} />}
           {activeTab === "settings" && <StoreSettings storeId={id} />}
           {activeTab === "discounts" && <StoreDiscounts storeId={id} />}
+        </Box>
         </Box>
       </Container>
     </Box>

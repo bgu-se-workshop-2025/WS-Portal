@@ -46,7 +46,7 @@ const StoreSettings: React.FC<{ storeId?: string }> = ({ storeId }) => {
   };
 
   return (
-    <Box mt={2} maxWidth={600} sx={{ width: "30rem" }}>
+    <Box mt={2} maxWidth={600} sx={{ width: "30rem" }} alignItems="center">
       <Typography
         variant="h5"
         fontWeight="600"

@@ -44,7 +44,7 @@ export interface SellerDto {
     permissions: string[];
 }
 
-enum SellerType {
+export enum SellerType {
   OWNER = 0,
   MANAGER = 1,
   UNKNOWN = 2
@@ -66,4 +66,76 @@ export interface PublicUserDto {
   email: string;
   username: string;
   profilePictureUri: string;
+}
+
+export interface UserOrderDto {
+    id: string;
+    time: string;
+    buyerId: string;
+    shippingAddress: ShippingAddressDto;
+    cartSnapshot: string;
+}
+
+export interface StoreOrderDto {
+    id: string;
+    time: string;
+    storeId: string;
+    storeSnapshot: string;
+}
+
+export interface ShippingAddressDto {
+    country: string;
+    city: string;
+    region: string;
+    street: string;
+    zipCode: string;
+    homeNumber: string;
+    apartmentNumber: string;
+    mailbox: string;
+}
+
+export interface ReviewDto {
+    id: string;
+    productId: string;  
+    storeId: string;
+    writerId: string;
+    title: string;
+    body: string;
+    rating: number;
+    date: string;
+}
+
+export interface OrderRequestDetails {
+    cart: CartDto;
+    paymentDetails: PaymentDetails;
+    shippingAddress: ShippingAddressDto;
+}
+
+export interface CartDto {
+    ownerId: string;
+    stores: CartStoreBasketDto[];
+}
+
+export interface CartStoreBasketDto {
+    storeId: string;
+    products: CartProductEntryDto[];
+}
+
+export interface CartProductEntryDto {
+    productId: string;
+    quantity: number;
+}
+
+export interface PaymentDetails {
+    paymentMethod: PaymentMethod;
+    externalId: string;
+    payerEmail: string;
+    payerId: string;
+}
+
+export enum PaymentMethod {
+    CREDIT_CARD = 0,
+    PAYPAL = 1,
+    APPLE_PAY = 2,
+    GOOGLE_PAY = 3,
 }

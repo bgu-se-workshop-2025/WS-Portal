@@ -28,7 +28,7 @@ export async function getStores(this: SDK, pageable: Pageable): Promise<StoreDto
     return result;
 }
 
-export async function getStoreOfficials(this: SDK, storeId: string): Promise<PublicUserDto[]> { // TODO chekc if i need to get the users in the promise
+export async function getStoreOfficials(this: SDK, storeId: string): Promise<PublicUserDto[]> {
     const response = await this.get(`${publicStore}/${storeId}/${seller}`, {});
     
     if(!response.ok) {
