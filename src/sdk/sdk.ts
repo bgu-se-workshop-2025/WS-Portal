@@ -38,6 +38,9 @@ export class SDK {
   public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
   public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public deleteMessage!: (messageId: string) => Promise<void>;
+  // Product SDK
+  public getProduct!: (id: string) => Promise<dtos.ProductDto>;
+  public getProducts!: (payload: requests.GetProductsPayload) => Promise<dtos.ProductDto[]>;
   //Review SDK
   public createStoreReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
   public createProductReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
