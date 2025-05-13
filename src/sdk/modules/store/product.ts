@@ -1,4 +1,5 @@
 import { ProductDto } from "../../../shared/types/dtos.ts";
+import { GetProductsPayload } from "../../../shared/types/requests.ts";
 import { SDK } from "../../sdk.ts";
 
 const controller = "product";
@@ -14,17 +15,6 @@ export async function getProduct(this: SDK, id: string): Promise<ProductDto> {
 
     const result = (await response.json()) as ProductDto;
     return result;
-}
-
-export interface GetProductsPayload {
-    page: number;
-    size: number;
-    storeId?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    keywords?: string[];
-    categories?: string[];
-    sortBy?: string;
 }
 
 export async function getProducts(this: SDK, payload: GetProductsPayload): Promise<ProductDto[]> {
