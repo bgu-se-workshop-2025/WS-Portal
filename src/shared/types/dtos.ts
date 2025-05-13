@@ -45,7 +45,7 @@ export interface SellerDto {
     permissions: string[];
 }
 
-enum SellerType {
+export enum SellerType {
   OWNER = 0,
   MANAGER = 1,
   UNKNOWN = 2
@@ -104,4 +104,39 @@ export interface ReviewDto {
     body: string;
     rating: number;
     date: string;
+}
+
+export interface OrderRequestDetails {
+    cart: CartDto;
+    paymentDetails: PaymentDetails;
+    shippingAddress: ShippingAddressDto;
+}
+
+export interface CartDto {
+    ownerId: string;
+    stores: CartStoreBasketDto[];
+}
+
+export interface CartStoreBasketDto {
+    storeId: string;
+    products: CartProductEntryDto[];
+}
+
+export interface CartProductEntryDto {
+    productId: string;
+    quantity: number;
+}
+
+export interface PaymentDetails {
+    paymentMethod: PaymentMethod;
+    externalId: string;
+    payerEmail: string;
+    payerId: string;
+}
+
+export enum PaymentMethod {
+    CREDIT_CARD = 0,
+    PAYPAL = 1,
+    APPLE_PAY = 2,
+    GOOGLE_PAY = 3,
 }
