@@ -7,23 +7,33 @@ import StoreSellers from "../store/components/subpages/StoreSellers";
 import StoreSettings from "../store/components/subpages/StoreSettings";
 import StoreDiscounts from "../store/components/subpages/StoreDiscounts";
 
+import { StoreDto } from "../../shared/types/dtos";
+import { sdk } from "../../sdk/sdk";
+
 type Tab = "products" | "sellers" | "settings" | "discounts";
 
 const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
   const [activeTab, setActiveTab] = useState<Tab>("products");
-  const [storeName, setStoreName] = useState<string>("");
+  const [store, setStore] = useState<StoreDto | null>(null);
 
   useEffect(() => {
-    if (id) {
-      setStoreName(`Store ${id}`);
-    }
+    if (!id) return;
+
+    sdk.getStore(id)
+      .then((result) => {
+        setStore(result);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch store:", err.message);
+        setStore(null);
+      });
   }, [id]);
 
   return (
     <Box minHeight="100vh" bgcolor="#f7f7f7" py={6}>
       <Container maxWidth="md">
         <Typography variant="h4" align="center" color="textPrimary" gutterBottom>
-          🏪 {storeName}
+          🏪 {store?.name || "Loading..."}
         </Typography>
 
         <Box display="flex" justifyContent="center" mb={4}>

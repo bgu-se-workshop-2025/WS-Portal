@@ -30,7 +30,7 @@ const SellerCard: React.FC<SellerCardProps> = ({
         px: 3,
         py: 2,
         borderRadius: 2,
-        backgroundColor: "#f3f4ff", // use MUI indigo-like background
+        backgroundColor: "#f3f4ff", 
       }}
     >
       <Box

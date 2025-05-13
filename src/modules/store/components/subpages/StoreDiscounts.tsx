@@ -49,10 +49,13 @@ const StoreDiscounts: React.FC<{ storeId?: string }> = ({ storeId }) => {
     if (
       !newDiscount.name ||
       newDiscount.percent === undefined ||
-      newDiscount.percent < 1 ||
       !newDiscount.end
     ) {
-      alert("Please fill all fields and ensure percent is at least 1.");
+      alert("Please fill all fields.");
+      return;
+    }
+    if (newDiscount.percent <= 0 || newDiscount.percent > 100) {
+      alert("Percent must be bigger than 0 and not bigger than 100.");
       return;
     }
 

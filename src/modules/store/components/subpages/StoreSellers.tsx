@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Stack, Button } from "@mui/material";
 import SellerCard from "./SellerCard";
 import SellerPermissionsDialog from "./SellerPermissionsDialog";
+import AddSellerDialog from "./AddSellerDialog";             // ← make sure this path is correct
+import { sdk } from "../../../../sdk/sdk";
+import { PublicUserDto } from "../../../../shared/types/dtos";
 
-// Define permissions type used in both dialog and local state
+// Permissions structure
 type PermissionObject = {
   CanAddDiscount: boolean;
   CanRemoveProduct: boolean;
@@ -12,91 +15,101 @@ type PermissionObject = {
 };
 
 interface Seller {
-  id: number;
+  id: string;
   name: string;
   role: string;
   isYou?: boolean;
   permissions: PermissionObject;
 }
 
-const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
-  const [sellers, setSellers] = useState<Seller[]>([
-    {
-      id: 1,
-      name: "Adam",
-      role: "Manager",
-      isYou: true,
-      permissions: {
-        CanAddDiscount: true,
-        CanRemoveProduct: false,
-        CanAddProduct: true,
-        CanModifyPermissions: true,
-      },
+// Fallback data in case the SDK call fails
+const fallbackSellers: Seller[] = [
+  {
+    id: "1",
+    name: "Adam",
+    role: "Manager",
+    isYou: true,
+    permissions: {
+      CanAddDiscount: true,
+      CanRemoveProduct: false,
+      CanAddProduct: true,
+      CanModifyPermissions: true,
     },
-    {
-      id: 2,
-      name: "Shalev",
-      role: "Moderator",
-      permissions: {
-        CanAddDiscount: false,
-        CanRemoveProduct: false,
-        CanAddProduct: false,
-        CanModifyPermissions: false,
-      },
-    },
-    {
-      id: 3,
-      name: "Noam",
-      role: "Custom",
-      permissions: {
-        CanAddDiscount: false,
-        CanRemoveProduct: false,
-        CanAddProduct: false,
-        CanModifyPermissions: false,
-      },
-    },
-  ]);
+  },
+];
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
+  const [sellers, setSellers] = useState<Seller[]>([]);
+  const [permDialogOpen, setPermDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
 
-  // Simulated current user's permissions
-  const currentUserPermissions: (keyof PermissionObject)[] = [
-    "CanModifyPermissions",
-  ];
+  const currentUserId = "1"; // ← replace with real logged-in seller ID
 
-  const handleOpenDialog = (seller: Seller) => {
-    setSelectedSeller(seller);
-    setDialogOpen(true);
+  const fetchSellers = () => {
+    if (!storeId) return;
+    sdk.getStoreOfficials(storeId)
+      .then((officials: PublicUserDto[]) => {
+        setSellers(
+          officials.map((u) => ({
+            id: u.id,
+            name: u.username,
+            role: "Manager",             // or map from u.roles if available
+            isYou: u.id === currentUserId,
+            permissions: {
+              CanAddDiscount: false,
+              CanRemoveProduct: false,
+              CanAddProduct: false,
+              CanModifyPermissions: false,
+            },
+          }))
+        );
+      })
+      .catch(() => {
+        setSellers(fallbackSellers);
+      });
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  useEffect(fetchSellers, [storeId]);
+
+  // Permissions dialog handlers
+  const handleOpenPerms = (seller: Seller) => {
+    setSelectedSeller(seller);
+    setPermDialogOpen(true);
+  };
+  const handleClosePerms = () => {
+    setPermDialogOpen(false);
     setSelectedSeller(null);
   };
-
-  const handleSavePermissions = (updatedPermissions: PermissionObject) => {
+  const handleSavePerms = (newPerms: PermissionObject) => {
     setSellers((prev) =>
       prev.map((s) =>
-        s.id === selectedSeller!.id
-          ? { ...s, permissions: updatedPermissions }
-          : s
+        s.id === selectedSeller?.id ? { ...s, permissions: newPerms } : s
       )
     );
-    handleCloseDialog();
+    handleClosePerms();
+  };
+
+  // After adding a seller, re-fetch and close the add‐dialog
+  const handleAddSuccess = () => {
+    fetchSellers();
+    setAddDialogOpen(false);
   };
 
   return (
     <Box width="100%" display="flex" flexDirection="column" alignItems="center">
-      <Typography
-        variant="h6"
-        fontWeight={700}
-        color="purple"
-        textAlign="center"
-        mb={2}
-      >
-        👥 Store Sellers {storeId}
+      <Typography variant="h6" mb={2}>
+        👥 Store Sellers
       </Typography>
+
+      {/* ← Your Add Seller button */}
+      <Button
+        variant="contained"
+        onClick={() => setAddDialogOpen(true)}
+        sx={{ mb: 3 }}
+      >
+        Add Seller
+      </Button>
 
       <Stack spacing={2} width="100%" maxWidth="500px">
         {sellers.map((seller) => (
@@ -105,19 +118,31 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
             name={seller.name}
             role={seller.role}
             isYou={seller.isYou}
-            onSettingsClick={() => handleOpenDialog(seller)}
+            onSettingsClick={() => handleOpenPerms(seller)}
           />
         ))}
       </Stack>
 
+      {/* ← Correctly render the AddSellerDialog component */}
+      {storeId && (
+        <AddSellerDialog
+          open={addDialogOpen}
+          onClose={() => setAddDialogOpen(false)}
+          storeId={storeId}
+          employerSellerId={currentUserId}  // ← don’t forget this prop
+          onSuccess={handleAddSuccess}
+        />
+      )}
+
+      {/* ← Your existing permissions‐editing dialog */}
       {selectedSeller && (
         <SellerPermissionsDialog
-          open={dialogOpen}
+          open={permDialogOpen}
           sellerName={selectedSeller.name}
           permissions={selectedSeller.permissions}
-          canEdit={currentUserPermissions.includes("CanModifyPermissions")}
-          onClose={handleCloseDialog}
-          onSave={handleSavePermissions}
+          canEdit={true}
+          onClose={handleClosePerms}
+          onSave={handleSavePerms}
         />
       )}
     </Box>
