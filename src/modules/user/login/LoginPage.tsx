@@ -1,71 +1,101 @@
 import React from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import PaneLayout from "../register/components/PaneLayout/PaneLayout";
+import { Button, Typography } from "@mui/material";
 
-import LoginTextField from "./components/LoginTextField";
-
-import { SharedResources } from "../../../shared/Resources.json";
-import { Resources } from "./LoginPageResources.json";
-
+import LoginPageResources from "./LoginPageResources.json";
+import FormTextField from "../register/components/FormTextField/FormTextField";
 import { sdk } from "../../../sdk/sdk";
 
-import { useEffect } from "react";
-import { client } from "../../../sdk/modules/notification/notification";
-
 const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
 
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const handleRegisterNav = () => {
+    navigate("/register");
+  };
 
-  useEffect(() => {
-    client.activate();
-  }, [])
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  const handleLogin = async () => {
+    const formData = new FormData(event.currentTarget);
+    const username = formData.get(LoginPageResources.Main.Form.Username.Id) as string;
+    const password = formData.get(LoginPageResources.Main.Form.Password.Id) as string;
+
     try {
-      const { token } = await sdk.login({ username, password });
-      console.log("Login successful, token:", token);
+      await sdk.login({ username, password });
+      navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
     }
   };
 
   return (
-    <Box
-      sx={{
-        ...SharedResources.Styles.FlexboxRow,
-        ...SharedResources.Styles.FullScreenHeight,
-      }}
-    >
-      <Box
-        sx={{
-          ...Resources.Styles.MainContainer,
-          ...SharedResources.Styles.FlexboxCol,
-          ...SharedResources.Styles.AlignCenter,
-        }}
-      >
-        <Typography variant="h2">{Resources.Content.LoginTitle}</Typography>
-        <LoginTextField {...Resources.Content.Fields.User} setState={setUsername} />
-        <LoginTextField {...Resources.Content.Fields.Password} setState={setPassword} />
-        <Button variant="contained" sx={Resources.Styles.Button} onClick={handleLogin}>
-          {Resources.Content.LoginButton}
-        </Button>
-      </Box>
-      <Box
-        sx={{
-          ...Resources.Styles.SideContainer,
-          ...SharedResources.Styles.FlexboxCol,
-          ...SharedResources.Styles.AlignCenter,
-        }}
-      >
-        <Typography variant="h2">{Resources.Content.SignupTitle}</Typography>
-        <Typography variant="body1">
-          {Resources.Content.SignupDescription}
+    <PaneLayout.Container>
+      {/* Side pane: prompt to register */}
+      <PaneLayout.Pane>
+        <Typography
+          variant="h2"
+          sx={LoginPageResources.SidePanel.Styles.MarginBottom}
+        >
+          {LoginPageResources.SidePanel.Title}
         </Typography>
-        <Button variant="outlined" color="inherit" sx={Resources.Styles.Button}>
-          {Resources.Content.SignupButton}
+        <Typography
+          variant="body1"
+          sx={LoginPageResources.SidePanel.Styles.MarginBottom}
+        >
+          {LoginPageResources.SidePanel.Body}
+        </Typography>
+        <Button
+          onClick={handleRegisterNav}
+          variant="outlined"
+          color="inherit"
+          sx={LoginPageResources.SidePanel.Styles.Button}
+        >
+          {LoginPageResources.SidePanel.Button.Content}
         </Button>
-      </Box>
-    </Box>
+        OR
+        <Button
+          onClick={() => navigate("/")}
+          variant="contained"
+          color="inherit"
+          sx={{ color: "black", borderRadius: "1rem", mt: "1rem"}}
+        >
+          {LoginPageResources.SidePanel.AsGuest}
+        </Button>
+      </PaneLayout.Pane>
+
+      {/* Main pane: login form */}
+      <PaneLayout.Pane main>
+        <Typography
+          variant="h2"
+          sx={LoginPageResources.Main.Styles.MarginBottom}
+        >
+          {LoginPageResources.Main.Title}
+        </Typography>
+        <form onSubmit={handleLogin}>
+          <FormTextField
+            id={LoginPageResources.Main.Form.Username.Id}
+            label={LoginPageResources.Main.Form.Username.Label}
+            placeholder={LoginPageResources.Main.Form.Username.Placeholder}
+            required
+          />
+          <FormTextField
+            id={LoginPageResources.Main.Form.Password.Id}
+            label={LoginPageResources.Main.Form.Password.Label}
+            placeholder={LoginPageResources.Main.Form.Password.Placeholder}
+            type="password"
+            required
+          />
+          <Button
+            variant="contained"
+            type="submit"
+            sx={LoginPageResources.Main.Styles.Button}
+          >
+            {LoginPageResources.Main.Form.Button.Content}
+          </Button>
+        </form>
+      </PaneLayout.Pane>
+    </PaneLayout.Container>
   );
 };
 
