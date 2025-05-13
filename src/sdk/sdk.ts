@@ -31,6 +31,7 @@ export class SDK {
   public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
   public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
   public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
+  //Message SDK
   public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public getMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
   public getSentMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
@@ -40,6 +41,10 @@ export class SDK {
   // Product SDK
   public getProduct!: (id: string) => Promise<dtos.ProductDto>;
   public getProducts!: (payload: product.GetProductsPayload) => Promise<dtos.ProductDto[]>;
+  //Review SDK
+  public createStoreReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+  public createProductReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+
 
   private options: SDKOptions;
 
