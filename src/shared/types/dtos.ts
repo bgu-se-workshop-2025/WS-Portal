@@ -69,6 +69,32 @@ export interface PublicUserDto {
   profilePictureUri: string;
 }
 
+export interface UserOrderDto {
+    id: string;
+    time: string;
+    buyerId: string;
+    shippingAddress: ShippingAddressDto;
+    cartSnapshot: string;
+}
+
+export interface StoreOrderDto {
+    id: string;
+    time: string;
+    storeId: string;
+    storeSnapshot: string;
+}
+
+export interface ShippingAddressDto {
+    country: string;
+    city: string;
+    region: string;
+    street: string;
+    zipCode: string;
+    homeNumber: string;
+    apartmentNumber: string;
+    mailbox: string;
+}
+
 export interface ReviewDto {
     id: string;
     productId: string;  
