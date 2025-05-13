@@ -31,14 +31,17 @@ export class SDK {
   public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
   public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
   public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
-  //Message SDK
+  // Message SDK
   public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public getMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
   public getSentMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
   public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
   public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public deleteMessage!: (messageId: string) => Promise<void>;
-  //Review SDK
+  // Product SDK
+  public getProduct!: (id: string) => Promise<dtos.ProductDto>;
+  public getProducts!: (payload: requests.GetProductsPayload) => Promise<dtos.ProductDto[]>;
+  // Review SDK
   public createStoreReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
   public createProductReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
   //Store SDK
@@ -60,6 +63,9 @@ export class SDK {
   public getStoreOrders!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.StoreOrderDto[]>;
   //Public Order SDK
   public createOrder!: (payload: dtos.OrderRequestDetails) => Promise<dtos.UserOrderDto>;
+  // Public Review SDK
+  public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
+  public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
 
 
   private options: SDKOptions;
