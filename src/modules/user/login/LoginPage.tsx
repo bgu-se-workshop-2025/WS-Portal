@@ -9,7 +9,7 @@ import { Resources } from "./LoginPageResources.json";
 import { sdk } from "../../../sdk/sdk";
 
 import { useEffect } from "react";
-import { connect } from "../../../sdk/modules/notification/notification";
+import { client } from "../../../sdk/modules/notification/notification";
 
 const LoginPage: React.FC = () => {
 
@@ -17,8 +17,11 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = React.useState("");
 
   useEffect(() => {
-    console.log('use')
-    connect((msg: string) => console.log(msg));
+    client.activate();
+    // client.publish({
+    //   destination: '/queue/notifications',
+    //   body: JSON.stringify({'try': 'try'})
+    // });
   }, [])
 
   const handleLogin = async () => {
