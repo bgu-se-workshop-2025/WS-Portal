@@ -13,8 +13,12 @@ import {
 
 import { AccountCircleOutlined } from "@mui/icons-material";
 
+import { useNavigate } from "react-router-dom";
+
 const AccountMenu: React.FC = () => {
   const [accountOpen, setAccountOpen] = React.useState(false);
+
+  const navigate = useNavigate();
 
   return (
     <ClickAwayListener onClickAway={() => setAccountOpen(false)}>
@@ -40,13 +44,8 @@ const AccountMenu: React.FC = () => {
           >
             <List dense>
               <ListItem disablePadding>
-                <ListItemButton>
+                <ListItemButton onClick={() => navigate("/profile")}>
                   <Typography variant="body2">Profile</Typography>
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton>
-                  <Typography variant="body2">Settings</Typography>
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
