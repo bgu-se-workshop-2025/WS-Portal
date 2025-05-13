@@ -19,8 +19,8 @@ import * as user from "./modules/user/user";
 import { TokenService } from "../shared/utils/token";
 
 import * as dtos from "../shared/types/dtos";
-import * as responses from "../shared/types/responses";
 import * as requests from "../shared/types/requests";
+import * as responses from "../shared/types/responses";
 
 interface SDKOptions {
   baseUrl: string;
@@ -31,6 +31,17 @@ export class SDK {
   public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
   public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
   public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
+  //Message SDK
+  public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
+  public getMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
+  public getSentMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
+  public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
+  public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
+  public deleteMessage!: (messageId: string) => Promise<void>;
+  //Review SDK
+  public createStoreReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+  public createProductReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+
 
   private options: SDKOptions;
 
@@ -86,6 +97,13 @@ export class SDK {
     const queryString = new URLSearchParams(params).toString();
     return await fetch(`${this.options.baseUrl}/${endpoint}?${queryString}`, {
       method: "GET",
+      headers: this.getHeaders(),
+    });
+  }
+
+  public async delete(endpoint: string): Promise<Response> {
+    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+      method: "DELETE",
       headers: this.getHeaders(),
     });
   }
