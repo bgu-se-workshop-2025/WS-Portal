@@ -4,6 +4,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./shared/components/layout/Header";
 import Footer from "./shared/components/layout/Footer";
 
+import StorePage from "./modules/store/StorePage";
 import LoginPage from "./modules/user/login/LoginPage";
 import RegisterPage from "./modules/user/register/RegisterPage";
 import UserProfilePage from "./modules/user/profile/UserProfilePage";
@@ -21,6 +22,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<></>} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/store/:id" element={<StorePage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
           path="/profile"

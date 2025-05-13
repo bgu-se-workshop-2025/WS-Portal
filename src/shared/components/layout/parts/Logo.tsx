@@ -8,7 +8,7 @@ const Logo: React.FC = () => {
     <>
       <Box
         component="img"
-        src="./icon.png"
+        src="/icon.png"
         alt="Kaj Kadir Logo"
         sx={{ width: "4rem" }}
       ></Box>
