@@ -1,14 +1,12 @@
-import { Box, Paper, IconButton, Typography, InputBase } from "@mui/material";
-import {
-  AccountCircleOutlined,
-  ShoppingCartOutlined,
-  NotificationsOutlined,
-  SearchOutlined,
-  FilterAltOutlined,
-} from "@mui/icons-material";
+import React from "react";
+import { Box } from "@mui/material";
 
 import { SharedResources } from "../../Resources.json";
 import { Resources } from "../layout/Resources.json";
+
+import SearchBar from "./parts/SearchBar";
+import IconBar from "./parts/IconBar";
+import Logo from "./parts/Logo";
 
 const zigzag = encodeURIComponent(`
     <svg width="30" height="10" xmlns="http://www.w3.org/2000/svg">
@@ -37,41 +35,18 @@ const Header: React.FC = () => {
           ...Resources.Styles.HeaderSection,
         }}
       >
-        <Box
-          component="img"
-          src="./icon.png"
-          alt="Kaj Kadir Logo"
-          sx={{ width: "4rem", height: "4rem" }}
-        ></Box>
-        <Typography variant="h4" sx={{ fontFamily: '"IM Fell DW Pica", serif', lineHeight: "4rem" }}>
-          {Resources.Content.Header.HeaderTitle}
-        </Typography>
+        <Logo />
       </Box>
-      <Box id="search" sx={{ ...Resources.Styles.HeaderSection }}>
-        <Paper
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            // handle search submit here
-          }}
-          elevation={1}
-          sx={{
-            p: "0.125rem 0.5rem",
-            display: "flex",
-            alignItems: "center",
-            width: "37.5rem",
-            borderRadius: "1.5rem",
-            boxShadow: "0 0.0625rem 0.375rem rgba(32,33,36,0.28)",
-          }}
-        >
-          <IconButton type="submit" sx={{ p: "0.375rem" }} color="inherit">
-            <SearchOutlined />
-          </IconButton>
-          <InputBase sx={{ ml: 1, flex: 1 }} placeholder="Search..." />
-          <IconButton sx={{ p: "0.375rem" }} color="inherit">
-            <FilterAltOutlined />
-          </IconButton>
-        </Paper>
+      <Box
+        id="search"
+        sx={{
+          ...Resources.Styles.HeaderSection,
+          alignSelf: "flex-start",
+          position: "relative",
+          mt: "1rem",
+        }}
+      >
+        <SearchBar />
       </Box>
       <Box
         id="icons"
@@ -80,15 +55,7 @@ const Header: React.FC = () => {
           ...Resources.Styles.HeaderSection,
         }}
       >
-        <IconButton color="inherit">
-          <NotificationsOutlined sx={{ ...Resources.Styles.HeaderIcon }} />
-        </IconButton>
-        <IconButton color="inherit">
-          <ShoppingCartOutlined sx={{ ...Resources.Styles.HeaderIcon }} />
-        </IconButton>
-        <IconButton color="inherit">
-          <AccountCircleOutlined sx={{ ...Resources.Styles.HeaderIcon }} />
-        </IconButton>
+        <IconBar />
       </Box>
     </Box>
   );
