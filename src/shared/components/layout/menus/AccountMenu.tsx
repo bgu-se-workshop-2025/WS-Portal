@@ -14,11 +14,42 @@ import {
 import { AccountCircleOutlined } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
+import { isAuthenticated } from "../../../../sdk/sdk";
+import { TokenService } from "../../../../shared/utils/token";
 
 const AccountMenu: React.FC = () => {
   const [accountOpen, setAccountOpen] = React.useState(false);
 
   const navigate = useNavigate();
+
+  const userButtons = [
+    {
+      label: "Profile",
+      onClick: () => navigate("/profile"),
+    },
+    {
+      label: "Logout",
+      onClick: () => {
+        setAccountOpen(false);
+        TokenService.clearToken();
+        navigate("/");
+        window.location.reload();
+      },
+    },
+  ];
+
+  const guestButtons = [
+    {
+      label: "Login",
+      onClick: () => navigate("/login"),
+    },
+    {
+      label: "Register",
+      onClick: () => navigate("/register"),
+    },
+  ];
+
+  const buttons = isAuthenticated() ? userButtons : guestButtons;
 
   return (
     <ClickAwayListener onClickAway={() => setAccountOpen(false)}>
@@ -43,16 +74,13 @@ const AccountMenu: React.FC = () => {
             }}
           >
             <List dense>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => navigate("/profile")}>
-                  <Typography variant="body2">Profile</Typography>
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding>
-                <ListItemButton>
-                  <Typography variant="body2">Logout</Typography>
-                </ListItemButton>
-              </ListItem>
+              {buttons.map((button) => (
+                <ListItem disablePadding key={button.label}>
+                  <ListItemButton onClick={button.onClick}>
+                    <Typography variant="body2">{button.label}</Typography>
+                  </ListItemButton>
+                </ListItem>
+              ))}
             </List>
           </Paper>
         </Collapse>

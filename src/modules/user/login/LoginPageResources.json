@@ -1,6 +1,7 @@
 {
   "SidePanel": {
     "Title": "New here?",
+    "AsGuest": "Continue as Guest",
     "Body": "Sign up and start your journey!",
     "Button": { "Content": "Register" },
     "Styles": {

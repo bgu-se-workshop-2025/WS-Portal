@@ -22,8 +22,8 @@ const LoginPage: React.FC = () => {
     const password = formData.get(LoginPageResources.Main.Form.Password.Id) as string;
 
     try {
-      const { token } = await sdk.login({ username, password });
-      console.log("Login successful, token:", token); //TODO: Delete this line
+      await sdk.login({ username, password });
+      navigate("/");
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -52,6 +52,15 @@ const LoginPage: React.FC = () => {
           sx={LoginPageResources.SidePanel.Styles.Button}
         >
           {LoginPageResources.SidePanel.Button.Content}
+        </Button>
+        OR
+        <Button
+          onClick={() => navigate("/")}
+          variant="contained"
+          color="inherit"
+          sx={{ color: "black", borderRadius: "1rem", mt: "1rem"}}
+        >
+          {LoginPageResources.SidePanel.AsGuest}
         </Button>
       </PaneLayout.Pane>
 
