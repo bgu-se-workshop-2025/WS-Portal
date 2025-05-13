@@ -31,12 +31,17 @@ export class SDK {
   public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
   public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
   public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
+  //Message SDK
   public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public getMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
   public getSentMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
   public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
   public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public deleteMessage!: (messageId: string) => Promise<void>;
+  //Review SDK
+  public createStoreReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+  public createProductReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+
 
   private options: SDKOptions;
 
