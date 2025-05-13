@@ -1,3 +1,7 @@
+export interface AdminDetailsDto {
+    id: string;
+}
+
 export interface PublicUserDto {
   id: string;
   username: string;
@@ -89,4 +93,15 @@ export interface ShippingAddressDto {
     homeNumber: string;
     apartmentNumber: string;
     mailbox: string;
+}
+
+export interface ReviewDto {
+    id: string;
+    productId: string;  
+    storeId: string;
+    writerId: string;
+    title: string;
+    body: string;
+    rating: number;
+    date: string;
 }
