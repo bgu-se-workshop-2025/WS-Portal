@@ -28,6 +28,7 @@ interface SDKOptions {
 
 export class SDK {
 
+  // Auth SDK
   public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
   public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
   public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
@@ -66,7 +67,11 @@ export class SDK {
   // Public Review SDK
   public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
   public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
-
+  // Cart SDK
+  public getCart!: () => Promise<dtos.CartDto>;
+  public addProductToCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;
+  public removeProductFromCart!: (productId: number) => Promise<void>;
+  public updateProductInCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;
 
   private options: SDKOptions;
 
