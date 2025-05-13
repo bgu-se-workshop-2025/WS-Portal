@@ -18,10 +18,6 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     client.activate();
-    // client.publish({
-    //   destination: '/queue/notifications',
-    //   body: JSON.stringify({'try': 'try'})
-    // });
   }, [])
 
   const handleLogin = async () => {

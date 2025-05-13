@@ -1,15 +1,22 @@
 import { Client } from "@stomp/stompjs";
 
-const url = 'http://localhost:8080/ws';
+const url: string = 'http://localhost:8080/ws';
 
-export const client = new Client({
+const userNotificationsChannel: string = '/queue/notifications';
+const allUsersNotificationsChannel: string = '/topic/notifications';
+
+export const client: Client = new Client({
     brokerURL: url,
     debug: str => console.log(str)
 });
 
-client.onConnect = frame => {
-    console.log('connected: ' + frame);
-    client.subscribe('/queue/notifications', (message) => {
+client.onConnect = _ => {
+    client.subscribe(userNotificationsChannel, message => {
         console.log(message);
-    })
-}
+        // TODO: handle notification
+    });
+    client.subscribe(allUsersNotificationsChannel, message => {
+        console.log(message);
+        // TODO: handle notification
+    });
+};
