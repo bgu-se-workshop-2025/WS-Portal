@@ -19,7 +19,14 @@ const App: React.FC = () => {
     <>
       {showLayout && <Header />}
       <Routes>
-        <Route path="/" element={<></>} />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <></>
+            </RequireAuth>
+          }
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
@@ -30,7 +37,14 @@ const App: React.FC = () => {
             </RequireAuth>
           }
         />
-        <Route path="*" element={<></>} />
+        <Route
+          path="*"
+          element={
+            <RequireAuth>
+              <></>
+            </RequireAuth>
+          }
+        />
       </Routes>
       {showLayout && <Footer />}
     </>
