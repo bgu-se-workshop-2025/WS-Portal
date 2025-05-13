@@ -1,18 +1,10 @@
+import { ProductDto } from "../../../shared/types/dtos.ts";
 import { SDK } from "../../sdk.ts";
 
 const controller = "product";
 
-export interface Product {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    quantity: boolean;
-    storeId: string;
-    avarageRating: number;
-}
 
-export async function getProduct(this: SDK, id: string): Promise<Product> {
+export async function getProduct(this: SDK, id: string): Promise<ProductDto> {
     const response = await this.get(`${controller}/${id}`, {});
 
     if (!response.ok) {
@@ -20,7 +12,7 @@ export async function getProduct(this: SDK, id: string): Promise<Product> {
         throw new Error(`Get product failed: ${err}`);
     }
 
-    const result = (await response.json()) as Product;
+    const result = (await response.json()) as ProductDto;
     return result;
 }
 
@@ -35,7 +27,7 @@ export interface GetProductsPayload {
     sortBy?: string;
 }
 
-export async function getProducts(this: SDK, payload: GetProductsPayload): Promise<Product[]> {
+export async function getProducts(this: SDK, payload: GetProductsPayload): Promise<ProductDto[]> {
     const queryParams = new URLSearchParams();
     queryParams.append("page", payload.page.toString());
     queryParams.append("size", payload.size.toString());
@@ -53,6 +45,6 @@ export async function getProducts(this: SDK, payload: GetProductsPayload): Promi
         throw new Error(`Get products failed: ${err}`);
     }
 
-    const result = (await response.json()) as Product[];
+    const result = (await response.json()) as ProductDto[];
     return result;
 }

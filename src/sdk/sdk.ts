@@ -37,6 +37,9 @@ export class SDK {
   public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
   public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public deleteMessage!: (messageId: string) => Promise<void>;
+  // Product SDK
+  public getProduct!: (id: string) => Promise<dtos.ProductDto>;
+  public getProducts!: (payload: product.GetProductsPayload) => Promise<dtos.ProductDto[]>;
 
   private options: SDKOptions;
 
