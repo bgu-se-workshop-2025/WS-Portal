@@ -4,6 +4,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./shared/components/layout/Header";
 import Footer from "./shared/components/layout/Footer";
 import LoginPage from "./modules/user/login/LoginPage";
+import RegisterPage from "./modules/user/register/RegisterPage";
+import { createTheme, ThemeProvider } from "@mui/material";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -23,5 +25,3 @@ const App: React.FC = () => {
     </>
   );
 };
-
-export default App;

@@ -1,0 +1,60 @@
+{
+    "SidePanel": {
+        "Title": "Already have a user?",
+        "Body": "Login to your account to enjoy thousands of products in the greatest workshop project to ever exist.",
+        "Button": "Login to Account"
+    },
+    "Main": {
+        "Title": "Register new Account",
+        "Form": {
+            "FirstName": {
+                "Id": "firstName",
+                "Label": "First Name",
+                "Placeholder": "Enter your first name"
+            },
+            "LastName": {
+                "Id": "lastName",
+                "Label": "Last Name",
+                "Placeholder": "Enter your last name"
+            },
+            "Username": {
+                "Id": "username",
+                "Label": "Username",
+                "Placeholder": "Enter your username",
+                "Info": "Must contain at least 3 characters which can be alphanumeric, dots, underscores, hyphens. Must be shorter than 20 characters."
+            },
+            "Email": {
+                "Id": "email",
+                "Label": "Email",
+                "Placeholder": "Enter your email address",
+                "Info": "Must be a valid email address."
+            },
+            "Password": {
+                "Id": "password",
+                "Label": "Password",
+                "Placeholder": "Enter your password",
+                "Info": "Must contain at least 8 characters, one uppercase letter, one lowercase letter and one number."
+            },
+            "Button": {
+                "Content": "Sign Up"
+            },
+            "ValidationError": "One or more fields are invalid. Please check the form and try again."
+        }
+    },
+    "Styles": {
+        "MarginBottom": {
+            "mb": "2rem"
+        },
+        "Button": {
+            "my": "1rem",
+            "height": "3rem",
+            "borderRadius": "1rem",
+            "width": {
+                "xs": "100%",
+                "sm": "10rem",
+                "md": "20rem",
+                "lg": "30rem"
+            }
+        }
+    }
+}
