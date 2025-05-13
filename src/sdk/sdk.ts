@@ -18,12 +18,33 @@ import * as user from "./modules/user/user";
 
 import { TokenService } from "../shared/utils/token";
 
+import * as dtos from "../shared/types/dtos";
+import * as requests from "../shared/types/requests";
+import * as responses from "../shared/types/responses";
+
 interface SDKOptions {
   baseUrl: string;
 }
 
 export class SDK {
-  public login!: (payload: auth.LoginPayload) => Promise<auth.LoginResponse>;
+
+  public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
+  public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
+  public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
+  //Message SDK
+  public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
+  public getMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
+  public getSentMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
+  public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
+  public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
+  public deleteMessage!: (messageId: string) => Promise<void>;
+  // Product SDK
+  public getProduct!: (id: string) => Promise<dtos.ProductDto>;
+  public getProducts!: (payload: requests.GetProductsPayload) => Promise<dtos.ProductDto[]>;
+  //Review SDK
+  public createStoreReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+  public createProductReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
+
 
   private options: SDKOptions;
 
@@ -67,10 +88,25 @@ export class SDK {
     });
   }
 
+  public async patch(endpoint: string, payload: any): Promise<Response> {
+    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+      method: "PATCH",
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
+  }
+
   public async get(endpoint: string, params: Record<string, any>): Promise<Response> {
     const queryString = new URLSearchParams(params).toString();
     return await fetch(`${this.options.baseUrl}/${endpoint}?${queryString}`, {
       method: "GET",
+      headers: this.getHeaders(),
+    });
+  }
+
+  public async delete(endpoint: string): Promise<Response> {
+    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+      method: "DELETE",
       headers: this.getHeaders(),
     });
   }
