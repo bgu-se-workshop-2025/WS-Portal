@@ -68,3 +68,14 @@ export interface PublicUserDto {
   username: string;
   profilePictureUri: string;
 }
+
+export interface ReviewDto {
+    id: string;
+    productId: string;  
+    storeId: string;
+    writerId: string;
+    title: string;
+    body: string;
+    rating: number;
+    date: string;
+}
