@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { Box } from "@mui/material";
 
 import Header from "./shared/components/layout/Header";
 import Footer from "./shared/components/layout/Footer";
@@ -9,6 +10,7 @@ import LoginPage from "./modules/user/login/LoginPage";
 import RegisterPage from "./modules/user/register/RegisterPage";
 import UserProfilePage from "./modules/user/profile/UserProfilePage";
 import RequireAuth from "./shared/utils/RequireAuth";
+import MainPage from "./modules/main/MainPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -19,21 +21,23 @@ const App: React.FC = () => {
   return (
     <>
       {showLayout && <Header />}
-      <Routes>
-        <Route path="/" element={<></>} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/store/:id" element={<StorePage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route
-          path="/profile"
-          element={
-            <RequireAuth>
-              <UserProfilePage />
-            </RequireAuth>
-          }
-        />
-        <Route path="*" element={<></>} />
-      </Routes>
+      <Box sx={{ overflowY: "auto" }}>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/store/:id" element={<StorePage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <UserProfilePage />
+              </RequireAuth>
+            }
+          />
+          <Route path="*" element={<MainPage />} />
+        </Routes>
+      </Box>
       {showLayout && <Footer />}
     </>
   );

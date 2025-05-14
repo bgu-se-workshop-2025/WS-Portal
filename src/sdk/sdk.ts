@@ -53,9 +53,9 @@ export class SDK {
   public deleteProduct!: (storeId: string, productId: string) => Promise<void>;
   public addSeller!: (storeId: string, payload: dtos.SellerDto) => Promise<dtos.SellerDto>;
   public removeSeller!: (storeId: string, sellerId: string) => Promise<void>;
-  //Pyblic Store SDK
+  //Public Store SDK
   public getStore!: (id: string) => Promise<dtos.StoreDto>;
-  public getStores!: (page: number, size: number) => Promise<dtos.StoreDto[]>;
+  public getStores!: (pageable: dtos.Pageable) => Promise<dtos.StoreDto[]>;
   public getStoreOfficials!: (storeId: string) => Promise<dtos.PublicUserDto[]>;
   //Order SDK
   public getUserOrders!: (payload: dtos.Pageable) => Promise<dtos.UserOrderDto[]>;

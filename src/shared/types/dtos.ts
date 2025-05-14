@@ -18,7 +18,7 @@ export interface UpdatePublicUserDto {
 }
 
 export interface StoreDto {
-    id: string;
+    id?: string;
     name: string;
     description: string;
 }
