@@ -41,7 +41,6 @@ export interface SellerDto {
     storeId: string;
     sellerType: SellerType;
     employerSellerId: string;
-    employerUserId?: string;
     permissions: string[];
 }
 
