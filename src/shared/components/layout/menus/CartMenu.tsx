@@ -12,14 +12,30 @@ import {
 } from "@mui/material";
 import { ShoppingCartOutlined } from "@mui/icons-material";
 
+import { sdk } from "../../../../sdk/sdk";
+
 const CartMenu: React.FC = () => {
   const [cartOpen, setCartOpen] = React.useState(false);
 
-  const products = [
-    { id: 1, name: "Wireless Mouse", price: 25.99 },
-    { id: 2, name: "USB-C Cable", price: 9.99 },
-    // Add more products as needed
-  ];
+  const [cart, setCart] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    const fetchCart = async () => {
+      const cartData = await sdk.getCart();
+      setCart(cartData);
+    };
+    fetchCart();
+  }, []);
+
+  const productsInCart =
+    cart?.stores?.flatMap((store: any) =>
+      store.products.map((product: any) => ({
+        id: product.productId,
+        name: product.productId,
+        quantity: product.quantity,
+        price: product.price,
+      }))
+    ) || [];
 
   return (
     <ClickAwayListener onClickAway={() => setCartOpen(false)}>
@@ -37,34 +53,24 @@ const CartMenu: React.FC = () => {
             elevation={3}
             sx={{
               position: "absolute",
-              top: "100%",
               right: 0,
+              zIndex: 10,
+              minWidth: 250,
               mt: 1,
-              width: 280,
-              maxHeight: 300,
-              overflow: "auto",
             }}
           >
-            <List dense>
-              {products.map((product) => (
+            <Typography variant="h6" sx={{ p: 1 }}>
+              Cart
+            </Typography>
+            <Divider />
+            <List>
+              {productsInCart.map((product: { id: string; name: string; quantity: number; price: number }) => (
                 <ListItem key={product.id} disablePadding>
                   <Typography variant="body2">
-                    {product.name} - ₪{product.price.toFixed(2)}
+                    {product.name} x {product.quantity}
                   </Typography>
                 </ListItem>
               ))}
-              <Divider />
-              <ListItem disablePadding>
-                <Typography
-                  variant="body2"
-                  sx={{ textAlign: "center", fontWeight: "bold" }}
-                >
-                  Total: ₪
-                  {products
-                    .reduce((total, product) => total + product.price, 0)
-                    .toFixed(2)}
-                </Typography>
-              </ListItem>
             </List>
           </Paper>
         </Collapse>
