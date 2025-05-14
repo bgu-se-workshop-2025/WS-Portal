@@ -24,7 +24,6 @@ const MainPage: React.FC = () => {
 
   const [addedStores, setAddedStores] = useState<number>(0);
 
-  // Fetch whenever `page` changes
   useEffect(() => {
     const fetchStores = async () => {
       try {
@@ -123,14 +122,13 @@ const MainPage: React.FC = () => {
 
       <Box
         sx={{
-          mt: "auto", // push this whole block to the bottom
+          mt: "auto",
           display: "flex",
           flexDirection: "column",
-          gap: 2, // space between pager and button
-          mb: 4, // a little breathing room from viewport bottom
+          gap: 2,
+          mb: 4,
         }}
       >
-        {/* pagination, right-aligned */}
         <Box
           sx={{
             display: "flex",
@@ -156,7 +154,6 @@ const MainPage: React.FC = () => {
           </Button>
         </Box>
 
-        {/* Add Store button, centered */}
         <Box sx={{ textAlign: "center" }}>
           <Button variant="contained" onClick={openDialog}>
             Add Store
@@ -164,7 +161,6 @@ const MainPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* Dialog for new store */}
       <Dialog open={dialogOpen} onClose={closeDialog}>
         <DialogTitle>Add New Store</DialogTitle>
         <DialogContent
