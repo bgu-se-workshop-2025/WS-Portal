@@ -1,13 +1,14 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Container } from '@mui/material';
+import StoreProducts from './components/subpages/StoreProducts';
+
 interface UserStorePageProps {
     id?: string;
 }
 
 const UserStorePage: React.FC<UserStorePageProps> = ({ id }) => {
   return (
-    <div>
-      <h1>User Store Page</h1>
-      <p>Store ID: {id}</p>
-    </div>
+    <StoreProducts storeId={id || ''} />
   );
 };
 

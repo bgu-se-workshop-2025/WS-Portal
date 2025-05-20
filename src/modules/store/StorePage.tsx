@@ -8,7 +8,7 @@ const StorePage: React.FC = () => {
   const { id } = useParams();
 
   // TODO: Change with real endpoint
-  const isSeller = true; // Replace with actual logic to determine if the user is a seller
+  const isSeller = false; // Replace with actual logic to determine if the user is a seller
 
   return (
     <>{isSeller ? <SellerStorePage id={id} /> : <UserStorePage id={id} />}</>
