@@ -12,14 +12,21 @@ import {
   Divider,
 } from "@mui/material";
 
-import { NotificationsOutlined } from "@mui/icons-material";
+import { NotificationsOutlined, OpenInNewOutlined } from "@mui/icons-material";
 
-import { useAuthentications, NotificationPayload } from "../../../../shared/hooks/useNotifications";
+import { useNavigate } from "react-router-dom";
+
+import {
+  useAuthentications,
+  NotificationPayload,
+} from "../../../../shared/hooks/useNotifications";
 
 const NotificationMenu: React.FC = () => {
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
 
-  const { connected, notifications } = useAuthentications();
+  const { notifications } = useAuthentications();
+
+  const navigate = useNavigate();
 
   return (
     <ClickAwayListener onClickAway={() => setNotificationsOpen(false)}>
@@ -45,37 +52,51 @@ const NotificationMenu: React.FC = () => {
               overflow: "auto",
             }}
           >
-            <List dense>
-          {notifications.map((n: NotificationPayload) => (
-            <React.Fragment key={n.id}>
-              <ListItem alignItems="flex-start">
-                <ListItemText
-                  primary={n.title}
-                  secondary={
-                    <>
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        color="text.primary"
-                      >
-                        {n.message}
-                      </Typography>
-                      <Typography
-                        component="span"
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: 'block' }}
-                      >
-                        {new Date(n.timestamp).toLocaleString()}
-                      </Typography>
-                    </>
-                  }
-                />
-              </ListItem>
-              <Divider component="li" />
-            </React.Fragment>
-          ))}
-        </List>
+            <IconButton onClick={() => {
+              setNotificationsOpen(false);
+              navigate("/notifications");
+            }}>
+              <OpenInNewOutlined />
+            </IconButton>
+            {notifications.length === 0 ? (
+              <Box p={2} textAlign="center">
+                <Typography variant="body2" color="text.secondary">
+                  No notifications
+                </Typography>
+              </Box>
+            ) : (
+              <List dense>
+                {notifications.map((n: NotificationPayload) => (
+                  <React.Fragment key={n.id}>
+                    <ListItem alignItems="flex-start">
+                      <ListItemText
+                        primary={n.title}
+                        secondary={
+                          <>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                            >
+                              {n.message}
+                            </Typography>
+                            <Typography
+                              component="span"
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: "block" }}
+                            >
+                              {new Date(n.timestamp).toLocaleString()}
+                            </Typography>
+                          </>
+                        }
+                      />
+                    </ListItem>
+                    <Divider component="li" />
+                  </React.Fragment>
+                ))}
+              </List>
+            )}
           </Paper>
         </Collapse>
       </Box>

@@ -11,6 +11,7 @@ import RegisterPage from "./modules/user/register/RegisterPage";
 import UserProfilePage from "./modules/user/profile/UserProfilePage";
 import RequireAuth from "./shared/utils/RequireAuth";
 import MainPage from "./modules/main/MainPage";
+import NotificationPage from "./modules/user/notification/NotificationPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -27,14 +28,8 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/store/:id" element={<StorePage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/profile"
-            element={
-              <RequireAuth>
-                <UserProfilePage />
-              </RequireAuth>
-            }
-          />
+          <Route path="/profile" element={<RequireAuth><UserProfilePage /></RequireAuth>} />
+          <Route path="/notifications" element={<NotificationPage />} />
           <Route path="*" element={<MainPage />} />
         </Routes>
       </Box>
