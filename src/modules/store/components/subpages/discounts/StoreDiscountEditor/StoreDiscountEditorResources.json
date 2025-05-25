@@ -1,5 +1,8 @@
 {
     "DiscountEditorTitle": "Discount Editor",
     "SaveDiscountButton": "Save Discount",
-    "PickDiscountPolicy": "Pick a Discount Policy"
+    "PickDiscountPolicy": "Pick a Discount Policy",
+    "DiscountTitleLabel": "Title",
+    "DiscountDescriptionLabel": "Description",
+    "DiscountPolicyLabel": " Discount Policy"
 }
