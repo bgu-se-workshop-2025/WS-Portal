@@ -1,19 +1,19 @@
 import { getCategoryNamesFlatList } from "../../../../../sdk/modules/categories/categories";
 import { CategoryDiscountDataModel, CompositeDiscountDataModel, ContainsDiscountDataModel, DiscountDataModel, GreaterThanDiscountDataModel } from "./DiscountTypes";
 
-export default function validateDiscountDataModel(model?: DiscountDataModel): string[] {
+export default function validateDiscountDataModel(model?: DiscountDataModel, root: boolean = false): string[] {
     if (!model) {
         return ["Discount model is required to proceed."];
     }
 
     const errors: string[] = [];
-    if(!model.title || model.title.trim() === "") {
+    if(root && (!model.title || model.title.trim() === "")) {
         errors.push("Title is required.");
     }
     if(model.discountPercentage < 0 || model.discountPercentage > 100) {
         errors.push("Discount percentage must be between 0 and 100.");
     }
-
+    
     switch(model.type) {
         case "simple_discount_policy":
             return errors;
