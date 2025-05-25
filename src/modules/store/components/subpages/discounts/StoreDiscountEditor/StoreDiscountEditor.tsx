@@ -2,6 +2,7 @@ import { Box, Button, Dialog, Stack, Typography } from "@mui/material";
 import { DiscountDataModel } from "../DiscountTypes";
 import { useState } from "react";
 import { Close } from "@mui/icons-material";
+import DiscountTypeSelector from "./components/DiscountTypeSelector";
 
 export type StoreDiscountEditorProps = {
     storeId?: string;
@@ -19,7 +20,10 @@ const StoreDiscountEditor = () => {
                 <Button onClick={() => setOpen(!open)}><Close /></Button>
             </Stack>
             <Stack justifyContent="space-between" height="90%">
-                <Typography variant="h5">Discount Editor</Typography>
+                <Stack gap={2}>
+                    <Typography variant="h5">Discount Editor</Typography>
+                    <DiscountTypeSelector />
+                </Stack>
                 <Button>Save Discount</Button>
             </Stack>
         </Box>
