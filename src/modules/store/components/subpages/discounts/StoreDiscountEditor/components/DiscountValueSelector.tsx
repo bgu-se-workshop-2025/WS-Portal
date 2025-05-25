@@ -1,9 +1,12 @@
-import { Stack, TextField, Checkbox, FormControlLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import { Stack, TextField, Checkbox, FormControlLabel, Select, MenuItem, SelectChangeEvent, Typography } from "@mui/material";
 import resources from "../StoreDiscountEditorResources.json";
-import { ContainsDiscountDataModel, DiscountDataModel, DiscountTypeTag, CategoryDiscountDataModel, GreaterThanDiscountDataModel } from "../../DiscountTypes";
+import DiscountResources from "../../DiscountResources.json";
+import { ContainsDiscountDataModel, DiscountDataModel, DiscountTypeTag, CategoryDiscountDataModel, GreaterThanDiscountDataModel, CompositeDiscountDataModel, XorDiscountDataModel } from "../../DiscountTypes";
 import { useState } from "react";
+import DiscountTypeSelector from "./DiscountTypeSelector";
 
 const ValueSelectorsStackGap = 2;
+const CompositePaddingLeft = 4;
 
 export type DiscountValueSelectorProps = {
     policy: DiscountDataModel;
@@ -149,6 +152,78 @@ const GreaterThanDiscountValueSelector = ({ policy, setPolicy, shouldShowPercent
     </Stack>
 }
 
+const CompositeDiscountValueSelector = ({ policy, setPolicy, shouldShowPercentage = false }: DiscountValueSelectorProps) => {
+    const typedPolicy = policy as CompositeDiscountDataModel;
+    const tagAndLabelPairs = DiscountResources.DiscountTypes as { tag: DiscountTypeTag, label: string }[];
+
+    const updateFirstDiscount = (first: DiscountDataModel | undefined) => {
+        setPolicy({ ...typedPolicy, first: first });
+    }
+
+    const updateSecondDiscount = (second: DiscountDataModel | undefined) => {
+        setPolicy({ ...typedPolicy, second: second });
+    }
+
+    const getLabelForTag = (tag: string): string => tagAndLabelPairs.find(pair => pair.tag === tag)?.label || "";
+
+    return <Stack gap={ValueSelectorsStackGap}>
+        <PercentageValueSelector policy={policy} setPolicy={setPolicy} shouldShowPercentage={shouldShowPercentage} />
+        <Typography variant="h6">
+            {resources.CompositeDiscountLabelFirst}{
+                typedPolicy.first
+                    ? `: (${getLabelForTag(typedPolicy.first.type)}${resources.DiscountPolicyLabel})`
+                    : ""
+            }
+        </Typography>
+        <Stack paddingLeft={CompositePaddingLeft}>
+            {typedPolicy.first ? DiscountValueSelector(typedPolicy.first.type, {
+                policy: typedPolicy.first,
+                setPolicy: updateFirstDiscount,
+                shouldShowPercentage: !shouldShowPercentage
+            }) : <DiscountTypeSelector setPolicy={updateFirstDiscount} />}
+        </Stack>
+        <Typography variant="h6">
+            {resources.CompositeDiscountLabelSecond}{
+                typedPolicy.second
+                    ? `: (${getLabelForTag(typedPolicy.second.type)}${resources.DiscountPolicyLabel})`
+                    : ""
+            }
+        </Typography>
+        <Stack paddingLeft={CompositePaddingLeft}>
+            {typedPolicy.second ? DiscountValueSelector(typedPolicy.second.type, {
+                policy: typedPolicy.second,
+                setPolicy: updateSecondDiscount,
+                shouldShowPercentage: !shouldShowPercentage
+            }) : <DiscountTypeSelector setPolicy={updateSecondDiscount} />}
+        </Stack>
+    </Stack>
+}
+
+const XorDiscountValueSelector = ({ policy, setPolicy }: DiscountValueSelectorProps) => {
+    const typedPolicy = policy as XorDiscountDataModel;
+
+    const handlePreferCheaperChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPolicy({ ...typedPolicy, preferCheaper: event.target.checked });
+    };
+
+    return <Stack gap={ValueSelectorsStackGap}>
+        <FormControlLabel
+            control={
+                <Checkbox
+                    checked={typedPolicy.preferCheaper}
+                    onChange={handlePreferCheaperChange}
+                />
+            }
+            label={resources.PreferCheaperLabel}
+        />
+        <CompositeDiscountValueSelector
+            policy={policy}
+            setPolicy={setPolicy}
+            shouldShowPercentage={false}
+        />
+    </Stack>
+}
+
 const DiscountValueSelector = (tag: DiscountTypeTag, props: DiscountValueSelectorProps) => {
     switch (tag) {
         case "simple_discount_policy":
@@ -159,6 +234,14 @@ const DiscountValueSelector = (tag: DiscountTypeTag, props: DiscountValueSelecto
             return <CategoryDiscountValueSelector {...props} />;
         case "greater_than_discount_policy":
             return <GreaterThanDiscountValueSelector {...props} />;
+        case "max_discount_policy":
+            return <CompositeDiscountValueSelector {...props} shouldShowPercentage={false} />;
+        case "and_discount_policy":
+            return <CompositeDiscountValueSelector {...props} shouldShowPercentage />;
+        case "xor_discount_policy":
+            return <XorDiscountValueSelector {...props} />;
+        case "or_discount_policy":
+            return <CompositeDiscountValueSelector {...props} shouldShowPercentage />;
         // Add more cases for different discount types as needed
         default:
             return null; // or a default component

@@ -11,5 +11,8 @@
     "ContainsProductLabel": "Contains Product",
     "ContainsCategoryLabel": "Contains Category",
     "MinimumTransactionPriceLabel": "Minimum Transaction Price",
-    "CategoryScopedLabel": "Category Scoped"
+    "CategoryScopedLabel": "Category Scoped",
+    "CompositeDiscountLabelFirst": "First",
+    "CompositeDiscountLabelSecond": "Second",
+    "PreferCheaperLabel": "Prefer Cheaper?"
 }
