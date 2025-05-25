@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Stack, Typography, TextField } from "@mui/material";
+import { Box, Button, Dialog, Stack, Typography, TextField, Divider } from "@mui/material";
 import { DiscountDataModel } from "../DiscountTypes";
 import { useState } from "react";
 import { Close } from "@mui/icons-material";
@@ -7,13 +7,14 @@ import DiscountTypeSelector from "./components/DiscountTypeSelector";
 import DiscountResources from "../DiscountResources.json";
 import DiscountValueSelector from "./components/DiscountValueSelector";
 
+const ElementsVerticalMargin = 1;
+
 export type StoreDiscountEditorProps = {
     storeId?: string;
     productId?: string;
     discountId?: string;
     discountState?: DiscountDataModel;
 }
-
 
 const StoreDiscountEditor = ({
     storeId,
@@ -50,14 +51,15 @@ const StoreDiscountEditor = ({
 
     return (<Dialog open={open}>
         <Box width="32vw" height="88vh" padding="1rem">
-            <Stack direction="row" justifyContent="flex-end">
+            <Stack direction="row" justifyContent="space-between" marginBottom={ElementsVerticalMargin}>
+                <Typography marginTop={ElementsVerticalMargin} color="primary" variant="h5">{StoreDiscountEditorResources.DiscountEditorTitle}</Typography>
                 <Button onClick={() => setOpen(!open)}>
                     <Close />
                 </Button>
             </Stack>
             <Stack justifyContent="space-between" height="90%">
                 <Stack gap={2}>
-                    <Typography variant="h5">{StoreDiscountEditorResources.DiscountEditorTitle}</Typography>
+                    <Divider orientation="horizontal" flexItem />
                     {!policy && <DiscountTypeSelector setPolicy={setPolicy} />}
                     {policy && (<Stack gap={1}>
                         <Typography variant="h6">
@@ -79,7 +81,7 @@ const StoreDiscountEditor = ({
                 <Button onClick={onSave}>{StoreDiscountEditorResources.SaveDiscountButton}</Button>
             </Stack>
         </Box>
-    </Dialog>);
+    </Dialog >);
 }
 
 export default StoreDiscountEditor;
