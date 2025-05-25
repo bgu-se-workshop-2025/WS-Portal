@@ -5,6 +5,7 @@ import { Close } from "@mui/icons-material";
 import StoreDiscountEditorResources from "./StoreDiscountEditorResources.json";
 import DiscountTypeSelector from "./components/DiscountTypeSelector";
 import DiscountResources from "../DiscountResources.json";
+import DiscountValueSelector from "./components/DiscountValueSelector";
 
 export type StoreDiscountEditorProps = {
     storeId?: string;
@@ -23,6 +24,14 @@ const StoreDiscountEditor = ({
     const [open, setOpen] = useState<boolean>(true);
     const [policy, setPolicy] = useState<DiscountDataModel | undefined>(discountState);
     const tagAndLabelPairs = DiscountResources.DiscountTypes;
+
+    const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPolicy(policy => policy ? { ...policy, title: event.target.value } : undefined);
+    };
+
+    const handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPolicy(policy => policy ? { ...policy, description: event.target.value } : undefined);
+    };
 
     const onSave = () => {
         if (!policy) {
@@ -51,9 +60,20 @@ const StoreDiscountEditor = ({
                     <Typography variant="h5">{StoreDiscountEditorResources.DiscountEditorTitle}</Typography>
                     {!policy && <DiscountTypeSelector setPolicy={setPolicy} />}
                     {policy && (<Stack gap={1}>
-                        <Typography variant="h6">{getLabelForTag(policy.type)}{StoreDiscountEditorResources.DiscountPolicyLabel}</Typography>
-                        <TextField label={StoreDiscountEditorResources.DiscountTitleLabel} value={policy?.title || ""} onChange={(e) => setPolicy({ ...policy, title: e.target.value })} />
-                        <TextField label={StoreDiscountEditorResources.DiscountDescriptionLabel} value={policy?.description || ""} onChange={(e) => setPolicy({ ...policy, description: e.target.value })} />
+                        <Typography variant="h6">
+                            {getLabelForTag(policy.type)}{StoreDiscountEditorResources.DiscountPolicyLabel}
+                        </Typography>
+                        <TextField
+                            label={StoreDiscountEditorResources.DiscountTitleLabel}
+                            value={policy?.title || ""}
+                            onChange={handleTitleChange}
+                        />
+                        <TextField
+                            label={StoreDiscountEditorResources.DiscountDescriptionLabel}
+                            value={policy?.description || ""}
+                            onChange={handleDescriptionChange}
+                        />
+                        {DiscountValueSelector(policy.type, { policy, setPolicy })}
                     </Stack>)}
                 </Stack>
                 <Button onClick={onSave}>{StoreDiscountEditorResources.SaveDiscountButton}</Button>
