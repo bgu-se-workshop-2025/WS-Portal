@@ -31,6 +31,9 @@ const StoreDiscountEditor = ({
         }
         // Implement save logic here
         console.log("Saving discount policy:", policy);
+        console.log("Store ID:", storeId);
+        console.log("Product ID:", productId);
+        console.log("Discount ID:", discountId);
         setOpen(false);
     }
 
