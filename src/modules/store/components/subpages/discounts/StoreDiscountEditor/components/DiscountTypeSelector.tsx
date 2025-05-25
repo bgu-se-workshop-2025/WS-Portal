@@ -1,13 +1,15 @@
-import { MenuItem } from "@mui/material";
+import { MenuItem, Stack, Tooltip } from "@mui/material";
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import DiscountResources from "../../DiscountResources.json";
 import { useState } from "react";
 import StoreDiscountEditorResources from "../StoreDiscountEditorResources.json";
 import { DiscountDataModel, DiscountTypeTag, getDiscountDataModel } from "../../DiscountTypes";
+import { Info } from "@mui/icons-material";
 
 type DiscountEntry = {
     tag: DiscountTypeTag;
     label: string;
+    description: string;
 }
 
 const DiscountTypeSelector = ({ setPolicy }: { setPolicy: (policy: DiscountDataModel) => void }) => {
@@ -37,7 +39,14 @@ const DiscountTypeSelector = ({ setPolicy }: { setPolicy: (policy: DiscountDataM
             {StoreDiscountEditorResources.PickDiscountPolicy}
         </MenuItem>
         {discountTypes.map((type) => (
-            <MenuItem key={type.tag} value={type.tag}>{type.label}</MenuItem>
+            <MenuItem key={type.tag} value={type.tag}>
+                <Stack direction="row" justifyContent="space-between" width="100%">
+                    {type.label}
+                    <Tooltip title={type.description} placement="right">
+                        <Info fontSize="small" />
+                    </Tooltip>
+                </Stack>
+            </MenuItem>
         ))}
     </Select>
 }
