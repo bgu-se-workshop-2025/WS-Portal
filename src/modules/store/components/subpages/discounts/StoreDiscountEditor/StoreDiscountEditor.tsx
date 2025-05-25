@@ -6,6 +6,8 @@ import StoreDiscountEditorResources from "./StoreDiscountEditorResources.json";
 import DiscountTypeSelector from "./components/DiscountTypeSelector";
 import DiscountResources from "../DiscountResources.json";
 import DiscountValueSelector from "./components/DiscountValueSelector";
+import validateDiscountDataModel from "../validateDiscountDataModel";
+import { set } from "date-fns";
 
 const ElementsVerticalMargin = 1;
 
@@ -24,6 +26,7 @@ const StoreDiscountEditor = ({
 }: StoreDiscountEditorProps) => {
     const [open, setOpen] = useState<boolean>(true);
     const [policy, setPolicy] = useState<DiscountDataModel | undefined>(discountState);
+    const [errors, setErrors] = useState<string[]>([]);
     const tagAndLabelPairs = DiscountResources.DiscountTypes;
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,16 +38,18 @@ const StoreDiscountEditor = ({
     };
 
     const onSave = () => {
-        if (!policy) {
-            console.error("No discount policy set.");
+        const validationErrors = validateDiscountDataModel(policy, true);
+        setErrors(validationErrors);
+        if (validationErrors.length > 0) {
             return;
+        } else {
+            // Implement save logic here
+            console.log("Product ID:", productId);
+            console.log("Discount ID:", discountId);
+            console.log("Saving discount policy:", policy);
+            console.log("Store ID:", storeId);
+            setOpen(false);
         }
-        // Implement save logic here
-        console.log("Saving discount policy:", policy);
-        console.log("Store ID:", storeId);
-        console.log("Product ID:", productId);
-        console.log("Discount ID:", discountId);
-        setOpen(false);
     }
 
     const getLabelForTag = (tag: string): string => tagAndLabelPairs.find(pair => pair.tag === tag)?.label || "";
@@ -77,6 +82,15 @@ const StoreDiscountEditor = ({
                         />
                         {DiscountValueSelector(policy.type, { policy, setPolicy })}
                     </Stack>)}
+                    {errors.length > 0 && (
+                        <Stack>
+                            {errors.map((error, index) => (
+                                <Typography key={index} color="error">
+                                    - {error}
+                                </Typography>
+                            ))}
+                        </Stack>
+                    )}
                 </Stack>
                 <Button onClick={onSave}>{StoreDiscountEditorResources.SaveDiscountButton}</Button>
             </Stack>
