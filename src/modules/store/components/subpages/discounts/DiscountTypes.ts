@@ -1,3 +1,5 @@
+// https://github.com/bgu-se-workshop-2025/WS-Api/tree/main/src/main/java/bguse/wsapi/models/store/policies/discount
+
 export type SimpleDiscountTypeTag = "simple_discount_policy";
 export type ContainsDiscountTypeTag = "contains_discount_policy";
 export type CatregoryDiscountTypeTag = "category_discount_policy";
