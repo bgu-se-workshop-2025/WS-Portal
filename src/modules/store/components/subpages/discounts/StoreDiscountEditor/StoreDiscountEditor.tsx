@@ -7,7 +7,6 @@ import DiscountTypeSelector from "./components/DiscountTypeSelector";
 import DiscountResources from "../DiscountResources.json";
 import DiscountValueSelector from "./components/DiscountValueSelector";
 import validateDiscountDataModel from "../validateDiscountDataModel";
-import { set } from "date-fns";
 
 const ElementsVerticalMargin = 1;
 
