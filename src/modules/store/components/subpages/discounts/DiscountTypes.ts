@@ -24,6 +24,9 @@ export type DiscountTypeTag = SimpleDiscountTypeTag
 
 export type BaseDiscountDataModel = {
     type: DiscountTypeTag;
+    id?: string;
+    title: string;
+    description?: string;
     discountPercentage: number;
 }
 
@@ -50,8 +53,8 @@ export type GreaterThanDiscountDataModel = BaseDiscountDataModel & {
 }
 
 export type BaseCompositeDiscountDataModel = BaseDiscountDataModel & {
-    first: DiscountDataModel;
-    second: DiscountDataModel;
+    first?: DiscountDataModel;
+    second?: DiscountDataModel;
 }
 
 export type MaxDiscountDataModel = BaseCompositeDiscountDataModel & {
@@ -81,3 +84,26 @@ export type DiscountDataModel = SimpleDiscountDataModel
     | CategoryDiscountDataModel
     | GreaterThanDiscountDataModel
     | CompositeDiscountDataModel;
+
+export function getDiscountDataModel(tag: DiscountTypeTag): DiscountDataModel {
+    switch (tag) {
+        case "simple_discount_policy":
+            return { type: "simple_discount_policy", discountPercentage: 0, title: "" };
+        case "contains_discount_policy":
+            return { type: "contains_discount_policy", discountPercentage: 0, quantity: 1, title: "" };
+        case "category_discount_policy":
+            return { type: "category_discount_policy", discountPercentage: 0, category: "", title: "" };
+        case "greater_than_discount_policy":
+            return { type: "greater_than_discount_policy", discountPercentage: 0, minTransactionPrice: 0, title: "" };
+        case "max_discount_policy":
+            return { type: "max_discount_policy", discountPercentage: 0, first: undefined, second: undefined, title: "" };
+        case "and_discount_policy":
+            return { type: "and_discount_policy", discountPercentage: 0, first: undefined, second: undefined, title: "" };
+        case "xor_discount_policy":
+            return { type: "xor_discount_policy", discountPercentage: 0, preferCheaper: true, first: undefined, second: undefined, title: "" };
+        case "or_discount_policy":
+            return { type: "or_discount_policy", discountPercentage: 0, first: undefined, second: undefined, title: "" };
+        default:
+            throw new Error(`Unknown discount type tag ${tag}`);
+    }
+}
