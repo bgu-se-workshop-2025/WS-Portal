@@ -1,0 +1,36 @@
+{
+    "DiscountTypes": [
+        {
+            "label": "Simple",
+            "tag": "simple_discount_policy"
+        },
+        {
+            "label": "Contains",
+            "tag": "contains_discount_policy"
+        },
+        {
+            "label": "Category",
+            "tag": "category_discount_policy"
+        },
+        {
+            "label": "Greater Than",
+            "tag": "greater_than_discount_policy"
+        },
+        {
+            "label": "Max",
+            "tag": "max_discount_policy"
+        },
+        {
+            "label": "And",
+            "tag": "and_discount_policy"
+        },
+        {
+            "label": "Xor",
+            "tag": "xor_discount_policy"
+        },
+        {
+            "label": "Or",
+            "tag": "or_discount_policy"
+        }
+    ]
+}
