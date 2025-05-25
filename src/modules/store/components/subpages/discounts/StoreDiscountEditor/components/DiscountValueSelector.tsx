@@ -1,4 +1,4 @@
-import { Stack, TextField, Checkbox, FormControlLabel, Select, Menu, MenuItem, SelectChangeEvent } from "@mui/material";
+import { Stack, TextField, Checkbox, FormControlLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 import resources from "../StoreDiscountEditorResources.json";
 import { ContainsDiscountDataModel, DiscountDataModel, DiscountTypeTag, CategoryDiscountDataModel, GreaterThanDiscountDataModel } from "../../DiscountTypes";
 import { useState } from "react";
