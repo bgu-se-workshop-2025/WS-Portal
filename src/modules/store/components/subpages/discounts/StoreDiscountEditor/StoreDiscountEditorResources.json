@@ -4,5 +4,12 @@
     "PickDiscountPolicy": "Pick a Discount Policy",
     "DiscountTitleLabel": "Title",
     "DiscountDescriptionLabel": "Description",
-    "DiscountPolicyLabel": " Discount Policy"
+    "DiscountPolicyLabel": " Discount Policy",
+    "DiscountPercentageLabel": "Discount Percentage",
+    "ProductIdLabel": "Product ID",
+    "CategoryLabel": "Category",
+    "ContainsProductLabel": "Contains Product",
+    "ContainsCategoryLabel": "Contains Category",
+    "MinimumTransactionPriceLabel": "Minimum Transaction Price",
+    "CategoryScopedLabel": "Category Scoped"
 }
