@@ -7,3 +7,10 @@ export interface GeneralAuthResponse {
     authorities?: string[];
     token?: string;
 }
+
+export interface NotificationPayload {
+  id: string;
+  title: string;
+  message: string;
+  timestamp: number;
+}

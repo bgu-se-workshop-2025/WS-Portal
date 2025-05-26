@@ -1,28 +1,40 @@
-// import { Client } from "@stomp/stompjs";
+import { Client, IMessage } from "@stomp/stompjs";
+import { NotificationPayload } from "../../../shared/types/responses";
 
-// const baseurl: string = 'http://localhost:8080/ws';
+const baseurl = "http://localhost:8080/ws";
+const userNotificationsChannel = "/user/noamarg/queue/notifications";
+const allUsersNotificationsChannel = "/topic/notifications";
 
-// const userNotificationsChannel: string = '/queue/notifications';
-// const allUsersNotificationsChannel: string = '/topic/notifications';
+export const generateClient = () => {
+  return new Client({
+    brokerURL: baseurl,
+    reconnectDelay: 5_000,
+    debug: (msg) => {
+      console.debug("STOMP debug:", msg);
+    },
+  });
+};
 
-// export const websocket: Client = new Client({
-//     brokerURL: baseurl
-// });
+export const subscribeToNotifications = (
+  client: Client,
+  setNotifications: React.Dispatch<React.SetStateAction<NotificationPayload[]>>
+) => {
+  // user-specific notifications
+  client.subscribe(userNotificationsChannel, (msg: IMessage) => {
+    console.debug("Received user notification:", msg);
+    if (msg.body) {
+      console.debug("Received user notification:", msg.body);
+      const notif = JSON.parse(msg.body) as NotificationPayload;
+      setNotifications((prev) => [...prev, notif]);
+    }
+  });
 
-// export const connectWebSocket = () => websocket.activate();
-// export const closeWebSocket = () => websocket.deactivate();
-
-// websocket.onConnect = _ => {
-//     websocket.subscribe(userNotificationsChannel, (message: import("@stomp/stompjs").IMessage) => {
-//         console.log(message);
-//         // TODO: handle notification
-//     });
-//     websocket.subscribe(allUsersNotificationsChannel, (message: import("@stomp/stompjs").IMessage) => {
-//         console.log(message);
-//         // TODO: handle notification
-//     });
-// };
-
-export const baseurl = 'http://localhost:8080/ws';
-export const userNotificationsChannel = '/queue/notifications';
-export const allUsersNotificationsChannel = '/topic/notifications';
+  // broadcast to all users
+  client.subscribe(allUsersNotificationsChannel, (msg: IMessage) => {
+    if (msg.body) {
+      console.debug("Received broadcast notification:", msg.body);
+      const notif = JSON.parse(msg.body) as NotificationPayload;
+      setNotifications((prev) => [...prev, notif]);
+    }
+  });
+};

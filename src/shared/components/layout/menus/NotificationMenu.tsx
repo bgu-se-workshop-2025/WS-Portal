@@ -16,18 +16,25 @@ import { NotificationsOutlined, OpenInNewOutlined } from "@mui/icons-material";
 
 import { useNavigate } from "react-router-dom";
 
-import {
-  useAuthentications,
-  NotificationPayload,
-} from "../../../../shared/hooks/useNotifications";
+import { useNotifications } from "../../../../shared/hooks/useNotifications";
+import { NotificationPayload } from "../../../../shared/types/responses";
 
 const NotificationMenu: React.FC = () => {
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
 
-  const { notifications } = useAuthentications();
+  const { notifications } = useNotifications();
+  const { connected } = useNotifications();
 
   const navigate = useNavigate();
 
+  if (!connected) {
+    return (
+      <Box p={2}>
+        <Typography color="error">Not connected to notifications.</Typography>
+      </Box>
+    );
+  }
+  
   return (
     <ClickAwayListener onClickAway={() => setNotificationsOpen(false)}>
       <Box position="relative">
