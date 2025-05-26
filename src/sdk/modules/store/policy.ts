@@ -21,6 +21,7 @@ export type DiscountPolicyParams = {
 }
 
 export type DiscountContract = {
+    id?: string;
     title: string;
     description?: string;
     // no support of expiration and internal description for now
