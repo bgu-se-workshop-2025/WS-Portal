@@ -1,6 +1,6 @@
 // https://github.com/bgu-se-workshop-2025/WS-Api/tree/main/src/main/java/bguse/wsapi/models/store/policies/discount
 
-import { DiscountContract, DiscountPolicyParams } from "../../../../../sdk/modules/store/policy";
+import { DiscountDto, DiscountPolicyParamsDto } from "../../../../../sdk/modules/store/policy";
 
 export type SimpleDiscountTypeTag = "simple_discount_policy";
 export type ContainsDiscountTypeTag = "contains_discount_policy";
@@ -116,14 +116,14 @@ export function getDiscountDataModel(tag: DiscountTypeTag): DiscountDataModel {
     }
 }
 
-export function getSimpleDiscountContractParams(policy: SimpleDiscountDataModel): DiscountPolicyParams {
+export function getSimpleDiscountContractParams(policy: SimpleDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage
     };
 }
 
-export function getContainsDiscountContractParams(policy: ContainsDiscountDataModel): DiscountPolicyParams {
+export function getContainsDiscountContractParams(policy: ContainsDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage,
@@ -133,7 +133,7 @@ export function getContainsDiscountContractParams(policy: ContainsDiscountDataMo
     };
 }
 
-export function getCategoryDiscountContractParams(policy: CategoryDiscountDataModel): DiscountPolicyParams {
+export function getCategoryDiscountContractParams(policy: CategoryDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage,
@@ -141,7 +141,7 @@ export function getCategoryDiscountContractParams(policy: CategoryDiscountDataMo
     };
 }
 
-export function getGreaterThanDiscountContractParams(policy: GreaterThanDiscountDataModel): DiscountPolicyParams {
+export function getGreaterThanDiscountContractParams(policy: GreaterThanDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage,
@@ -150,7 +150,7 @@ export function getGreaterThanDiscountContractParams(policy: GreaterThanDiscount
     };
 }
 
-export function getMaxDiscountContractParams(policy: MaxDiscountDataModel): DiscountPolicyParams {
+export function getMaxDiscountContractParams(policy: MaxDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage,
@@ -159,7 +159,7 @@ export function getMaxDiscountContractParams(policy: MaxDiscountDataModel): Disc
     };
 }
 
-export function getAndDiscountContractParams(policy: AndDiscountDataModel): DiscountPolicyParams {
+export function getAndDiscountContractParams(policy: AndDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage,
@@ -168,7 +168,7 @@ export function getAndDiscountContractParams(policy: AndDiscountDataModel): Disc
     };
 }
 
-export function getXorDiscountContractParams(policy: XorDiscountDataModel): DiscountPolicyParams {
+export function getXorDiscountContractParams(policy: XorDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage,
@@ -178,7 +178,7 @@ export function getXorDiscountContractParams(policy: XorDiscountDataModel): Disc
     };
 }
 
-export function getOrDiscountContractParams(policy: OrDiscountDataModel): DiscountPolicyParams {
+export function getOrDiscountContractParams(policy: OrDiscountDataModel): DiscountPolicyParamsDto {
     return {
         type: policy.type,
         discountPercentage: policy.discountPercentage,
@@ -187,7 +187,7 @@ export function getOrDiscountContractParams(policy: OrDiscountDataModel): Discou
     };
 }
 
-export function getDiscountParams(policy: DiscountDataModel): DiscountPolicyParams {
+export function getDiscountParams(policy: DiscountDataModel): DiscountPolicyParamsDto {
     switch (policy.type) {
         case "simple_discount_policy":
             return getSimpleDiscountContractParams(policy as SimpleDiscountDataModel);
@@ -208,7 +208,7 @@ export function getDiscountParams(policy: DiscountDataModel): DiscountPolicyPara
     }
 }
 
-export function getDiscountContract(policy: DiscountDataModel): DiscountContract {
+export function getDiscountContract(policy: DiscountDataModel): DiscountDto {
     return {
         title: policy.title,
         description: policy.description,
@@ -217,7 +217,7 @@ export function getDiscountContract(policy: DiscountDataModel): DiscountContract
     };
 }
 
-export function getDiscountDataModelFromParams(params: DiscountPolicyParams): DiscountDataModel {
+export function getDiscountDataModelFromParams(params: DiscountPolicyParamsDto): DiscountDataModel {
     const data = getDiscountDataModel(params.type);
     switch (data.type) {
         case "simple_discount_policy":
@@ -263,7 +263,7 @@ export function getDiscountDataModelFromParams(params: DiscountPolicyParams): Di
     return data;
 }
 
-export function getDiscountDataModelFromContract(contract: DiscountContract, storeId: string, productId?: string): DiscountDataModel {
+export function getDiscountDataModelFromContract(contract: DiscountDto, storeId: string, productId?: string): DiscountDataModel {
     const resourceScope = { storeId, productId };
     const data = getDiscountDataModelFromParams(contract.params);
     data.id = contract.id;

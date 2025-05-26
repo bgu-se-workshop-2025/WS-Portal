@@ -6,7 +6,7 @@ const publicStoreController = "public/stores";
 const policyResource = "policies"
 const productResource = "products";
 
-export type DiscountPolicyParams = {
+export type DiscountPolicyParamsDto = {
     type: DiscountTypeTag;
     discountPercentage: number;
     category?: string;
@@ -15,21 +15,21 @@ export type DiscountPolicyParams = {
     quantity?: number;
     minTransactionPrice?: number;
     greaterThanCategory?: string;
-    first?: DiscountPolicyParams;
-    second?: DiscountPolicyParams;
+    first?: DiscountPolicyParamsDto;
+    second?: DiscountPolicyParamsDto;
     preferCheaper?: boolean;
 }
 
-export type DiscountContract = {
+export type DiscountDto = {
     id?: string;
     title: string;
     description?: string;
     // no support of expiration and internal description for now
     discountPercentage: number;
-    params: DiscountPolicyParams
+    params: DiscountPolicyParamsDto
 }
 
-export async function getDiscountPolicy(this: SDK, storeId: string, policyId: string): Promise<DiscountContract> {
+export async function getDiscountPolicy(this: SDK, storeId: string, policyId: string): Promise<DiscountDto> {
     const response = await this.get(`${publicStoreController}/${storeId}/${policyResource}/${policyId}`, {});
 
     if (!response.ok) {
@@ -37,11 +37,11 @@ export async function getDiscountPolicy(this: SDK, storeId: string, policyId: st
         throw new Error(`Error fetching discount policy: ${error}`);
     }
 
-    const result = (await response.json()) as DiscountContract;
+    const result = (await response.json()) as DiscountDto;
     return result;
 }
 
-export async function getDiscountPolicies(this: SDK, storeId: string, productId?: string): Promise<DiscountContract[]> {
+export async function getDiscountPolicies(this: SDK, storeId: string, productId?: string): Promise<DiscountDto[]> {
     const response = await this.get(`${publicStoreController}/${storeId}${
         productId 
         ? `/${productResource}/${productId}` 
@@ -53,11 +53,11 @@ export async function getDiscountPolicies(this: SDK, storeId: string, productId?
         throw new Error(`Error fetching discount policies: ${error}`);
     }
 
-    const result = (await response.json()) as DiscountContract[];
+    const result = (await response.json()) as DiscountDto[];
     return result;
 }
 
-export async function createDiscountPolicy(this: SDK, storeId: string, policy: DiscountContract, productId?: string): Promise<DiscountContract> {
+export async function createDiscountPolicy(this: SDK, storeId: string, policy: DiscountDto, productId?: string): Promise<DiscountDto> {
     const response = await this.post(`${storeController}/${storeId}${
         productId 
         ? `/${productResource}/${productId}` 
@@ -69,7 +69,7 @@ export async function createDiscountPolicy(this: SDK, storeId: string, policy: D
         throw new Error(`Error creating discount policy: ${error}`);
     }
 
-    const result = (await response.json()) as DiscountContract;
+    const result = (await response.json()) as DiscountDto;
     return result;
 }
 
