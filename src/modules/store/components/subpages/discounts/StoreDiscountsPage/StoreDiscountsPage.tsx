@@ -1,5 +1,5 @@
 import { Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DiscountDataModel } from "../DiscountTypes";
 import PaginatedDiscountsTable from "./components/PaginatedDiscountsTable";
 import { Add, Loyalty } from "@mui/icons-material";
@@ -53,9 +53,10 @@ const StoreDiscountsPage = ({ context }: StoreDiscountsPageProps) => {
 		deleteDiscount,
 	} = useDiscounts({ storeId: context.storeId });
 
-	useState(() => {
+	useEffect(() => {
 		fetchDiscounts();
-	},);
+	}, []);
+
 
 	return (
 		<Stack sx={MainContainerProps}>
