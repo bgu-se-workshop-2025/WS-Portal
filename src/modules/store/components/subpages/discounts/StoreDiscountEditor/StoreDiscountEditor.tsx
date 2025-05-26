@@ -50,11 +50,17 @@ const StoreDiscountEditor = ({
         }
     }
 
+    const handleClose = () => {
+        setOpen(false);
+        setPolicy(undefined);
+        setErrors([]);
+    }
+
     return (<Dialog open={open}>
         <Box width="32vw" height="88vh" padding="1rem">
             <Stack direction="row" justifyContent="space-between" marginBottom={ElementsVerticalMargin}>
                 <Typography marginTop={ElementsVerticalMargin} color="primary" variant="h5">{StoreDiscountEditorResources.DiscountEditorTitle}</Typography>
-                <Button onClick={() => setOpen(!open)}>
+                <Button onClick={handleClose}>
                     <Close />
                 </Button>
             </Stack>
