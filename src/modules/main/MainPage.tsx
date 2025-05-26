@@ -14,6 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { StoreDto } from "../../shared/types/dtos";
 import { sdk } from "../../sdk/sdk";
 
+import TransactionView, { PaymentDetails, PaymentMethod, ShippingAddress } from "../../shared/components/transaction/TransactionView";
+import TransactionList from "../../shared/components/transaction/TransactionList";
+
 const PAGE_SIZE = 12;
 
 const MainPage: React.FC = () => {
@@ -99,6 +102,51 @@ const MainPage: React.FC = () => {
     setPage(0);
   };
 
+  // TODO - remove later
+  const dummyTransactions = [
+    {
+      buyerName: "John Doe",
+      dateTime: new Date().toISOString(),
+      paymentDetails: {
+        payerName: "Jane Smith",
+        payerEmail: "JaneSmith@gmail.com",
+        paymentMethod: PaymentMethod.creditCard,
+        externalId: "123456789",
+      },
+      shippingAddress: {
+        country: "USA",
+        city: "New York",
+        region: "NY",
+        street: "123 Main St",
+        zipCode: "10001",
+        homeNumber: "1A",
+        apartmentNumber: "2B",
+        mailbox: "3C",
+      },
+    },
+    {
+      buyerName: "John Doe",
+      dateTime: new Date().toISOString(),
+      paymentDetails: {
+        payerName: "Jane Smith",
+        payerEmail: "JaneSmith@gmail.com",
+        paymentMethod: PaymentMethod.creditCard,
+        externalId: "123456789",
+      },
+      shippingAddress: {
+        country: "USA",
+        city: "New York",
+        region: "NY",
+        street: "123 Main St",
+        zipCode: "10001",
+        homeNumber: "1A",
+        apartmentNumber: "2B",
+        mailbox: "3C",
+      },
+    }
+  ]
+
+
   return (
     <Box
       sx={{
@@ -119,6 +167,11 @@ const MainPage: React.FC = () => {
       >
         {storeList()}
       </Box>
+
+      <TransactionList
+        transactions={dummyTransactions}
+      />
+
 
       <Box
         sx={{
