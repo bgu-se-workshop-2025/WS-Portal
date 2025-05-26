@@ -1,9 +1,9 @@
-import StoreDiscountEditor from "./modules/store/components/subpages/discounts/StoreDiscountEditor/StoreDiscountEditor";
+import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
 
 export default function TestPage() {
     return (
         <div>
-            <StoreDiscountEditor />
+            <StoreDiscountsPage />
         </div>
     );
 }
