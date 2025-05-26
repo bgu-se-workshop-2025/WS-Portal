@@ -22,12 +22,18 @@ export type DiscountTypeTag = SimpleDiscountTypeTag
     | GreaterThanDiscountTypeTag
     | CompositeDiscountTypeTag;
 
+export type ResourceScope = {
+    storeId?: string;
+    productId?: string;
+}
+
 export type BaseDiscountDataModel = {
     type: DiscountTypeTag;
     id?: string;
     title: string;
     description?: string;
     discountPercentage: number;
+    scope?: ResourceScope;
 }
 
 export type SimpleDiscountDataModel = BaseDiscountDataModel & {
