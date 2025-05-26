@@ -3,6 +3,8 @@ import { useState } from "react";
 import { DiscountDataModel } from "../DiscountTypes";
 import PaginatedDiscountsTable from "./components/PaginatedDiscountsTable";
 import { Add, Loyalty } from "@mui/icons-material";
+import StoreDiscountEditor from "../StoreDiscountEditor/StoreDiscountEditor";
+import useDiscounts from "../hooks/useDiscounts";
 
 const MainContainerProps = {
 	display: "flex",
@@ -11,27 +13,54 @@ const MainContainerProps = {
 	paddingLeft: 8,
 };
 
-const CommandBar = () => {
+export type StoreDiscountsPageProps = {
+	context: {
+		storeId: string;
+	}
+};
+
+const CommandBar = ({ createDiscount, disabled }: {
+	disabled: boolean;
+	createDiscount: (policy: DiscountDataModel) => Promise<void>
+}) => {
+	const [open, setOpen] = useState(false);
+
+	const handleClicked = () => {
+		setOpen(true);
+	}
+
 	return <Stack direction="row" spacing={2} sx={{ marginBottom: 2 }}>
-		<Button><Add />Create New Discount</Button>
+		<Button
+			disabled={disabled}
+			onClick={handleClicked}
+		>
+			<Add />Create New Discount
+		</Button>
+		<StoreDiscountEditor
+			openState={{ open, setOpen }}
+			createDiscount={createDiscount}
+		/>
 	</Stack>
 }
 
-const StoreDiscountsPage = () => {
-	const [discounts, setDiscounts] = useState<DiscountDataModel[]>([]); // todo initialize with actual data from the store
-	const [loading, setLoading] = useState(true);
+const StoreDiscountsPage = ({ context }: StoreDiscountsPageProps) => {
+	const {
+		discounts,
+		loading,
+		error,
+		fetchDiscounts,
+		createDiscount,
+		deleteDiscount,
+	} = useDiscounts({ storeId: context.storeId });
 
 	useState(() => {
-		if (false) { // todo replace with actual condition to fetch discounts
-			setDiscounts([]);
-		}
-		setTimeout(() => { setLoading(false); }, 2000); // Simulate a delay for loading
+		fetchDiscounts();
 	},);
 
 	return (
 		<Stack sx={MainContainerProps}>
 			<Typography variant="h4">Store Discounts <Loyalty /></Typography>
-			<CommandBar />
+			<CommandBar {...{ context, createDiscount }} disabled={loading} />
 			{loading &&
 				<Stack direction="row" justifyContent="center" alignItems="center" sx={{ height: '100%' }}>
 					<CircularProgress />
@@ -39,14 +68,17 @@ const StoreDiscountsPage = () => {
 			}
 			{!loading && discounts.length === 0 &&
 				<Stack>
-					<PaginatedDiscountsTable rows={discounts} />
+					<PaginatedDiscountsTable rows={discounts} deleteDiscount={deleteDiscount} />
 					<Stack direction="row" justifyContent="center" alignItems="center" sx={{ height: '100%' }} padding={2}>
-						<Typography variant="body1" color="textSecondary">No discounts available.</Typography>
+						{!error
+							? <Typography variant="body1" color="textSecondary">No discounts available.</Typography>
+							: <Typography variant="body1" color="error"> Something went wrong while fetching the discounts: {error}</Typography>
+						}
 					</Stack>
 				</Stack>
 			}
 			{!loading && discounts.length > 0 &&
-				<PaginatedDiscountsTable rows={discounts} />
+				<PaginatedDiscountsTable rows={discounts} deleteDiscount={deleteDiscount} />
 			}
 		</Stack>
 	);

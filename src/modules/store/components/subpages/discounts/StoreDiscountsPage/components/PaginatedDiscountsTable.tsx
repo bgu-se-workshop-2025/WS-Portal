@@ -12,17 +12,15 @@ import { Delete } from '@mui/icons-material';
 
 export type PaginatedDiscountTableProps = {
     rows: DiscountDataModel[];
+    deleteDiscount: (id: string) => Promise<void>;
 }
 
-const PaginatedDiscountsTable = ({ rows }: PaginatedDiscountTableProps) => {
+const PaginatedDiscountsTable = ({ rows, deleteDiscount }: PaginatedDiscountTableProps) => {
 
-    const deleteDiscount = (id?: string) => {
-        if (!id) {
-            console.error("No discount ID provided for deletion.");
-            return;
+    const handleDeleteDiscount = async (id?: string) => {
+        if (id) {
+            await deleteDiscount(id);
         }
-        console.log(`Delete discount with id: ${id}`);
-        // Implement the delete logic here, e.g., call an API to delete the discount
     };
 
     return (
@@ -44,7 +42,7 @@ const PaginatedDiscountsTable = ({ rows }: PaginatedDiscountTableProps) => {
                     {rows.map((row) => (
                         <TableRow key={row.id}>
                             <TableCell width={2}>
-                                <Button onClick={() => deleteDiscount(row.id)} size="small">
+                                <Button onClick={() => handleDeleteDiscount(row.id)} size="small">
                                     <Delete />
                                 </Button>
                             </TableCell>

@@ -11,19 +11,19 @@ import { getLabelForTag } from "../util/discountUtils";
 const ElementsVerticalMargin = 1;
 
 export type StoreDiscountEditorProps = {
-    storeId?: string;
-    productId?: string;
-    discountId?: string;
     discountState?: DiscountDataModel;
+    openState: {
+        open: boolean;
+        setOpen: (open: boolean) => void;
+    },
+    createDiscount: (discount: DiscountDataModel) => Promise<void>;
 }
 
 const StoreDiscountEditor = ({
-    storeId,
-    productId,
-    discountId,
-    discountState
+    discountState,
+    openState: { open, setOpen },
+    createDiscount,
 }: StoreDiscountEditorProps) => {
-    const [open, setOpen] = useState<boolean>(true);
     const [policy, setPolicy] = useState<DiscountDataModel | undefined>(discountState);
     const [errors, setErrors] = useState<string[]>([]);
 
@@ -38,15 +38,15 @@ const StoreDiscountEditor = ({
     const onSave = () => {
         const validationErrors = validateDiscountDataModel(policy, true);
         setErrors(validationErrors);
-        if (validationErrors.length > 0) {
+        if (validationErrors.length > 0 || !policy) {
             return;
         } else {
-            // Implement save logic here
-            console.log("Product ID:", productId);
-            console.log("Discount ID:", discountId);
-            console.log("Saving discount policy:", policy);
-            console.log("Store ID:", storeId);
-            setOpen(false);
+            createDiscount(policy).then(() => {
+                setOpen(false);
+            }).catch((error) => {
+                console.error("Error saving discount:", error);
+                setErrors([...errors, "Something went wrong while saving the discount, contact support if this issue persists."]);
+            });
         }
     }
 

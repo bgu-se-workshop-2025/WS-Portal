@@ -3,7 +3,7 @@ import StoreDiscountsPage from "./modules/store/components/subpages/discounts/St
 export default function TestPage() {
     return (
         <div>
-            <StoreDiscountsPage />
+            <StoreDiscountsPage {...{ context: { storeId: "example" } }} />
         </div>
     );
 }
