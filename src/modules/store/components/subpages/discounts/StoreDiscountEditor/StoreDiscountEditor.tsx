@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Close } from "@mui/icons-material";
 import StoreDiscountEditorResources from "./StoreDiscountEditorResources.json";
 import DiscountTypeSelector from "./components/DiscountTypeSelector";
-import DiscountResources from "../DiscountResources.json";
 import DiscountValueSelector from "./components/DiscountValueSelector";
 import validateDiscountDataModel from "../validateDiscountDataModel";
+import { getLabelForTag } from "../util/discountUtils";
 
 const ElementsVerticalMargin = 1;
 
@@ -26,7 +26,6 @@ const StoreDiscountEditor = ({
     const [open, setOpen] = useState<boolean>(true);
     const [policy, setPolicy] = useState<DiscountDataModel | undefined>(discountState);
     const [errors, setErrors] = useState<string[]>([]);
-    const tagAndLabelPairs = DiscountResources.DiscountTypes;
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setPolicy(policy => policy ? { ...policy, title: event.target.value } : undefined);
@@ -50,8 +49,6 @@ const StoreDiscountEditor = ({
             setOpen(false);
         }
     }
-
-    const getLabelForTag = (tag: string): string => tagAndLabelPairs.find(pair => pair.tag === tag)?.label || "";
 
     return (<Dialog open={open}>
         <Box width="32vw" height="88vh" padding="1rem">
