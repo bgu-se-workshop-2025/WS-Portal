@@ -67,6 +67,10 @@ export class SDK {
   // Public Review SDK
   public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
   public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
+  // Admin SDK
+  public suspendUser!: (userId: string, millis: number) => Promise<string>;
+  public elevateUser!: (userId: string) => Promise<string>;
+  public isAdmin!: () => Promise<dtos.AdminDetailsDto>;
   // Cart SDK
   public getCart!: () => Promise<dtos.CartDto>;
   public addProductToCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;
