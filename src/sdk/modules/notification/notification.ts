@@ -2,7 +2,7 @@ import { Client, IMessage } from "@stomp/stompjs";
 import { NotificationPayload } from "../../../shared/types/responses";
 
 const baseurl = "http://localhost:8080/ws";
-const userNotificationsChannel = "/user/noamarg/queue/notifications";
+const userNotificationsChannel = "/queue/notifications";
 const allUsersNotificationsChannel = "/topic/notifications";
 
 export const generateClient = () => {
@@ -17,22 +17,29 @@ export const generateClient = () => {
 
 export const subscribeToNotifications = (
   client: Client,
+  username: string | undefined,
   setNotifications: React.Dispatch<React.SetStateAction<NotificationPayload[]>>
 ) => {
-  // user-specific notifications
-  client.subscribe(userNotificationsChannel, (msg: IMessage) => {
-    console.debug("Received user notification:", msg);
-    if (msg.body) {
-      console.debug("Received user notification:", msg.body);
-      const notif = JSON.parse(msg.body) as NotificationPayload;
-      setNotifications((prev) => [...prev, notif]);
-    }
-  });
-
+  
   // broadcast to all users
   client.subscribe(allUsersNotificationsChannel, (msg: IMessage) => {
     if (msg.body) {
       console.debug("Received broadcast notification:", msg.body);
+      const notif = JSON.parse(msg.body) as NotificationPayload;
+      setNotifications((prev) => [...prev, notif]);
+    }
+  });
+  
+  // user-specific notifications
+  if (!username) {
+    console.warn("No username provided, cannot subscribe to user notifications.");
+    return;
+  }
+
+  client.subscribe("/user/" + username + userNotificationsChannel, (msg: IMessage) => {
+    console.debug("Received user notification:", msg);
+    if (msg.body) {
+      console.debug("Received user notification:", msg.body);
       const notif = JSON.parse(msg.body) as NotificationPayload;
       setNotifications((prev) => [...prev, notif]);
     }

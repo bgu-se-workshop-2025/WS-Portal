@@ -32,6 +32,9 @@ export class SDK {
   public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
   public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
   public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
+  // User SDK
+  public getCurrentUserProfileDetails!: () => Promise<dtos.PublicUserDto>;
+  public getPublicUserProfileDetails!: (id: string) => Promise<dtos.PublicUserDto>;
   // Message SDK
   public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public getMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;

@@ -4,8 +4,9 @@ import {
   subscribeToNotifications,
 } from "../../sdk/modules/notification/notification";
 import { NotificationPayload } from "../../shared/types/responses";
+import { TokenService } from "../../shared/utils/token";
 
-export function useNotifications() {
+export const useNotifications = () => {
   const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
   const [connected, setConnected] = useState(false);
 
@@ -14,7 +15,7 @@ export function useNotifications() {
 
     client.onConnect = () => {
       setConnected(true);
-      subscribeToNotifications(client, setNotifications);
+      subscribeToNotifications(client, TokenService.username, setNotifications);
     };
 
     client.onStompError = (frame) => {
