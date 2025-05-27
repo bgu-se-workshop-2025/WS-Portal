@@ -3,7 +3,7 @@ import useAdmin from "./hooks/useAdmin";
 import { CircularProgress, Stack } from "@mui/material";
 import { useEffect } from "react";
 
-const OnlyAdmins = () => {
+const RequireAdmin = () => {
     const navigate = useNavigate();
     const { result, loading, error, isAdmin } = useAdmin();
 
@@ -23,4 +23,4 @@ const OnlyAdmins = () => {
     return <Outlet />
 }
 
-export default OnlyAdmins;
+export default RequireAdmin;
