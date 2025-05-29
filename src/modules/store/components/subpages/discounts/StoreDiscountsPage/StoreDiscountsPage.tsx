@@ -5,18 +5,13 @@ import PaginatedDiscountsTable from "./components/PaginatedDiscountsTable";
 import { Add, Loyalty } from "@mui/icons-material";
 import StoreDiscountEditor from "../StoreDiscountEditor/StoreDiscountEditor";
 import useDiscounts from "../hooks/useDiscounts";
+import { useParams } from "react-router-dom";
 
 const MainContainerProps = {
 	display: "flex",
 	gap: 2,
 	padding: 4,
 	paddingLeft: 8,
-};
-
-export type StoreDiscountsPageProps = {
-	context: {
-		storeId: string;
-	}
 };
 
 const CommandBar = ({ createDiscount, disabled }: {
@@ -43,7 +38,10 @@ const CommandBar = ({ createDiscount, disabled }: {
 	</Stack>
 }
 
-const StoreDiscountsPage = ({ context }: StoreDiscountsPageProps) => {
+const StoreDiscountsPage = () => {
+	const { storeId } = useParams();
+	if (!storeId) return;
+
 	const {
 		discounts,
 		loading,
@@ -51,7 +49,7 @@ const StoreDiscountsPage = ({ context }: StoreDiscountsPageProps) => {
 		fetchDiscounts,
 		createDiscount,
 		deleteDiscount,
-	} = useDiscounts({ storeId: context.storeId });
+	} = useDiscounts({ storeId });
 
 	useEffect(() => {
 		fetchDiscounts();
@@ -61,7 +59,7 @@ const StoreDiscountsPage = ({ context }: StoreDiscountsPageProps) => {
 	return (
 		<Stack sx={MainContainerProps}>
 			<Typography variant="h4">Store Discounts <Loyalty /></Typography>
-			<CommandBar {...{ context, createDiscount }} disabled={loading} />
+			<CommandBar createDiscount={createDiscount} disabled={loading} />
 			{loading &&
 				<Stack direction="row" justifyContent="center" alignItems="center" sx={{ height: '100%' }}>
 					<CircularProgress />

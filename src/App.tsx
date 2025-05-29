@@ -31,7 +31,7 @@ const App: React.FC = () => {
           <Route
             path="/store/:storeId/sellers"
             element={<RequireAuth />}
-          >
+          > {/* NEED TO ANOTHER "LAYOUT FILTER" HERE WHICH CHECKS WHETHER THE CURRENT USER IS A SELLER */}
             <Route path="/discounts" element={<StoreDiscountsPage />} />
           </Route>
           <Route
