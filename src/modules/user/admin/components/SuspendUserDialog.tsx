@@ -44,7 +44,7 @@ const SuspendUserDialog = ({ openState: { open, setOpen } }: SuspendUserDialogPr
                 setOpen: setOpen
             }}
         >
-            <Stack gap={2}>
+            <Stack gap={Resources.Page.NormalFormGap}>
                 <TextField
                     label={Resources.SuspendDialog.UsernameInputLabel}
                     value={username}

@@ -29,7 +29,7 @@ const ElevateUserDialog = ({ openState: { open, setOpen } }: ElevateUserDialogPr
         title={Resources.ElevateDialog.Title}
         openState={{ open, setOpen }}
     >
-        <Stack>
+        <Stack gap={Resources.Page.NormalFormGap}>
             <TextField
                 label={Resources.ElevateDialog.UsernameInputLabel}
                 value={username}
