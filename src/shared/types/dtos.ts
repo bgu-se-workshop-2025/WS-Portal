@@ -2,6 +2,13 @@ export interface AdminDetailsDto {
     id: string;
 }
 
+export interface SuspensionTicketDto {
+    username: string;
+    issued: Date;
+    ends: Date;
+    status: string;
+}
+
 export interface PublicUserDto {
   id: string;
   username: string;
