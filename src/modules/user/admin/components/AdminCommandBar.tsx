@@ -1,5 +1,6 @@
 import { Button, Stack } from "@mui/material"
 import { useState } from "react";
+import SuspendUserDialog from "./SuspendUserDialog";
 
 const AdminCommandBar = () => {
     const [openSuspendDialog, setOpenSuspendDialog] = useState(false);
@@ -15,10 +16,15 @@ const AdminCommandBar = () => {
 
     return <Stack
         direction="row"
-        justifyContent="space-between"
+        marginY={1}
+        gap={4}
     >
-        <Button onClick={handleSuspendClick}>Suspend User</Button>
-        <Button onClick={handleElevateClick}>Elevate User</Button>
+        <Button variant="outlined" onClick={handleSuspendClick}>Suspend User</Button>
+        <SuspendUserDialog openState={{
+            open: openSuspendDialog,
+            setOpen: setOpenSuspendDialog
+        }} />
+        <Button variant="outlined" onClick={handleElevateClick}>Elevate User</Button>
     </Stack>
 }
 
