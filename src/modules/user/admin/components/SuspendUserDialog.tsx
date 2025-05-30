@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AdminPageDialog from "./AdminPageDialog";
-import { Button, Stack, TextField } from "@mui/material";
+import { Button, Stack, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -16,13 +16,15 @@ export type SuspendUserDialogProps = {
 const SuspendUserDialog = ({ openState: { open, setOpen } }: SuspendUserDialogProps) => {
     const [username, setUsername] = useState("");
     const [period, setPeriod] = useState(0);
-    const { loading, suspendUser } = useAdmin();
+    const { error, suspendUser } = useAdmin();
 
     const handleSuspend = async () => {
         await suspendUser(username, period);
-        setUsername("");
-        setPeriod(0);
-        setOpen(false);
+        if (!error) {
+            setUsername("");
+            setPeriod(0);
+            setOpen(false);
+        }
     };
 
     const handleDateChanged = (value: PickerValue) => {
@@ -50,7 +52,8 @@ const SuspendUserDialog = ({ openState: { open, setOpen } }: SuspendUserDialogPr
                         onChange={handleDateChanged}
                     />
                 </LocalizationProvider>
-                <Button disabled={!loading} onClick={handleSuspend}>Suspend</Button>
+                {!error && <Typography color="error">{error}</Typography>}
+                <Button onClick={handleSuspend}>Suspend</Button>
             </Stack>
         </AdminPageDialog>
     );
