@@ -3,7 +3,7 @@ import { Button, Dialog, Divider, Stack, Typography } from "@mui/material";
 import { JSX } from "react";
 
 export type AdminPageDialogProps = {
-    children: JSX.Element;
+    children: JSX.Element[];
     title: string;
     openState: {
         open: boolean;
