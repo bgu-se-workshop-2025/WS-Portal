@@ -1,0 +1,18 @@
+{
+    "DiscountEditorTitle": "Discount Editor",
+    "SaveDiscountButton": "Save Discount",
+    "PickDiscountPolicy": "Pick a Discount Policy",
+    "DiscountTitleLabel": "Title",
+    "DiscountDescriptionLabel": "Description",
+    "DiscountPolicyLabel": " Discount Policy",
+    "DiscountPercentageLabel": "Discount Percentage",
+    "ProductIdLabel": "Product ID",
+    "CategoryLabel": "Category",
+    "ContainsProductLabel": "Contains Product",
+    "ContainsCategoryLabel": "Contains Category",
+    "MinimumTransactionPriceLabel": "Minimum Transaction Price",
+    "CategoryScopedLabel": "Category Scoped",
+    "CompositeDiscountLabelFirst": "First",
+    "CompositeDiscountLabelSecond": "Second",
+    "PreferCheaperLabel": "Prefer Cheaper?"
+}

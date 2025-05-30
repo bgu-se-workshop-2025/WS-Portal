@@ -21,6 +21,7 @@ import { TokenService } from "../shared/utils/token";
 import * as dtos from "../shared/types/dtos";
 import * as requests from "../shared/types/requests";
 import * as responses from "../shared/types/responses";
+import { DiscountDto } from "./modules/store/policy";
 
 interface SDKOptions {
   baseUrl: string;
@@ -67,6 +68,11 @@ export class SDK {
   // Public Review SDK
   public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
   public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
+  // Discount Policy SDK
+  public getDiscountPolicy!: (storeId: string, policyId: string) => Promise<DiscountDto>;
+  public getDiscountPolicies!: (storeId: string, productId?: string) => Promise<DiscountDto[]>;
+  public createDiscountPolicy!: (storeId: string, policy: DiscountDto, productId?: string) => Promise<DiscountDto>;
+  public deleteDiscountPolicy!: (storeId: string, policyId: string, productId?: string) => Promise<void>;
   // Cart SDK
   public getCart!: () => Promise<dtos.CartDto>;
   public addProductToCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;

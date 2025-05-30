@@ -1,0 +1,44 @@
+{
+    "DiscountTypes": [
+        {
+            "label": "Simple",
+            "tag": "simple_discount_policy",
+            "description": "A basic discount that applies a fixed amount or percentage off the total price."
+        },
+        {
+            "label": "Contains",
+            "tag": "contains_discount_policy",
+            "description": "A discount that applies when a specific item is present in the cart above a certain quantity, can also be applied based on categories."
+        },
+        {
+            "label": "Category",
+            "tag": "category_discount_policy",
+            "description": "A discount that applies to all items in a specific category."
+        },
+        {
+            "label": "Greater Than",
+            "tag": "greater_than_discount_policy",
+            "description": "A discount that applies when the total price exceeds a specified amount, or if the products of some category exceed a certain amount. Note that on categories this discount is calculated off the base price."
+        },
+        {
+            "label": "Max",
+            "tag": "max_discount_policy",
+            "description": "A discount that applies the maximum discount between two discounts."
+        },
+        {
+            "label": "And",
+            "tag": "and_discount_policy",
+            "description": "A discount that applies when both the conditions are met."
+        },
+        {
+            "label": "Xor",
+            "tag": "xor_discount_policy",
+            "description": "A discount that applies when exactly one of the conditions is met. If both conditions are met, then preference of cheaper/ more expensive discount can be set."
+        },
+        {
+            "label": "Or",
+            "tag": "or_discount_policy",
+            "description": "A discount that applies when at least one of the conditions is met. If both conditions are met, then preference of cheaper/ more expensive discount can be set."
+        }
+    ]
+}
