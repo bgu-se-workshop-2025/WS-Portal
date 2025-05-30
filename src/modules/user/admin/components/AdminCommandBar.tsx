@@ -1,6 +1,7 @@
 import { Button, Stack } from "@mui/material"
 import { useState } from "react";
 import SuspendUserDialog from "./SuspendUserDialog";
+import ElevateUserDialog from "./ElevateUserDialog";
 
 const AdminCommandBar = () => {
     const [openSuspendDialog, setOpenSuspendDialog] = useState(false);
@@ -25,6 +26,10 @@ const AdminCommandBar = () => {
             setOpen: setOpenSuspendDialog
         }} />
         <Button variant="outlined" onClick={handleElevateClick}>Elevate User</Button>
+        <ElevateUserDialog openState={{
+            open: openElevateDialog,
+            setOpen: setOpenElevateDialog
+        }} />
     </Stack>
 }
 
