@@ -1,6 +1,7 @@
 {
     "Page": {
-        "NormalFormGap": 2
+        "NormalFormGap": 2,
+        "LargePadding": 4
     },
     "ElevateDialog": {
         "Title": "Elevate User",
@@ -10,5 +11,11 @@
         "Title": "Suspend User",
         "UsernameInputLabel": "Username",
         "DatePickerLabel": "Until?"
+    },
+    "SuspendedUsersTable": {
+        "Headers": ["Cancel", "Username", "Issued At", "Ends At", "Status"],
+        "NoSuspensions": "No suspensions to display.",
+        "PreviousPageButtonLabel": "Previous",
+        "NextPageButtonLabel": "Next"
     }
 }
