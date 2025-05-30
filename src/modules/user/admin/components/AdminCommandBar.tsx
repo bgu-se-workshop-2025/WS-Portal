@@ -2,8 +2,14 @@ import { Button, Stack } from "@mui/material"
 import { useState } from "react";
 import SuspendUserDialog from "./SuspendUserDialog";
 import ElevateUserDialog from "./ElevateUserDialog";
+import useAdmin, { useAdminResponse } from "../hooks/useAdmin";
+
+export type AdminCommandBarProps = {
+    useAdminResponse: useAdminResponse;
+}
 
 const AdminCommandBar = () => {
+    const useAdminResponse = useAdmin();
     const [openSuspendDialog, setOpenSuspendDialog] = useState(false);
     const [openElevateDialog, setOpenElevateDialog] = useState(false);
 
@@ -21,7 +27,7 @@ const AdminCommandBar = () => {
         gap={4}
     >
         <Button variant="outlined" onClick={handleSuspendClick}>Suspend User</Button>
-        <SuspendUserDialog openState={{
+        <SuspendUserDialog useAdminResponse={useAdminResponse} openState={{
             open: openSuspendDialog,
             setOpen: setOpenSuspendDialog
         }} />

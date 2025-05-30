@@ -1,14 +1,18 @@
 import { Button, ButtonGroup, CircularProgress, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import Resources from "../AdminPageResources.json";
-import useAdmin from "../hooks/useAdmin";
+import { useAdminResponse } from "../hooks/useAdmin";
 import { useEffect, useState } from "react";
 import { SuspensionTicketDto } from "../../../../shared/types/dtos";
 import { Delete } from "@mui/icons-material";
 
 const headers = Resources.SuspendedUsersTable.Headers;
 
-const SuspendedUsersTable = () => {
-    const { loading, error, cancelSuspensionUser, getSuspensions } = useAdmin();
+export type SuspendedUsersTableProps = {
+    useAdminResponse: useAdminResponse;
+}
+
+const SuspendedUsersTable = ({ useAdminResponse }: SuspendedUsersTableProps) => {
+    const { loading, error, cancelSuspensionUser, getSuspensions } = useAdminResponse;
     const [suspensions, setSuspensions] = useState<SuspensionTicketDto[]>([]);
     const [page, setPage] = useState(0);
 
