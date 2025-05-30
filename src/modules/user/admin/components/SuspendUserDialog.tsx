@@ -5,6 +5,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import useAdmin from "../hooks/useAdmin";
+import Resources from "../AdminPageResources.json"
 
 export type SuspendUserDialogProps = {
     openState: {
@@ -37,18 +38,20 @@ const SuspendUserDialog = ({ openState: { open, setOpen } }: SuspendUserDialogPr
 
     return (
         <AdminPageDialog
-            title="Suspend User" openState={{
+            title={Resources.SuspendDialog.Title}
+            openState={{
                 open: open,
                 setOpen: setOpen
-            }} >
+            }}
+        >
             <Stack gap={2}>
                 <TextField
-                    label="Username"
+                    label={Resources.SuspendDialog.UsernameInputLabel}
                     value={username}
                     onChange={e => setUsername(e.target.value)} />
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
-                        label="Until?"
+                        label={Resources.SuspendDialog.DatePickerLabel}
                         onChange={handleDateChanged}
                     />
                 </LocalizationProvider>

@@ -1,0 +1,14 @@
+{
+    "Page": {
+        "NormalFormGap": 2
+    },
+    "ElevateDialog": {
+        "Title": "Elevate User",
+        "UsernameInputLabel": "Username"
+    },
+    "SuspendDialog": {
+        "Title": "Suspend User",
+        "UsernameInputLabel": "Username",
+        "DatePickerLabel": "Until?"
+    }
+}

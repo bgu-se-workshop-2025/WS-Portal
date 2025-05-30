@@ -2,6 +2,7 @@ import { Button, Stack, TextField, Typography } from "@mui/material";
 import AdminPageDialog from "./AdminPageDialog";
 import useAdmin from "../hooks/useAdmin";
 import { useState } from "react";
+import Resources from "../AdminPageResources.json"
 
 export type ElevateUserDialogProps = {
     openState: {
@@ -25,12 +26,12 @@ const ElevateUserDialog = ({ openState: { open, setOpen } }: ElevateUserDialogPr
     }
 
     return <AdminPageDialog
-        title="Elevate User"
+        title={Resources.ElevateDialog.Title}
         openState={{ open, setOpen }}
     >
         <Stack>
             <TextField
-                label="username"
+                label={Resources.ElevateDialog.UsernameInputLabel}
                 value={username}
                 onChange={e => setUsername(e.target.value)}
             />
