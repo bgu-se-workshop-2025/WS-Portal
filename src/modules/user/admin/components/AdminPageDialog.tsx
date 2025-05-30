@@ -3,7 +3,7 @@ import { Button, Dialog, Divider, Stack, Typography } from "@mui/material";
 import { JSX } from "react";
 
 export type AdminPageDialogProps = {
-    children: JSX.Element[];
+    children: JSX.Element;
     title: string;
     openState: {
         open: boolean;
@@ -20,12 +20,12 @@ const AdminPageDialog = ({
     }
 }: AdminPageDialogProps) => {
     return <Dialog open={open}>
-        <Stack>
+        <Stack padding={2} gap={2}>
             <Stack
                 direction="row"
                 justifyContent="space-between"
             >
-                <Typography variant="h4">{title}</Typography>
+                <Typography variant="h6">{title}</Typography>
                 <Button onClick={() => setOpen(false)}>
                     <Close />
                 </Button>
