@@ -13,6 +13,7 @@ import RequireAuth from "./shared/utils/RequireAuth";
 import MainPage from "./modules/main/MainPage";
 import AdminPage from "./modules/user/admin/pages/AdminPage";
 import RequireAdmin from "./modules/user/admin/RequireAdmin";
+import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -33,13 +34,17 @@ const App: React.FC = () => {
             <Route index element={<AdminPage />} />
           </Route>
           <Route
+            path="/store/:storeId/sellers"
+            element={<RequireAuth />}
+          > {/* NEED TO ANOTHER "LAYOUT FILTER" HERE WHICH CHECKS WHETHER THE CURRENT USER IS A SELLER */}
+            <Route path="/discounts" element={<StoreDiscountsPage />} />
+          </Route>
+          <Route
             path="/profile"
-            element={
-              <RequireAuth>
-                <UserProfilePage />
-              </RequireAuth>
-            }
-          />
+            element={<RequireAuth />}
+          >
+            <Route element={<UserProfilePage />} />
+          </Route>
           <Route path="*" element={<MainPage />} />
         </Routes>
       </Box>

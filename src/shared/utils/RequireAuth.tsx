@@ -1,12 +1,7 @@
-import React, { JSX } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { TokenService } from "./token";
 
-interface RequireAuthProps {
-  children: JSX.Element;
-}
-
-const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
+const RequireAuth = () => {
   const location = useLocation();
   const isAuthenticated = TokenService.isAuthenticated;
 
@@ -16,7 +11,7 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
+  return <Outlet />;
 };
 
 export default RequireAuth;
