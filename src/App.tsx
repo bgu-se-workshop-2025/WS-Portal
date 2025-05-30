@@ -12,6 +12,7 @@ import UserProfilePage from "./modules/user/profile/UserProfilePage";
 import RequireAuth from "./shared/utils/RequireAuth";
 import MainPage from "./modules/main/MainPage";
 import AdminPage from "./modules/user/admin/pages/AdminPage";
+import RequireAdmin from "./modules/user/admin/RequireAdmin";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -28,7 +29,9 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/store/:id" element={<StorePage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin" element={<RequireAdmin />} >
+            <Route index element={<AdminPage />} />
+          </Route>
           <Route
             path="/profile"
             element={

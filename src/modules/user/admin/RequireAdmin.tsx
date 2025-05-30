@@ -8,9 +8,7 @@ const RequireAdmin = () => {
     const { result, loading, error, isAdmin } = useAdmin();
 
     useEffect(() => {
-        if (isAdmin) {
-            isAdmin();
-        }
+        isAdmin();
     }, []);
 
     if (loading) {
