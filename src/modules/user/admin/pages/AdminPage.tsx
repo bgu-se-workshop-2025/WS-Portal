@@ -11,7 +11,7 @@ const AdminPage = () => {
         gap={Resources.Page.NormalFormGap}
     >
         <Typography variant="h3">System Management</Typography>
-        <AdminCommandBar />
+        <AdminCommandBar useAdminResponse={useAdminResponse} />
         <SuspendedUsersTable useAdminResponse={useAdminResponse} />
     </Stack>
 }

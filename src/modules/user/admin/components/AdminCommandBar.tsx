@@ -2,14 +2,13 @@ import { Button, Stack } from "@mui/material"
 import { useState } from "react";
 import SuspendUserDialog from "./SuspendUserDialog";
 import ElevateUserDialog from "./ElevateUserDialog";
-import useAdmin, { useAdminResponse } from "../hooks/useAdmin";
+import { useAdminResponse } from "../hooks/useAdmin";
 
 export type AdminCommandBarProps = {
     useAdminResponse: useAdminResponse;
 }
 
-const AdminCommandBar = () => {
-    const useAdminResponse = useAdmin();
+const AdminCommandBar = ({ useAdminResponse }: AdminCommandBarProps) => {
     const [openSuspendDialog, setOpenSuspendDialog] = useState(false);
     const [openElevateDialog, setOpenElevateDialog] = useState(false);
 
