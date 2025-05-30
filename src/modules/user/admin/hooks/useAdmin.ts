@@ -10,11 +10,11 @@ export interface useAdminResponse {
     loading: boolean;
     error?: string;
     suspensions: SuspensionTicketDto[];
-    suspendUser?: (userId: string, millis: number) => Promise<void>;
-    elevateUser?: (userId: string) => Promise<void>;
-    isAdmin?: () => Promise<AdminDetailsDto>;
-    cancelSuspensionUser?: (userId: string) => Promise<void>;
-    getSuspensions?: (
+    suspendUser: (userId: string, millis: number) => Promise<void>;
+    elevateUser: (userId: string) => Promise<void>;
+    isAdmin: () => Promise<AdminDetailsDto>;
+    cancelSuspensionUser: (userId: string) => Promise<void>;
+    getSuspensions: (
         page: number,
         limit: number
     ) => Promise<SuspensionTicketDto[]>;
