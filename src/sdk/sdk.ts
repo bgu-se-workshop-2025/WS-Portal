@@ -107,6 +107,7 @@ export class SDK {
 
             ...order,
             ...publicOrder,
+            ...bidding,
 
             ...policy,
             ...product,
