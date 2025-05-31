@@ -7,7 +7,6 @@ import RemoveSellerDialog from "./RemoveSellerDialog";
 import { sdk } from "../../../../sdk/sdk";
 import { PublicUserDto } from "../../../../shared/types/dtos";
 
-// Permissions structure
 type PermissionObject = {
   CanAddDiscount: boolean;
   CanRemoveProduct: boolean;
@@ -31,21 +30,21 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
   const [selectedSellerToRemove, setSelectedSellerToRemove] = useState<Seller | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(""); // 🔹 NEW STATE
 
   const currentUserId = "1"; // Replace with real current user ID
 
-
-
-  
   const fetchSellers = () => {
     if (!storeId) return;
     setLoading(true);
+    setFetchError("");
+
     sdk.getStoreOfficials(storeId)
       .then((officials: PublicUserDto[]) => {
         const result: Seller[] = officials.map((u) => ({
           id: u.id,
           name: u.username,
-          role: "Manager", // You can replace with u.role if available
+          role: "Manager",
           isYou: u.id === currentUserId,
           permissions: {
             CanAddDiscount: false,
@@ -56,13 +55,14 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
         }));
         setSellers(result);
       })
-      .catch(() => setSellers([]))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+      setSellers([]);
+      setFetchError(`Error fetching store officials: ${err.message || String(err) || "Unknown error"}`);
+      }).finally(() => setLoading(false));
   };
 
   useEffect(fetchSellers, [storeId]);
 
-  // Permissions dialog handlers
   const handleOpenPerms = (seller: Seller) => {
     setSelectedSeller(seller);
     setPermDialogOpen(true);
@@ -75,7 +75,6 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
 
   const handleSavePerms = (newPerms: PermissionObject) => {
     if (!selectedSeller) return;
-    // Optional: update backend with new permissions here via sdk
     setSellers((prev) =>
       prev.map((s) =>
         s.id === selectedSeller.id ? { ...s, permissions: newPerms } : s
@@ -84,13 +83,11 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
     handleClosePerms();
   };
 
-  // Add seller success
   const handleAddSuccess = (newSeller: Seller) => {
     setSellers((prev) => [...prev, newSeller]);
     setAddDialogOpen(false);
   };
 
-  // Remove seller flow
   const handleDeleteSellerClick = (seller: Seller) => {
     setSelectedSellerToRemove(seller);
     setRemoveDialogOpen(true);
@@ -126,6 +123,13 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
       </Button>
 
       <Stack spacing={2} width="100%" maxWidth="500px">
+        {/* 🔹 SHOW FETCH ERROR */}
+        {fetchError && (
+          <Typography color="error.main" align="center">
+            {fetchError}
+          </Typography>
+        )}
+
         {sellers.map((seller) => (
           <SellerCard
             key={seller.id}
@@ -137,14 +141,13 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
           />
         ))}
 
-        {!loading && sellers.length === 0 && (
+        {!loading && !fetchError && sellers.length === 0 && (
           <Typography color="textSecondary" align="center">
             No sellers yet for this store.
           </Typography>
         )}
       </Stack>
 
-      {/* Add Seller Dialog */}
       {storeId && (
         <AddSellerDialog
           open={addDialogOpen}
@@ -155,7 +158,6 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
         />
       )}
 
-      {/* Permissions Dialog */}
       {selectedSeller && (
         <SellerPermissionsDialog
           open={permDialogOpen}
@@ -167,7 +169,6 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
         />
       )}
 
-      {/* Remove Seller Dialog */}
       <RemoveSellerDialog
         open={removeDialogOpen}
         sellerName={selectedSellerToRemove?.name || ""}
