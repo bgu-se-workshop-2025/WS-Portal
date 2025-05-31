@@ -22,8 +22,8 @@ export async function updateStore(this: SDK, storeId: string, store: StoreDto): 
     const response = await this.patch(`${storeController}/${storeId}`, store);
     
     if(!response.ok) {
-        const err = await response.text();
-        throw new Error(`Failed to update store ${storeId}: ${err}`);
+
+        throw new Error(`Failed to update store : ${response.status}`);
     }
 
     const result = (await response.json()) as StoreDto;
