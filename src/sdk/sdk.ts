@@ -54,6 +54,7 @@ export class SDK {
   public createProduct!: (storeId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public updateProduct!: (storeId: string, productId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public deleteProduct!: (storeId: string, productId: string) => Promise<void>;
+  public getSeller!: (storeId: string, sellerId: string) => Promise<dtos.SellerDto>;
   public addSeller!: (storeId: string, payload: dtos.SellerDto) => Promise<dtos.SellerDto>;
   public removeSeller!: (storeId: string, sellerId: string) => Promise<void>;
   //Public Store SDK
