@@ -71,7 +71,7 @@ export class SDK {
     //Public Order SDK
     public createOrder!: (payload: dtos.OrderRequestDetails) => Promise<dtos.UserOrderDto>;
     // Bidding SDK
-    public createRequest!: (payload: dtos.BidRequestDto) => Promise<dtos.BidRequestDto>;
+    public createBidRequest!: (payload: dtos.BidRequestDto) => Promise<dtos.BidRequestDto>;
     public acceptBidRequest!: (bidRequestId: string) => Promise<void>;
     public rejectBidRequest!: (bidRequestId: string) => Promise<void>;
     public submitAlternativePrice!: (bidRequestId: string, newPrice: number) => Promise<void>;
