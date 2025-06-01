@@ -14,6 +14,9 @@ import MainPage from "./modules/main/MainPage";
 import AdminPage from "./modules/user/admin/pages/AdminPage";
 import RequireAdmin from "./modules/user/admin/RequireAdmin";
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
+import CartTestPage from "./modules/cart/CartTestPage";
+import CartMainPage from "./modules/cart/CartMainPage";
+import PaymentPage from "./modules/order/PayemntPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -30,6 +33,9 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/store/:id" element={<StorePage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/cart-test" element={<CartTestPage />} />
+          <Route path="/cart" element={<CartMainPage />} />
+          <Route path="/public/orders" element={<PaymentPage />} />
           <Route path="/admin" element={<RequireAdmin />} >
             <Route index element={<AdminPage />} />
           </Route>

@@ -45,7 +45,6 @@ const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
             {activeTab === "products" && <StoreProducts storeId={id} />}
             {activeTab === "sellers" && <StoreSellers storeId={id} />}
             {activeTab === "settings" && <StoreSettings storeId={id} />}
-            {activeTab === "discounts" && <StoreDiscounts storeId={id} />}
           </Box>
         </Box>
       </Container>

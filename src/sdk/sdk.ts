@@ -79,9 +79,9 @@ export class SDK {
     public deleteDiscountPolicy!: (storeId: string, policyId: string, productId?: string) => Promise<void>;
     // Cart SDK
     public getCart!: () => Promise<dtos.CartDto>;
-    public addProductToCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;
-    public removeProductFromCart!: (productId: number) => Promise<void>;
-    public updateProductInCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;
+    public addProductToCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
+    public removeProductFromCart!: (productId: string) => Promise<void>;
+    public updateProductInCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
     
     private options: SDKOptions;
     
