@@ -1,3 +1,5 @@
+// TODO - fix the id thing
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -31,7 +33,7 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
       const data =
         mode === 'user'
           ? await sdk.getBidRequestsOfUser(pageable)
-          : await sdk.getBidRequestsOfProduct(id!, pageable);
+          : await sdk.getBidRequestsOfProduct(id!, pageable); // TODO - need getBidRequestsOfStore
 
       setBidRequests(data);
     } catch (err: any) {
@@ -58,7 +60,7 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
 
       <Grid container spacing={2} mt={2}>
         {bidRequests.map((request) => (
-          <Grid item xs={12} sm={6} md={4} key={request.id}>
+          <Grid item xs={12} sm={6} md={4} key={request.id}> // TODO - fix the Grid
             <BidRequestCard
               bidRequest={request}
               mode={mode}

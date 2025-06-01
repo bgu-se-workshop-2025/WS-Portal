@@ -1,3 +1,5 @@
+// TODO - check if need to fix the backend and add BidRequestId to BidRequestDto
+
 import React, { useState } from 'react';
 import {
   Card,
