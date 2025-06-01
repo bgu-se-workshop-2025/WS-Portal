@@ -119,12 +119,24 @@ const CartProductItem: React.FC<CartProductItemProps> = ({
       </Stack>
 
       <Snackbar
-        open={!!errorMessage}
-        autoHideDuration={6000}
-        onClose={() => setErrorMessage(null)}
-        message={errorMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      />
+      open={!!errorMessage}
+      autoHideDuration={4000}
+      onClose={() => setErrorMessage(null)}
+      message={errorMessage}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      ContentProps={{
+        sx: {
+          backgroundColor: "#ffe0e0",     // Light red background
+          color: "#b22222",               // Dark red text
+          fontWeight: 500,
+          px: 3,
+          py: 1.5,
+          borderRadius: "12px",
+          boxShadow: 3,
+        },
+      }}
+    />
+
     </Paper>
   );
 };
