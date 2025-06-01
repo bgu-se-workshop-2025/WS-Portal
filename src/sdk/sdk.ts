@@ -2,6 +2,7 @@ import * as auth from "./modules/auth/auth";
 
 import * as order from "./modules/order/order";
 import * as publicOrder from "./modules/order/publicOrder";
+import * as bidding from "./modules/order/bidding";
 
 import * as policy from "./modules/store/policy";
 import * as product from "./modules/store/product";
@@ -69,6 +70,19 @@ export class SDK {
     public getStoreOrders!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.StoreOrderDto[]>;
     //Public Order SDK
     public createOrder!: (payload: dtos.OrderRequestDetails) => Promise<dtos.UserOrderDto>;
+    // Bidding SDK
+    public createRequest!: (payload: dtos.BidRequestDto) => Promise<dtos.BidRequestDto>;
+    public acceptBidRequest!: (bidRequestId: string) => Promise<void>;
+    public rejectBidRequest!: (bidRequestId: string) => Promise<void>;
+    public submitAlternativePrice!: (bidRequestId: string, newPrice: number) => Promise<void>;
+    public getBidRequest!: (bidRequestId: string) => Promise<dtos.BidRequestDto>;
+    public getBid!: (bidRequestId: string) => Promise<dtos.BidDto>;
+    public getBidsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
+    public getBidsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
+    public getBidRequestsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
+    public getBidRequestsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
+    public deleteBidRequest!: (bidRequestId: string) => Promise<void>;
+    public deleteBid!: (bidRequestId: string) => Promise<void>;
     // Public Review SDK
     public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
     public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
@@ -93,6 +107,7 @@ export class SDK {
 
             ...order,
             ...publicOrder,
+            ...bidding,
 
             ...policy,
             ...product,
