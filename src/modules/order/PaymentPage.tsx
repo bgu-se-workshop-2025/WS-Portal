@@ -8,6 +8,8 @@ import {
   TextField,
   Typography,
   Alert,
+  Divider,
+  CircularProgress,
 } from '@mui/material';
 
 import {
@@ -87,12 +89,13 @@ const PaymentPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 700, mx: 'auto', mt: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         <Typography variant="h5" gutterBottom>
           Payment Information
         </Typography>
-        <Stack spacing={2}>
+
+        <Stack spacing={2} mt={2}>
           <TextField
             select
             label="Payment Method"
@@ -100,6 +103,7 @@ const PaymentPage: React.FC = () => {
             value={paymentDetails.paymentMethod}
             onChange={handlePaymentChange}
             fullWidth
+            disabled={loading}
           >
             {paymentMethods.map(method => (
               <MenuItem key={method.value} value={method.value}>
@@ -107,12 +111,14 @@ const PaymentPage: React.FC = () => {
               </MenuItem>
             ))}
           </TextField>
+
           <TextField
-            label="External ID"
+            label="External Payment ID"
             name="externalId"
             value={paymentDetails.externalId}
             onChange={handlePaymentChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Payer Email"
@@ -120,6 +126,7 @@ const PaymentPage: React.FC = () => {
             value={paymentDetails.payerEmail}
             onChange={handlePaymentChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Payer ID"
@@ -127,19 +134,24 @@ const PaymentPage: React.FC = () => {
             value={paymentDetails.payerId}
             onChange={handlePaymentChange}
             fullWidth
+            disabled={loading}
           />
         </Stack>
 
-        <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
+        <Divider sx={{ my: 4 }} />
+
+        <Typography variant="h5" gutterBottom>
           Shipping Address
         </Typography>
-        <Stack spacing={2}>
+
+        <Stack spacing={2} mt={2}>
           <TextField
             label="Country"
             name="country"
             value={shippingAddress.country}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="City"
@@ -147,6 +159,7 @@ const PaymentPage: React.FC = () => {
             value={shippingAddress.city}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Region"
@@ -154,6 +167,7 @@ const PaymentPage: React.FC = () => {
             value={shippingAddress.region}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Street"
@@ -161,6 +175,7 @@ const PaymentPage: React.FC = () => {
             value={shippingAddress.street}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Zip Code"
@@ -168,6 +183,7 @@ const PaymentPage: React.FC = () => {
             value={shippingAddress.zipCode}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Home Number"
@@ -175,6 +191,7 @@ const PaymentPage: React.FC = () => {
             value={shippingAddress.homeNumber}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Apartment Number"
@@ -182,6 +199,7 @@ const PaymentPage: React.FC = () => {
             value={shippingAddress.apartmentNumber}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
           <TextField
             label="Mailbox"
@@ -189,6 +207,7 @@ const PaymentPage: React.FC = () => {
             value={shippingAddress.mailbox}
             onChange={handleShippingChange}
             fullWidth
+            disabled={loading}
           />
         </Stack>
 
@@ -197,18 +216,19 @@ const PaymentPage: React.FC = () => {
           color="primary"
           onClick={handleSubmit}
           disabled={loading}
-          sx={{ mt: 4 }}
+          fullWidth
+          sx={{ mt: 4, py: 1.5 }}
         >
-          {loading ? 'Processing...' : 'Purchase'}
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Purchase'}
         </Button>
 
         {success && (
-          <Alert severity="success" sx={{ mt: 2 }}>
+          <Alert severity="success" sx={{ mt: 3 }}>
             Purchase successful! Transaction ID: {success.id}
           </Alert>
         )}
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
+          <Alert severity="error" sx={{ mt: 3 }}>
             {error}
           </Alert>
         )}
