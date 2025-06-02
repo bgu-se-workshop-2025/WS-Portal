@@ -7,12 +7,7 @@ import RemoveSellerDialog from "./RemoveSellerDialog";
 import { sdk } from "../../../../sdk/sdk";
 import { PublicUserDto } from "../../../../shared/types/dtos";
 
-type PermissionObject = {
-  CanAddDiscount: boolean;
-  CanRemoveProduct: boolean;
-  CanAddProduct: boolean;
-  CanModifyPermissions: boolean;
-};
+type PermissionObject = Record<string, boolean>;
 
 interface Seller {
   id: string;
@@ -32,7 +27,7 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(""); // 🔹 NEW STATE
 
-  const currentUserId = "1"; // Replace with real current user ID
+  const currentUserId = ;
 
   const fetchSellers = () => {
     if (!storeId) return;
@@ -46,12 +41,7 @@ const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
           name: u.username,
           role: "Manager",
           isYou: u.id === currentUserId,
-          permissions: {
-            CanAddDiscount: false,
-            CanRemoveProduct: false,
-            CanAddProduct: false,
-            CanModifyPermissions: false,
-          },
+          permissions: ,
         }));
         setSellers(result);
       })

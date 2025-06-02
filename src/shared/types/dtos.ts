@@ -43,7 +43,7 @@ export interface ProductDto {
 }
 
 export interface SellerDto {
-    id: string;
+    id?: string;
     userId: string;
     storeId: string;
     sellerType: SellerType;
@@ -52,10 +52,11 @@ export interface SellerDto {
 }
 
 export enum SellerType {
-  OWNER = 0,
-  MANAGER = 1,
-  UNKNOWN = 2
+  OWNER = "OWNER",
+  MANAGER = "MANAGER",
+  UNKNOWN = "UNKNOWN",
 }
+
 
 export interface MessageDto {
     recipientId: string;

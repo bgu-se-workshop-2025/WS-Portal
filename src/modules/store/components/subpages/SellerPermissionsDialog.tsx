@@ -11,18 +11,7 @@ import {
   Stack,
 } from "@mui/material";
 
-type Permission =
-  | "CanAddDiscount"
-  | "CanRemoveProduct"
-  | "CanAddProduct"
-  | "CanModifyPermissions";
-
-type PermissionObject = {
-  CanAddDiscount: boolean;
-  CanRemoveProduct: boolean;
-  CanAddProduct: boolean;
-  CanModifyPermissions: boolean;
-};
+type PermissionObject = Record<string, boolean>;
 
 interface Props {
   open: boolean;
@@ -33,12 +22,11 @@ interface Props {
   onSave: (updated: PermissionObject) => void;
 }
 
-const ALL_PERMISSIONS: Permission[] = [
-  "CanAddDiscount",
-  "CanRemoveProduct",
-  "CanAddProduct",
-  "CanModifyPermissions",
-];
+const formatLabel = (label: string): string =>
+  label
+    .replace(/([A-Z])/g, " $1")
+    .trim()
+    .replace(/^./, (str) => str.toUpperCase());
 
 const SellerPermissionsDialog: React.FC<Props> = ({
   open,
@@ -48,18 +36,13 @@ const SellerPermissionsDialog: React.FC<Props> = ({
   onClose,
   onSave,
 }) => {
-  const [editedPermissions, setEditedPermissions] = useState<PermissionObject>({
-    CanAddDiscount: false,
-    CanRemoveProduct: false,
-    CanAddProduct: false,
-    CanModifyPermissions: false,
-  });
+  const [editedPermissions, setEditedPermissions] = useState<PermissionObject>({});
 
   useEffect(() => {
     setEditedPermissions(permissions);
   }, [permissions]);
 
-  const togglePermission = (perm: Permission) => {
+  const togglePermission = (perm: string) => {
     if (!canEdit) return;
     setEditedPermissions((prev) => ({
       ...prev,
@@ -75,7 +58,7 @@ const SellerPermissionsDialog: React.FC<Props> = ({
 
       <DialogContent>
         <Stack spacing={2}>
-          {ALL_PERMISSIONS.map((perm) => (
+          {Object.entries(editedPermissions).map(([perm, value]) => (
             <Paper
               key={perm}
               sx={{
@@ -88,15 +71,12 @@ const SellerPermissionsDialog: React.FC<Props> = ({
               }}
               elevation={2}
             >
-              <Typography
-                fontWeight={600}
-                color="white"
-                sx={{ fontFamily: "monospace" }}
-              >
-                {perm}
+             <Typography fontWeight={600} color="white">
+              {formatLabel(perm)}
               </Typography>
+
               <Switch
-                checked={editedPermissions[perm]}
+                checked={value}
                 onChange={() => togglePermission(perm)}
                 disabled={!canEdit}
               />
