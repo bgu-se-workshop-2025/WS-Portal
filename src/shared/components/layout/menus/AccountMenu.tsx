@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Box,
   Paper,
@@ -22,21 +22,24 @@ const AccountMenu: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const userButtons = [
-    {
-      label: "Profile",
-      onClick: () => navigate("/profile"),
-    },
-    {
-      label: "Logout",
-      onClick: () => {
-        setAccountOpen(false);
-        TokenService.clearToken();
-        navigate("/");
-        window.location.reload();
+  const userButtons = useMemo(
+    () => [
+      {
+        label: (TokenService.username ?? "User") + "'s Profile",
+        onClick: () => navigate("/profile"),
       },
-    },
-  ];
+      {
+        label: "Logout",
+        onClick: () => {
+          setAccountOpen(false);
+          TokenService.clearToken();
+          navigate("/");
+          window.location.reload();
+        },
+      },
+    ],
+    []
+  );
 
   const guestButtons = [
     {

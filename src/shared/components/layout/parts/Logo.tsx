@@ -3,9 +3,13 @@ import React from "react";
 import { Box, Typography } from "@mui/material";
 import { Resources } from "../Resources.json";
 
+import { useNavigate } from "react-router-dom";
+
 const Logo: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <>
+    <Box sx={{ cursor: "pointer", display: "flex" }} onClick={() => navigate("/")}>
       <Box
         component="img"
         src="/icon.png"
@@ -18,7 +22,7 @@ const Logo: React.FC = () => {
       >
         {Resources.Content.Header.HeaderTitle}
       </Typography>
-    </>
+    </Box>
   );
 };
 

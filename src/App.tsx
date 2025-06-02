@@ -11,6 +11,7 @@ import RegisterPage from "./modules/user/register/RegisterPage";
 import UserProfilePage from "./modules/user/profile/UserProfilePage";
 import RequireAuth from "./shared/utils/RequireAuth";
 import MainPage from "./modules/main/MainPage";
+import NotificationPage from "./modules/user/notification/NotificationPage";
 import AdminPage from "./modules/user/admin/pages/AdminPage";
 import RequireAdmin from "./modules/user/admin/RequireAdmin";
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
@@ -30,6 +31,13 @@ const App: React.FC = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/store/:id" element={<StorePage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/profile"
+            element={<RequireAuth />}
+          >
+            <Route element={<UserProfilePage />} />
+          </Route>
+          <Route path="/notifications" element={<NotificationPage />} />
           <Route path="/admin" element={<RequireAdmin />} >
             <Route index element={<AdminPage />} />
           </Route>
