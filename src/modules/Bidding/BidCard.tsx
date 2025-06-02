@@ -1,8 +1,15 @@
 import React from 'react';
-import { Card, CardContent, Typography, Button, Box, Stack } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  useTheme,
+  Box,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { BidDto } from '../../shared/types/dtos';
-import { sdk } from '../../sdk/sdk';
 
 interface BidCardProps {
   bid: BidDto;
@@ -10,37 +17,64 @@ interface BidCardProps {
   onAction: () => void;
 }
 
-const BidCard: React.FC<BidCardProps> = ({ bid, mode, onAction }) => {
+const BidCard: React.FC<BidCardProps> = ({ bid, mode }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
 
-  const handlePurchase = async () => {
+  const handlePurchase = () => {
     navigate(`/payment?mode=bid&bidId=${bid.id}`);
-    // After navigating, the payment page is responsible for deleting the bid
-    // Once deleted and user returns, `onAction` should be triggered to refresh the list
+    // Payment page is responsible for deletion
   };
 
   return (
-    <Card sx={{ minHeight: 180, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+    <Card
+      sx={{
+        minHeight: 180,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        backgroundColor: '#ffffff',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        '&:hover': {
+          boxShadow: theme.shadows[6],
+          transform: 'translateY(-4px)',
+        },
+      }}
+    >
       <CardContent>
-        <Typography variant="subtitle1">Product: {bid.productId}</Typography>
-        <Typography>Final Price: ${bid.price}</Typography>
+        <Typography variant="subtitle1" gutterBottom>
+          Product: {bid.productId}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Store ID: {bid.storeId}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Final Price: ${bid.price.toFixed(2)}
+        </Typography>
       </CardContent>
 
-      <Box px={2} pb={2}>
-        <Stack direction="row" spacing={1}>
-          {mode === 'user' && (
-            <Button variant="contained" color="primary" onClick={handlePurchase}>
-              Purchase
-            </Button>
-          )}
-
-          {mode === 'store' && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+      <CardActions sx={{ px: 2, pb: 2 }}>
+        {mode === 'user' ? (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handlePurchase}
+            fullWidth
+          >
+            Purchase
+          </Button>
+        ) : (
+          <Box sx={{ width: '100%' }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: 'center', width: '100%' }}
+            >
               Waiting for user to purchase.
             </Typography>
-          )}
-        </Stack>
-      </Box>
+          </Box>
+        )}
+      </CardActions>
     </Card>
   );
 };

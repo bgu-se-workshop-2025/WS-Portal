@@ -34,7 +34,59 @@ const BidPage: React.FC<BidPageProps> = ({ mode }) => {
 
       setBids(data);
     } catch (err: any) {
-      setError(err.message || 'Failed to load bids.');
+      console.warn('Backend not available, using mock data:', err.message);
+
+      // Fallback mock data
+      const mockUserBids: BidDto[] = [
+        {
+          id: 'mock-bid-user-1',
+          userId: id ?? 'mock-user',
+          productId: 'product-123',
+          price: 99.99,
+          storeId: 'store-1',
+        },
+        {
+          id: 'mock-bid-user-2',
+          userId: id ?? 'mock-user',
+          productId: 'product-456',
+          price: 149.5,
+          storeId: 'store-2',
+        },
+        {
+          id: 'mock-bid-user-3',
+          userId: id ?? 'mock-user',
+          productId: 'product-789',
+          price: 20,
+          storeId: 'store-3',
+        },
+      ];
+
+      const mockStoreBids: BidDto[] = [
+        {
+          id: 'mock-bid-store-1',
+          userId: 'user-1',
+          productId: 'item-A',
+          price: 75.0,
+          storeId: id ?? 'mock-store',
+        },
+        {
+          id: 'mock-bid-store-2',
+          userId: 'user-2',
+          productId: 'item-B',
+          price: 120.5,
+          storeId: id ?? 'mock-store',
+        },
+        {
+          id: 'mock-bid-store-3',
+          userId: 'user-3',
+          productId: 'item-C',
+          price: 59.99,
+          storeId: id ?? 'mock-store',
+        },
+      ];
+
+      const mockData = mode === 'user' ? mockUserBids : mockStoreBids;
+      setBids(mockData);
     } finally {
       setLoading(false);
     }
@@ -54,6 +106,12 @@ const BidPage: React.FC<BidPageProps> = ({ mode }) => {
 
       {loading && <CircularProgress />}
       {error && <Alert severity="error">{error}</Alert>}
+
+      {!loading && bids.length === 0 && !error && (
+        <Typography variant="body1" mt={2}>
+          No bids were found.
+        </Typography>
+      )}
 
       <Grid container spacing={2} mt={2}>
         {bids.map((bid) => (

@@ -11,9 +11,11 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Chip,
+  useTheme,
 } from '@mui/material';
 import { sdk } from '../../sdk/sdk';
-import { BidRequestDto } from '../../shared/types/dtos';
+import { BidRequestDto, BidRequestStatus } from '../../shared/types/dtos';
 
 interface BidRequestCardProps {
   bidRequest: BidRequestDto;
@@ -21,12 +23,42 @@ interface BidRequestCardProps {
   onAction?: () => void;
 }
 
+const statusToString = (status: BidRequestStatus): string => {
+  switch (status) {
+    case BidRequestStatus.PENDING:
+      return 'Pending';
+    case BidRequestStatus.ACCEPTED:
+      return 'Accepted';
+    case BidRequestStatus.APPROVED:
+      return 'Approved';
+    case BidRequestStatus.RECEIVED_ALTERNATIVE_PRICE:
+      return 'Received Alternative Price';
+    case BidRequestStatus.REJECTED:
+      return 'Rejected';
+    default:
+      return 'Unknown';
+  }
+};
+
+const statusColorMap: Record<
+  BidRequestStatus,
+  'default' | 'primary' | 'success' | 'warning' | 'error'
+> = {
+  [BidRequestStatus.PENDING]: 'default',
+  [BidRequestStatus.ACCEPTED]: 'primary',
+  [BidRequestStatus.APPROVED]: 'success',
+  [BidRequestStatus.RECEIVED_ALTERNATIVE_PRICE]: 'warning',
+  [BidRequestStatus.REJECTED]: 'error',
+};
+
 const BidRequestCard: React.FC<BidRequestCardProps> = ({
   bidRequest,
   mode,
   onAction,
 }) => {
+  const theme = useTheme();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [newPrice, setNewPrice] = useState('');
 
   const handleAccept = async () => {
@@ -58,7 +90,10 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleSuggestPrice = async () => {
     try {
-      await sdk.submitAlternativePrice(bidRequest.bidRequestId, parseFloat(newPrice));
+      await sdk.submitAlternativePrice(
+        bidRequest.bidRequestId,
+        parseFloat(newPrice)
+      );
       setDialogOpen(false);
       setNewPrice('');
       onAction?.();
@@ -66,6 +101,10 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
       alert(`Error suggesting price: ${err}`);
     }
   };
+
+  const isFinalStatus =
+    bidRequest.bidRequestStatus === BidRequestStatus.REJECTED ||
+    bidRequest.bidRequestStatus === BidRequestStatus.APPROVED;
 
   return (
     <>
@@ -75,35 +114,71 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
+          backgroundColor: '#ffffff',
+          transition: 'transform 0.2s, box-shadow 0.2s',
+          '&:hover': {
+            boxShadow: theme.shadows[6],
+            transform: 'translateY(-4px)',
+          },
         }}
       >
         <CardContent>
-          <Typography variant="h6">Bid ID: {bidRequest.bidRequestId}</Typography>
-          <Typography variant="subtitle1">Product: {bidRequest.productId}</Typography>
+          <Typography variant="subtitle1">
+            Product: {bidRequest.productId}
+          </Typography>
+          <Typography>Store ID: {bidRequest.storeId}</Typography>
           <Typography>Offered Price: ${bidRequest.price}</Typography>
-          <Typography>Status: {bidRequest.bidRequestStatus}</Typography>
+          <Box mt={1}>
+            <Chip
+              label={statusToString(bidRequest.bidRequestStatus)}
+              color={statusColorMap[bidRequest.bidRequestStatus]}
+              variant="outlined"
+            />
+          </Box>
         </CardContent>
 
         <Box px={2} pb={2}>
           <Stack direction="row" spacing={1}>
             {mode === 'store' && (
               <>
-                <Button variant="contained" color="success" onClick={handleAccept}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleAccept}
+                  disabled={isFinalStatus}
+                >
                   Accept
                 </Button>
-                <Button variant="outlined" color="error" onClick={handleReject}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={handleReject}
+                  disabled={isFinalStatus}
+                >
                   Reject
                 </Button>
-                <Button variant="outlined" onClick={() => setDialogOpen(true)}>
+                <Button
+                  variant="outlined"
+                  onClick={() => setDialogOpen(true)}
+                  disabled={isFinalStatus}
+                >
                   Suggest Price
                 </Button>
               </>
             )}
 
             {mode === 'user' && (
-              <Button variant="outlined" color="error" onClick={handleDelete}>
-                Cancel
-              </Button>
+              <Box sx={{ width: '100%' }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  color="error"
+                  onClick={() => setConfirmDialogOpen(true)}
+                  disabled={isFinalStatus}
+                >
+                  Cancel
+                </Button>
+              </Box>
             )}
           </Stack>
         </Box>
@@ -125,8 +200,38 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleSuggestPrice} variant="contained" color="primary">
+          <Button
+            onClick={handleSuggestPrice}
+            variant="contained"
+            color="primary"
+          >
             Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+      >
+        <DialogTitle>Confirm Cancellation</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to cancel this bid request?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialogOpen(false)}>No</Button>
+          <Button
+            onClick={() => {
+              setConfirmDialogOpen(false);
+              handleDelete();
+            }}
+            color="error"
+            variant="contained"
+          >
+            Yes, Cancel
           </Button>
         </DialogActions>
       </Dialog>

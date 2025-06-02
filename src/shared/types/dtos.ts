@@ -168,4 +168,5 @@ export interface BidDto {
     userId: string;
     productId: string;
     price: number;
+    storeId: string;
 }
