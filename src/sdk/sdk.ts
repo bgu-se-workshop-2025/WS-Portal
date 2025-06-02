@@ -16,6 +16,8 @@ import * as message from "./modules/user/message";
 import * as publicUser from "./modules/user/publicUser";
 import * as user from "./modules/user/user";
 
+import * as notifications from "./modules/notification/notification";
+
 import { TokenService } from "../shared/utils/token";
 
 import * as dtos from "../shared/types/dtos";
@@ -75,6 +77,9 @@ export class SDK {
   public addProductToCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;
   public removeProductFromCart!: (productId: number) => Promise<void>;
   public updateProductInCart!: (productId: number, payload: { quantity: number }) => Promise<dtos.CartDto>;
+  // Notification SDK
+  public getNotifications!: (payload: dtos.Pageable) => Promise<responses.NotificationPayload[]>;
+    
 
   private options: SDKOptions;
 
@@ -99,6 +104,8 @@ export class SDK {
       ...message,
       ...publicUser,
       ...user,
+
+      ...notifications,
     });
   }
 

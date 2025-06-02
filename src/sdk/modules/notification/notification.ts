@@ -3,6 +3,7 @@ import { Client, IMessage } from "@stomp/stompjs";
 import { SDK } from "../../sdk";
 import { Pageable } from "../../../shared/types/dtos";
 import { NotificationPayload } from "../../../shared/types/responses";
+import { TokenService } from "../../../shared/utils/token";
 
 const baseurl = "http://localhost:8080/ws";
 const userNotificationsChannel = "/queue/notifications";
@@ -16,6 +17,9 @@ export const generateClient = () => {
     reconnectDelay: 5_000,
     debug: (msg) => {
       console.debug("STOMP debug:", msg);
+    },
+    connectHeaders: {
+      Authorization: `Bearer ${TokenService.token}`,
     },
   });
 };

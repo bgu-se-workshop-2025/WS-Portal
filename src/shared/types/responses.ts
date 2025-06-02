@@ -10,7 +10,9 @@ export interface GeneralAuthResponse {
 
 export interface NotificationPayload {
   id: string;
-  title: string;
-  message: string;
-  timestamp: number;
+  content: string;
+  createdAt: number;
+  resourceId?: string;
+  resourceType?: string;
+  userIds: string[];
 }

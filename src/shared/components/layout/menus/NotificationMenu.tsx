@@ -77,15 +77,14 @@ const NotificationMenu: React.FC = () => {
                   <React.Fragment key={n.id}>
                     <ListItem alignItems="flex-start">
                       <ListItemText
-                        primary={n.title}
-                        secondary={
+                        primary={
                           <>
                             <Typography
                               component="span"
                               variant="body2"
                               color="text.primary"
                             >
-                              {n.message}
+                              {n.content}
                             </Typography>
                             <Typography
                               component="span"
@@ -93,7 +92,7 @@ const NotificationMenu: React.FC = () => {
                               color="text.secondary"
                               sx={{ display: "block" }}
                             >
-                              {new Date(n.timestamp).toLocaleString()}
+                              {new Date(n.createdAt).toLocaleString()}
                             </Typography>
                           </>
                         }
