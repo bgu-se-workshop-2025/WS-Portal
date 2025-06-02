@@ -1,7 +1,4 @@
-// BidPage.tsx
-// TODO - check this page and fix it if needed
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -9,45 +6,45 @@ import {
   Alert,
   Grid,
 } from '@mui/material';
+import { useParams } from 'react-router-dom';
 import { sdk } from '../../sdk/sdk';
 import { BidDto, Pageable } from '../../shared/types/dtos';
 import BidCard from './BidCard';
 
 interface BidPageProps {
-  mode: 'user' | 'store'; // TODO - need to change to what Noam did
+  mode: 'user' | 'store';
 }
 
 const BidPage: React.FC<BidPageProps> = ({ mode }) => {
-  const { id } = useParams(); // userId or productId
+  const { id } = useParams(); // userId or storeId
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [bids, setBids] = useState<BidDto[]>([]);
 
-  useEffect(() => {
-    const fetchBids = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchBids = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const pageable: Pageable = { page: 0, size: 20 };
 
-        const pageable: Pageable = { page: 0, size: 20 };
+      const data =
+        mode === 'user'
+          ? await sdk.getBidsOfUser(pageable)
+          : await sdk.getBidsOfStore(id!, pageable);
 
-        const data =
-          mode === 'user'
-            ? await sdk.getBidsOfUser(pageable)
-            : await sdk.getBidsOfProduct(id!, pageable); // TODO - need getBidsOfStore
-
-        setBids(data);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load bids.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) {
-      fetchBids();
+      setBids(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load bids.');
+    } finally {
+      setLoading(false);
     }
   }, [id, mode]);
+
+  useEffect(() => {
+    if (id || mode === 'user') {
+      fetchBids();
+    }
+  }, [id, mode, fetchBids]);
 
   return (
     <Container sx={{ mt: 4 }}>
@@ -61,7 +58,7 @@ const BidPage: React.FC<BidPageProps> = ({ mode }) => {
       <Grid container spacing={2} mt={2}>
         {bids.map((bid) => (
           <Grid container size = {{xs: 12, sm: 6, md: 4}} key={bid.id}>
-            <BidCard bid={bid} mode={mode} />
+            <BidCard bid={bid} mode={mode} onAction={fetchBids} />
           </Grid>
         ))}
       </Grid>

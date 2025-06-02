@@ -1,5 +1,3 @@
-// TODO - check if need to fix the backend and add BidRequestId to BidRequestDto
-
 import React, { useState } from 'react';
 import {
   Card,
@@ -33,7 +31,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleAccept = async () => {
     try {
-      await sdk.acceptBidRequest(bidRequest.id);
+      await sdk.acceptBidRequest(bidRequest.bidRequestId);
       onAction?.();
     } catch (err) {
       alert(`Error accepting bid: ${err}`);
@@ -42,7 +40,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleReject = async () => {
     try {
-      await sdk.rejectBidRequest(bidRequest.id);
+      await sdk.rejectBidRequest(bidRequest.bidRequestId);
       onAction?.();
     } catch (err) {
       alert(`Error rejecting bid: ${err}`);
@@ -51,7 +49,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleDelete = async () => {
     try {
-      await sdk.deleteBidRequest(bidRequest.id);
+      await sdk.deleteBidRequest(bidRequest.bidRequestId);
       onAction?.();
     } catch (err) {
       alert(`Error deleting bid request: ${err}`);
@@ -60,7 +58,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleSuggestPrice = async () => {
     try {
-      await sdk.submitAlternativePrice(bidRequest.id, parseFloat(newPrice));
+      await sdk.submitAlternativePrice(bidRequest.bidRequestId, parseFloat(newPrice));
       setDialogOpen(false);
       setNewPrice('');
       onAction?.();
@@ -80,7 +78,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
         }}
       >
         <CardContent>
-          <Typography variant="h6">Bid ID: {bidRequest.id}</Typography>
+          <Typography variant="h6">Bid ID: {bidRequest.bidRequestId}</Typography>
           <Typography variant="subtitle1">Product: {bidRequest.productId}</Typography>
           <Typography>Offered Price: ${bidRequest.price}</Typography>
           <Typography>Status: {bidRequest.bidRequestStatus}</Typography>

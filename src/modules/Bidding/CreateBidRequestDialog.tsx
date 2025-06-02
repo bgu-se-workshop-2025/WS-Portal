@@ -43,6 +43,7 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
 
     try {
       const bidRequest: BidRequestDto = {
+        bidRequestId: '', 
         productId,
         price,
         storeId: '',

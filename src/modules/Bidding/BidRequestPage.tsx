@@ -1,5 +1,3 @@
-// TODO - fix the id thing
-
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -11,7 +9,7 @@ import {
 } from '@mui/material';
 import { sdk } from '../../sdk/sdk';
 import { BidRequestDto, Pageable } from '../../shared/types/dtos';
-import BidRequestCard from './BidRequestCard'; // ✅ missing in your snippet
+import BidRequestCard from './BidRequestCard';
 
 interface BidRequestPageProps {
   mode: 'user' | 'store'; // TODO - need to change to what Noam did
@@ -33,7 +31,7 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
       const data =
         mode === 'user'
           ? await sdk.getBidRequestsOfUser(pageable)
-          : await sdk.getBidRequestsOfProduct(id!, pageable); // TODO - need getBidRequestsOfStore
+          : await sdk.getBidRequestsOfStore(id!, pageable);
 
       setBidRequests(data);
     } catch (err: any) {
@@ -60,7 +58,7 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
 
       <Grid container spacing={2} mt={2}>
         {bidRequests.map((request) => (
-          <Grid container size = {{xs: 12, sm: 6, md: 4}} key={request.id}> // TODO - fix id
+          <Grid container size = {{xs: 12, sm: 6, md: 4}} key={request.bidRequestId}>
             <BidRequestCard
               bidRequest={request}
               mode={mode}
