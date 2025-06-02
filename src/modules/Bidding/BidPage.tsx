@@ -14,7 +14,7 @@ import { BidDto, Pageable } from '../../shared/types/dtos';
 import BidCard from './BidCard';
 
 interface BidPageProps {
-  mode: 'user' | 'store'; // determines which API and view to use
+  mode: 'user' | 'store'; // TODO - need to change to what Noam did
 }
 
 const BidPage: React.FC<BidPageProps> = ({ mode }) => {
@@ -60,7 +60,7 @@ const BidPage: React.FC<BidPageProps> = ({ mode }) => {
 
       <Grid container spacing={2} mt={2}>
         {bids.map((bid) => (
-          <Grid xs={12} sm={6} md={4} key={bid.id}> // TODO - fix the Grid
+          <Grid container size = {{xs: 12, sm: 6, md: 4}} key={bid.id}>
             <BidCard bid={bid} mode={mode} />
           </Grid>
         ))}

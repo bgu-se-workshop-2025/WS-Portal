@@ -14,7 +14,7 @@ import { BidRequestDto, Pageable } from '../../shared/types/dtos';
 import BidRequestCard from './BidRequestCard'; // ✅ missing in your snippet
 
 interface BidRequestPageProps {
-  mode: 'user' | 'store'; // determines which API and view to use
+  mode: 'user' | 'store'; // TODO - need to change to what Noam did
 }
 
 const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
@@ -60,7 +60,7 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
 
       <Grid container spacing={2} mt={2}>
         {bidRequests.map((request) => (
-          <Grid item xs={12} sm={6} md={4} key={request.id}> // TODO - fix the Grid
+          <Grid container size = {{xs: 12, sm: 6, md: 4}} key={request.id}> // TODO - fix id
             <BidRequestCard
               bidRequest={request}
               mode={mode}

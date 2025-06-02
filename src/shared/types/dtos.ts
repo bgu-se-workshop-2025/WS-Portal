@@ -148,6 +148,7 @@ export enum PaymentMethod {
 }
 
 export interface BidRequestDto {
+    bidRequestId: string;
     storeId: string;
     productId: string;
     price: number;

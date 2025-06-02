@@ -92,6 +92,18 @@ export async function getBidsOfUser(this: SDK, userId: string, pageable: Pageabl
     return result;
 }
 
+export async function getBidsOfStore(this: SDK, storeId: string, pageable: Pageable): Promise<BidDto[]> {
+    const response = await this.get(`${biddingController}/stores/${storeId}`, {storeId, pageable});
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to get bids of store: ${error}`);
+    }
+
+    const result = (await response.json()) as BidDto[];
+    return result;
+}
+
 export async function getBidRequestsOfProduct(this: SDK, productId: string, pageable: Pageable): Promise<BidRequestDto[]> {
     const response = await this.get(`${biddingController}/requests/${productsController}/${productId}`, {productId, pageable});
 
@@ -110,6 +122,18 @@ export async function getBidRequestsOfUser(this: SDK, userId: string, pageable: 
     if (!response.ok) {
         const error = await response.text();
         throw new Error(`Failed to get bid requests of user: ${error}`);
+    }
+
+    const result = (await response.json()) as BidRequestDto[];
+    return result;
+}
+
+export async function getBidRequestsOfStore(this: SDK, storeId: string, pageable: Pageable): Promise<BidRequestDto[]> {
+    const response = await this.get(`${biddingController}/requests/stores/${storeId}`, {storeId, pageable});
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to get bid requests of store: ${error}`);
     }
 
     const result = (await response.json()) as BidRequestDto[];
