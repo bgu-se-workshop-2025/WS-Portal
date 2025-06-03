@@ -103,14 +103,14 @@ export interface ShippingAddressDto {
 }
 
 export interface ReviewDto {
-    id: string;
-    productId: string;  
+    id: string | null;
+    productId: string | null;  
     storeId: string;
     writerId: string;
-    title: string;
-    body: string;
+    title: string | null;
+    body: string | null;
     rating: number;
-    date: string;
+    date: string | null;
 }
 
 export interface OrderRequestDetails {

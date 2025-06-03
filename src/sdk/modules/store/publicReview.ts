@@ -1,11 +1,11 @@
 import { ReviewDto } from "../../../shared/types/dtos.ts";
 import { SDK } from "../../sdk.ts";
 
-const controller = "publicReview";
+const controller = "publicReviews";
 
 export async function getStoreReviews(this: SDK, storeId: string, page: number = 0, size: number = 25): Promise<ReviewDto[]> {
     const query = new URLSearchParams({ page: page.toString(), size: size.toString() });
-    const response = await this.get(`${controller}/store/${storeId}?${query.toString()}`, {});
+    const response = await this.get(`${controller}/stores/${storeId}?${query.toString()}`, {});
 
     if (!response.ok) {
         const err = await response.text();
@@ -18,7 +18,7 @@ export async function getStoreReviews(this: SDK, storeId: string, page: number =
 
 export async function getProductReviews(this: SDK, storeId: string, productId: string, page: number = 0, size: number = 25): Promise<ReviewDto[]> {
     const query = new URLSearchParams({ page: page.toString(), size: size.toString() });
-    const response = await this.get(`${controller}/store/${storeId}/product/${productId}?${query.toString()}`, {});
+    const response = await this.get(`${controller}/stores/${storeId}/products/${productId}?${query.toString()}`, {});
 
     if (!response.ok) {
         const err = await response.text();

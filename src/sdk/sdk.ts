@@ -152,35 +152,48 @@ export class SDK {
     };
   }
 
+  private buildUrl(endpoint: string): string {
+    return `${this.options.baseUrl.replace(/\/+$/, '')}/${endpoint.replace(/^\/+/, '')}`;
+  }
+
+  // Helper to remove null/undefined fields from payloads
+  private cleanPayload(payload: any): any {
+    if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+      return Object.fromEntries(
+        Object.entries(payload).filter(([, v]) => v !== null && v !== undefined)
+      );
+    }
+    return payload;
+  }
+
   public async post(endpoint: string, payload: any): Promise<Response> {
-    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+    const clean = this.cleanPayload(payload);
+    return await fetch(this.buildUrl(endpoint), {
       method: "POST",
       headers: this.getHeaders(),
-      body: JSON.stringify(payload),
+      body: JSON.stringify(clean),
     });
   }
 
   public async patch(endpoint: string, payload: any): Promise<Response> {
-    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+    const clean = this.cleanPayload(payload);
+    return await fetch(this.buildUrl(endpoint), {
       method: "PATCH",
       headers: this.getHeaders(),
-      body: JSON.stringify(payload),
+      body: JSON.stringify(clean),
     });
   }
 
-  public async get(
-    endpoint: string,
-    params: Record<string, any>
-  ): Promise<Response> {
+  public async get(endpoint: string, params: Record<string, any>): Promise<Response> {
     const queryString = new URLSearchParams(params).toString();
-    return await fetch(`${this.options.baseUrl}/${endpoint}?${queryString}`, {
+    return await fetch(`${this.buildUrl(endpoint)}?${queryString}`, {
       method: "GET",
       headers: this.getHeaders(),
     });
   }
 
   public async delete(endpoint: string): Promise<Response> {
-    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+    return await fetch(this.buildUrl(endpoint), {
       method: "DELETE",
       headers: this.getHeaders(),
     });
