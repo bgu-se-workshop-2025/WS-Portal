@@ -12,6 +12,7 @@ import { CartDto, ProductDto } from "../../shared/types/dtos";
 import CartProductItem from "./CartProductItem";
 import { useNavigate } from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
+import useCart from "../../shared/hooks/useCart";
 
 const CartMainPage = () => {
   const [cart, setCart] = useState<CartDto | null>(null);
@@ -19,19 +20,30 @@ const CartMainPage = () => {
   const [storeNames, setStoreNames] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
-  const fetchCart = async () => {
-    try {
-      const cartFromServer = await sdk.getCart();
-      setCart(cartFromServer);
+  // Pull in the hook’s cart and a method to refresh it
+  const { refreshCart, cart: cartFromHook } = useCart();
 
+  // 1️⃣ On mount, fetch the cart via hook
+  useEffect(() => {
+    refreshCart();
+  }, [refreshCart]);
+
+  // 2️⃣ Whenever cartFromHook changes, repopulate local state + fetch details
+  useEffect(() => {
+    const rebuildLocalState = async () => {
+      if (!cartFromHook) return;
+      setCart(cartFromHook);
+
+      // Collect all product IDs and store IDs
       const productIds = new Set<string>();
       const storeIds = new Set<string>();
 
-      cartFromServer.stores.forEach((store) => {
-        store.products.forEach((item) => productIds.add(item.productId));
+      cartFromHook.stores.forEach(store => {
+        store.products.forEach(item => productIds.add(item.productId));
         storeIds.add(store.storeId);
       });
 
+      // Fetch product details in parallel
       const productEntries = await Promise.all(
         Array.from(productIds).map(async (id) => {
           try {
@@ -42,9 +54,10 @@ const CartMainPage = () => {
           }
         })
       );
-      const filteredProductEntries = productEntries.filter(Boolean) as [string, ProductDto][];
+      const filteredProductEntries = (productEntries.filter(Boolean) as [string, ProductDto][]);
       setProductsMap(Object.fromEntries(filteredProductEntries));
 
+      // Fetch store names in parallel
       const storeEntries = await Promise.all(
         Array.from(storeIds).map(async (id) => {
           try {
@@ -55,25 +68,22 @@ const CartMainPage = () => {
           }
         })
       );
-      const filteredStoreEntries = storeEntries.filter(Boolean) as [string, string][];
+      const filteredStoreEntries = (storeEntries.filter(Boolean) as [string, string][]);
       setStoreNames(Object.fromEntries(filteredStoreEntries));
-    } catch (error) {
-      console.error("Failed to fetch cart or products:", error);
-    }
-  };
+    };
 
-  useEffect(() => {
-    fetchCart();
-  }, []);
+    rebuildLocalState();
+  }, [cartFromHook]);
 
-  const handleQuantityChange = async () => {
-    await fetchCart();
+  // 3️⃣ When quantity changes inside a CartProductItem, just refresh the hook’s cart.
+  const handleQuantityChange = () => {
+    refreshCart();
   };
 
   const calculateSubtotal = (): number => {
     let total = 0;
-    cart?.stores.forEach((store) => {
-      store.products.forEach((item) => {
+    cart?.stores.forEach(store => {
+      store.products.forEach(item => {
         const product = productsMap[item.productId];
         if (product) {
           total += product.price * item.quantity;
@@ -125,7 +135,7 @@ const CartMainPage = () => {
           </Typography>
 
           <Stack spacing={3}>
-            {cart.stores.map((store) => (
+            {cart.stores.map(store => (
               <Box key={store.storeId}>
                 <Typography
                   variant="subtitle1"
@@ -137,7 +147,7 @@ const CartMainPage = () => {
                 </Typography>
                 <Divider sx={{ mb: 1 }} />
                 <Stack spacing={1.5}>
-                  {store.products.map((entry) => {
+                  {store.products.map(entry => {
                     const product = productsMap[entry.productId];
                     if (!product) return null;
 
