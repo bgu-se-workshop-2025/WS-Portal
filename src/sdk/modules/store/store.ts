@@ -43,6 +43,7 @@ export async function createProduct(this: SDK, storeId: string, product: Product
 }
 
 export async function updateProduct(this: SDK, storeId: string, productId: string, product: ProductDto): Promise<ProductDto> {
+    console.log(`Updating product ${productId} in store ${storeId}`, product);
     const response = await this.patch(`${storeController}/${storeId}/${productController}/${productId}`, product);
 
     if(!response.ok) {
@@ -55,7 +56,7 @@ export async function updateProduct(this: SDK, storeId: string, productId: strin
 }
 
 export async function deleteProduct(this: SDK, storeId: string, productId: string): Promise<void> {
-    const response = await this.post(`${storeController}/${storeId}/${productController}/${productId}`, {});
+    const response = await this.delete(`${storeController}/${storeId}/${productController}/${productId}`);
 
     if(!response.ok) {
         const err = await response.text();

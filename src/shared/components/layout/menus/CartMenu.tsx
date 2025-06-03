@@ -9,31 +9,38 @@ import {
   ListItem,
   Typography,
   Divider,
+  CircularProgress,
 } from "@mui/material";
 import { ShoppingCartOutlined } from "@mui/icons-material";
 
-import { sdk } from "../../../../sdk/sdk";
+import useCart from "../../../../shared/hooks/useCart";
+import type {
+  CartStoreBasketDto,
+  CartProductEntryDto,
+} from "../../../../shared/types/dtos";
 
 const CartMenu: React.FC = () => {
   const [cartOpen, setCartOpen] = React.useState(false);
+  const { cart, loading, error, refreshCart } = useCart();
 
-  const [cart, setCart] = React.useState<any>(null);
-
+  // When opening the menu, refresh to get latest cart
   React.useEffect(() => {
-    const fetchCart = async () => {
-      const cartData = await sdk.getCart();
-      setCart(cartData);
-    };
-    fetchCart();
-  }, []);
+    if (cartOpen) {
+      refreshCart();
+    }
+  }, [cartOpen, refreshCart]);
 
-  const productsInCart =
-    cart?.stores?.flatMap((store: any) =>
-      store.products.map((product: any) => ({
-        id: product.productId,
-        name: product.productId,
-        quantity: product.quantity,
-        price: product.price,
+  // Flatten all products across all store baskets
+  const productsInCart: Array<{
+    storeId: string;
+    productId: string;
+    quantity: number;
+  }> =
+    cart?.stores?.flatMap((store: CartStoreBasketDto) =>
+      store.products.map((entry: CartProductEntryDto) => ({
+        storeId: store.storeId,
+        productId: entry.productId,
+        quantity: entry.quantity,
       }))
     ) || [];
 
@@ -43,7 +50,7 @@ const CartMenu: React.FC = () => {
         <IconButton
           color="inherit"
           onClick={() => {
-            setCartOpen((o) => !o);
+            setCartOpen((open) => !open);
           }}
         >
           <ShoppingCartOutlined />
@@ -55,23 +62,59 @@ const CartMenu: React.FC = () => {
               position: "absolute",
               right: 0,
               zIndex: 10,
-              minWidth: 250,
+              minWidth: 300,
               mt: 1,
+              maxHeight: 400,
+              overflowY: "auto",
             }}
           >
             <Typography variant="h6" sx={{ p: 1 }}>
               Cart
             </Typography>
             <Divider />
-            <List>
-              {productsInCart.map((product: { id: string; name: string; quantity: number; price: number }) => (
-                <ListItem key={product.id} disablePadding>
-                  <Typography variant="body2">
-                    {product.name} x {product.quantity}
-                  </Typography>
-                </ListItem>
-              ))}
-            </List>
+
+            {loading && (
+              <Box display="flex" justifyContent="center" p={2}>
+                <CircularProgress size={24} />
+              </Box>
+            )}
+
+            {!loading && error && (
+              <Box p={2}>
+                <Typography variant="body2" color="error">
+                  {error}
+                </Typography>
+              </Box>
+            )}
+
+            {!loading && !error && (
+              <List>
+                {productsInCart.length === 0 ? (
+                  <ListItem>
+                    <Typography variant="body2" sx={{ px: 1 }}>
+                      Your cart is empty.
+                    </Typography>
+                  </ListItem>
+                ) : (
+                  productsInCart.map((item) => (
+                    <ListItem
+                      key={`${item.storeId}-${item.productId}`}
+                      disablePadding
+                    >
+                      <Box sx={{ width: "100%", px: 1, py: 0.5 }}>
+                        <Typography variant="body2">
+                          <strong>Store:</strong> {item.storeId}
+                        </Typography>
+                        <Typography variant="body2">
+                          <strong>Product:</strong> {item.productId}{" "}
+                          <strong>x</strong> {item.quantity}
+                        </Typography>
+                      </Box>
+                    </ListItem>
+                  ))
+                )}
+              </List>
+            )}
           </Paper>
         </Collapse>
       </Box>
