@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Box, Typography, Stack, Button, Snackbar } from "@mui/material"; 
+import { useEffect, useState } from "react";
+import { Box, Typography, Stack, Button , Snackbar} from "@mui/material";
+import { useParams } from "react-router-dom";
 import SellerCard from "./SellerCard";
 import SellerPermissionsDialog from "./SellerPermissionsDialog";
 import AddSellerDialog from "./AddSellerDialog";
@@ -20,7 +21,10 @@ interface Seller {
   permissions: PermissionObject;
 }
 
-const StoreSellers: React.FC<{ storeId?: string }> = ({ storeId }) => {
+const StoreSellers = () => {
+  const { storeId } = useParams();
+	if (!storeId) return;
+
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [permDialogOpen, setPermDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);

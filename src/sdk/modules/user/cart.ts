@@ -15,7 +15,7 @@ export async function getCart(this: SDK): Promise<CartDto> {
   return (await response.json()) as CartDto;
 }
 
-export async function addProductToCart(this: SDK, productId: number, payload: { quantity: number }): Promise<CartDto> {
+export async function addProductToCart(this: SDK, productId: string, payload: { quantity: number }): Promise<CartDto> {
   const response = await this.post(
     `${cartsController}/${productsController}/${productId}`,
     payload
@@ -29,7 +29,7 @@ export async function addProductToCart(this: SDK, productId: number, payload: { 
   return (await response.json()) as CartDto;
 }
 
-export async function removeProductFromCart(this: SDK, productId: number): Promise<void> {
+export async function removeProductFromCart(this: SDK, productId: string): Promise<void> {
   const response = await this.delete(
     `${cartsController}/${productsController}/${productId}`
   );
@@ -40,7 +40,7 @@ export async function removeProductFromCart(this: SDK, productId: number): Promi
   }
 }
 
-export async function updateProductInCart(this: SDK, productId: number, payload: { quantity: number }): Promise<CartDto> {
+export async function updateProductInCart(this: SDK, productId: string, payload: { quantity: number }): Promise<CartDto> {
   const response = await this.patch(
     `${cartsController}/${productsController}/${productId}`,
     payload

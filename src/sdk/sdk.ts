@@ -38,40 +38,29 @@ export class SDK {
   public isAdmin!: () => Promise<dtos.AdminDetailsDto>;
 
   // Auth SDK
-  public login!: (
-    payload: requests.LoginUserRequest
-  ) => Promise<responses.GeneralAuthResponse>;
-  public register!: (
-    payload: requests.RegisterUserRequest
-  ) => Promise<responses.GeneralAuthResponse>;
-  public updatePublicUserProfileDetails!: (
-    id: string,
-    payload: dtos.UpdatePublicUserDto
-  ) => Promise<dtos.PublicUserDto>;
+  public login!: (payload: requests.LoginUserRequest) => Promise<responses.GeneralAuthResponse>;
+  public register!: (payload: requests.RegisterUserRequest) => Promise<responses.GeneralAuthResponse>;
+  public updatePublicUserProfileDetails!: (id: string, payload: dtos.UpdatePublicUserDto) => Promise<dtos.PublicUserDto>;
 
   // User SDK
   public getCurrentUserProfileDetails!: () => Promise<dtos.PublicUserDto>;
   public getPublicUserProfileDetails!: (
     id: string
   ) => Promise<dtos.PublicUserDto>;
-  public getPublicUserProfileDetailsByUsername!: (username: string) => Promise<dtos.PublicUserDto>;
+    public getPublicUserProfileDetailsByUsername!: (username: string) => Promise<dtos.PublicUserDto>;
+
 
   // Message SDK
   public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public getMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
   public getSentMessages!: (page?: number, size?: number) => Promise<dtos.MessageDto[]>;
   public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
-  public updateMessage!: (
-    messageId: string,
-    payload: dtos.MessageDto
-  ) => Promise<dtos.MessageDto>;
+  public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public deleteMessage!: (messageId: string) => Promise<void>;
 
   // Product SDK
   public getProduct!: (id: string) => Promise<dtos.ProductDto>;
-  public getProducts!: (
-    payload: requests.GetProductsPayload
-  ) => Promise<dtos.ProductDto[]>;
+  public getProducts!: (payload: requests.GetProductsPayload) => Promise<dtos.ProductDto[]>;
 
   // Review SDK
   public createStoreReview!: (payload: dtos.ReviewDto) => Promise<dtos.ReviewDto>;
@@ -79,21 +68,12 @@ export class SDK {
 
   // Store SDK
   public createStore!: (payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
-  public updateStore!: (
-    storeId: string,
-    payload: dtos.StoreDto
-  ) => Promise<dtos.StoreDto>;
-  public createProduct!: (
-    storeId: string,
-    payload: dtos.ProductDto
-  ) => Promise<dtos.ProductDto>;
-  public updateProduct!: (
-    storeId: string,
-    productId: string,
-    payload: dtos.ProductDto
-  ) => Promise<dtos.ProductDto>;
+  public updateStore!: (storeId: string, payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
+  public createProduct!: (storeId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
+  public updateProduct!: (storeId: string, productId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public deleteProduct!: (storeId: string, productId: string) => Promise<void>;
-  public addSeller!: (storeId: string,userId: string , payload: dtos.SellerDto) => Promise<dtos.SellerDto>;
+  public getSeller!: (storeId: string, sellerId: string) => Promise<dtos.SellerDto>;
+  public addSeller!: (storeId: string, payload: dtos.SellerDto) => Promise<dtos.SellerDto>;
   public removeSeller!: (storeId: string, sellerId: string) => Promise<void>;
   public updateManagerPermissions!: (storeId: string, sellerId: string, permissions: string[]) => Promise<dtos.SellerDto>;
 
@@ -102,18 +82,11 @@ export class SDK {
   public getStores!: (pageable: dtos.Pageable) => Promise<dtos.StoreDto[]>;
   public getStoreOfficials!: (storeId: string) => Promise<dtos.PublicUserDto[]>;
   public getStorePermissions!: () => Promise<string[]>;
-  public getSeller!: (storeId: string, userId: string) => Promise<dtos.SellerDto>;
   // Order SDK
   public getUserOrders!: (payload: dtos.Pageable) => Promise<dtos.UserOrderDto[]>;
   public getUserOrderById!: (id: string) => Promise<dtos.UserOrderDto>;
-  public getStoreOrderById!: (
-    orderId: string,
-    storeId: string
-  ) => Promise<dtos.StoreOrderDto>;
-  public getStoreOrders!: (
-    storeId: string,
-    payload: dtos.Pageable
-  ) => Promise<dtos.StoreOrderDto[]>;
+  public getStoreOrderById!: (orderId: string, storeId: string) => Promise<dtos.StoreOrderDto>;
+  public getStoreOrders!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.StoreOrderDto[]>;
 
   // Public Order SDK
   public createOrder!: (payload: dtos.OrderRequestDetails) => Promise<dtos.UserOrderDto>;
@@ -125,68 +98,31 @@ export class SDK {
   public submitAlternativePrice!: (bidRequestId: string, newPrice: number) => Promise<void>;
   public getBidRequest!: (bidRequestId: string) => Promise<dtos.BidRequestDto>;
   public getBid!: (bidRequestId: string) => Promise<dtos.BidDto>;
-  public getBidsOfProduct!: (
-    productId: string,
-    payload: dtos.Pageable
-  ) => Promise<dtos.BidDto[]>;
+  public getBidsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
   public getBidsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
-  public getBidRequestsOfProduct!: (
-    productId: string,
-    payload: dtos.Pageable
-  ) => Promise<dtos.BidRequestDto[]>;
+  public getBidRequestsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
   public getBidRequestsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
   public deleteBidRequest!: (bidRequestId: string) => Promise<void>;
   public deleteBid!: (bidRequestId: string) => Promise<void>;
 
   // Public Review SDK
-  public getStoreReviews!: (
-    storeId: string,
-    page?: number,
-    size?: number
-  ) => Promise<dtos.ReviewDto[]>;
-  public getProductReviews!: (
-    storeId: string,
-    productId: string,
-    page?: number,
-    size?: number
-  ) => Promise<dtos.ReviewDto[]>;
+  public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
+  public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
 
   // Discount Policy SDK
-  public getDiscountPolicy!: (
-    storeId: string,
-    policyId: string
-  ) => Promise<DiscountDto>;
-  public getDiscountPolicies!: (
-    storeId: string,
-    productId?: string
-  ) => Promise<DiscountDto[]>;
-  public createDiscountPolicy!: (
-    storeId: string,
-    policy: DiscountDto,
-    productId?: string
-  ) => Promise<DiscountDto>;
-  public deleteDiscountPolicy!: (
-    storeId: string,
-    policyId: string,
-    productId?: string
-  ) => Promise<void>;
+  public getDiscountPolicy!: (storeId: string, policyId: string) => Promise<DiscountDto>;
+  public getDiscountPolicies!: (storeId: string, productId?: string) => Promise<DiscountDto[]>;
+  public createDiscountPolicy!: (storeId: string, policy: DiscountDto, productId?: string) => Promise<DiscountDto>;
+  public deleteDiscountPolicy!: (storeId: string, policyId: string, productId?: string) => Promise<void>;
 
   // Cart SDK
   public getCart!: () => Promise<dtos.CartDto>;
-  public addProductToCart!: (
-    productId: number,
-    payload: { quantity: number }
-  ) => Promise<dtos.CartDto>;
-  public removeProductFromCart!: (productId: number) => Promise<void>;
-  public updateProductInCart!: (
-    productId: number,
-    payload: { quantity: number }
-  ) => Promise<dtos.CartDto>;
+  public addProductToCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
+  public removeProductFromCart!: (productId: string) => Promise<void>;
+  public updateProductInCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
 
   // Notification SDK
-  public getNotifications!: (
-    payload: dtos.Pageable
-  ) => Promise<responses.NotificationPayload[]>;
+  public getNotifications!: (payload: dtos.Pageable) => Promise<responses.NotificationPayload[]>;
 
   private options: SDKOptions;
 
