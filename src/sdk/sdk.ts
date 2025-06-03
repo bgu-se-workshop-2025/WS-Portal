@@ -97,7 +97,7 @@ export class SDK {
   public getBidsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
   public getBidsOfStore!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
   public getBidRequestsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
-  public getBidRequestsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
+  public getBidRequestsOfUser!: (userId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
   public getBidRequestsOfStore!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
   public deleteBidRequest!: (bidRequestId: string) => Promise<void>;
   public deleteBid!: (bidRequestId: string) => Promise<void>;

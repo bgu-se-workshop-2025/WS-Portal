@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -15,7 +15,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { sdk } from '../../sdk/sdk';
-import { BidRequestDto, BidRequestStatus } from '../../shared/types/dtos';
+import { BidRequestDto, ProductDto, StoreDto } from '../../shared/types/dtos';
 
 interface BidRequestCardProps {
   bidRequest: BidRequestDto;
@@ -23,32 +23,15 @@ interface BidRequestCardProps {
   onAction?: () => void;
 }
 
-const statusToString = (status: BidRequestStatus): string => {
-  switch (status) {
-    case BidRequestStatus.PENDING:
-      return 'Pending';
-    case BidRequestStatus.ACCEPTED:
-      return 'Accepted';
-    case BidRequestStatus.APPROVED:
-      return 'Approved';
-    case BidRequestStatus.RECEIVED_ALTERNATIVE_PRICE:
-      return 'Received Alternative Price';
-    case BidRequestStatus.REJECTED:
-      return 'Rejected';
-    default:
-      return 'Unknown';
-  }
-};
-
 const statusColorMap: Record<
-  BidRequestStatus,
+  string,
   'default' | 'primary' | 'success' | 'warning' | 'error'
 > = {
-  [BidRequestStatus.PENDING]: 'default',
-  [BidRequestStatus.ACCEPTED]: 'primary',
-  [BidRequestStatus.APPROVED]: 'success',
-  [BidRequestStatus.RECEIVED_ALTERNATIVE_PRICE]: 'warning',
-  [BidRequestStatus.REJECTED]: 'error',
+  ["PENDING"]: 'default',
+  ["ACCEPTED"]: 'primary',
+  ["APPROVED"]: 'success',
+  ["RECEIVED_ALTERNATIVE_PRICE"]: 'warning',
+  ["REJECTED"]: 'error',
 };
 
 const BidRequestCard: React.FC<BidRequestCardProps> = ({
@@ -60,6 +43,24 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [newPrice, setNewPrice] = useState('');
+  const [product, setProduct] = useState<ProductDto | null>(null);
+  const [store, setStore] = useState<StoreDto | null>(null);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const productResult = await sdk.getProduct(bidRequest.productId);
+        setProduct(productResult);
+
+        const storeResult = await sdk.getStore(bidRequest.storeId);
+        setStore(storeResult);
+      } catch (err) {
+        console.warn('Failed to fetch product or store details', err);
+      }
+    };
+
+    fetchDetails();
+  }, [bidRequest.productId, bidRequest.storeId]);
 
   const handleAccept = async () => {
     try {
@@ -103,8 +104,8 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
   };
 
   const isFinalStatus =
-    bidRequest.requestStatus === BidRequestStatus.REJECTED ||
-    bidRequest.requestStatus === BidRequestStatus.APPROVED;
+    bidRequest.requestStatus === "REJECTED" ||
+    bidRequest.requestStatus === "APPROVED";
 
   return (
     <>
@@ -124,13 +125,15 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
       >
         <CardContent>
           <Typography variant="subtitle1">
-            Product: {bidRequest.productId}
+            Product: {product?.name || bidRequest.productId}
           </Typography>
-          <Typography>Store ID: {bidRequest.storeId}</Typography>
+          <Typography>
+            Store: {store?.name || bidRequest.storeId}
+          </Typography>
           <Typography>Offered Price: ${bidRequest.price}</Typography>
           <Box mt={1}>
             <Chip
-              label={statusToString(bidRequest.requestStatus)}
+              label={bidRequest.requestStatus}
               color={statusColorMap[bidRequest.requestStatus]}
               variant="outlined"
             />

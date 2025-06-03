@@ -152,15 +152,7 @@ export interface BidRequestDto {
     storeId: string;
     productId: string;
     price: number;
-    requestStatus: BidRequestStatus;
-}
-
-export enum BidRequestStatus {
-    PENDING = 0,
-    ACCEPTED = 1,
-    APPROVED = 2,
-    RECEIVED_ALTERNATIVE_PRICE = 3,
-    REJECTED = 4
+    requestStatus:  'PENDING' | 'ACCEPTED' | 'APPROVED' | 'RECEIVED_ALTERNATIVE_PRICE' | 'REJECTED';
 }
 
 export interface BidDto {

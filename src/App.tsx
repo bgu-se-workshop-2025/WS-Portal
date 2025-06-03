@@ -40,7 +40,7 @@ const App: React.FC = () => {
           
 
           // TODO - remove later
-          <Route path="/bids" element={<BidRequestPage mode={"store"} />} />
+          <Route path="/bids" element={<BidRequestPage mode={"user"} />} />
           <Route path="/dev" element={<DevPage />} /> 
 
           <Route path="/store/:storeId/*" element={<StorePage />}>
