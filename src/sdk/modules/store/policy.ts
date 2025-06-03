@@ -3,7 +3,7 @@ import { SDK } from "../../sdk";
 
 const storeController = "stores";
 const publicStoreController = "public/stores";
-const policyResource = "policies"
+const policyResource = "policies";
 const productResource = "products";
 
 export type DiscountPolicyParamsDto = {
@@ -18,7 +18,7 @@ export type DiscountPolicyParamsDto = {
     first?: DiscountPolicyParamsDto;
     second?: DiscountPolicyParamsDto;
     preferCheaper?: boolean;
-}
+};
 
 export type DiscountDto = {
     id?: string;
@@ -26,11 +26,18 @@ export type DiscountDto = {
     description?: string;
     // no support of expiration and internal description for now
     discountPercentage: number;
-    params: DiscountPolicyParamsDto
-}
+    params: DiscountPolicyParamsDto;
+};
 
-export async function getDiscountPolicy(this: SDK, storeId: string, policyId: string): Promise<DiscountDto> {
-    const response = await this.get(`${publicStoreController}/${storeId}/${policyResource}/${policyId}`, {});
+export async function getDiscountPolicy(
+    this: SDK,
+    storeId: string,
+    policyId: string
+): Promise<DiscountDto> {
+    const response = await this.get(
+        `${publicStoreController}/${storeId}/${policyResource}/${policyId}`,
+        {}
+    );
 
     if (!response.ok) {
         const error = await response.text();
@@ -41,12 +48,17 @@ export async function getDiscountPolicy(this: SDK, storeId: string, policyId: st
     return result;
 }
 
-export async function getDiscountPolicies(this: SDK, storeId: string, productId?: string): Promise<DiscountDto[]> {
-    const response = await this.get(`${publicStoreController}/${storeId}${
-        productId 
-        ? `/${productResource}/${productId}` 
-        : ""
-    }/${policyResource}`, {});
+export async function getDiscountPolicies(
+    this: SDK,
+    storeId: string,
+    productId?: string
+): Promise<DiscountDto[]> {
+    const response = await this.get(
+        `${publicStoreController}/${storeId}${
+            productId ? `/${productResource}/${productId}` : ""
+        }/${policyResource}`,
+        {}
+    );
 
     if (!response.ok) {
         const error = await response.text();
@@ -57,12 +69,18 @@ export async function getDiscountPolicies(this: SDK, storeId: string, productId?
     return result;
 }
 
-export async function createDiscountPolicy(this: SDK, storeId: string, policy: DiscountDto, productId?: string): Promise<DiscountDto> {
-    const response = await this.post(`${storeController}/${storeId}${
-        productId 
-        ? `/${productResource}/${productId}` 
-        : ""
-    }/${policyResource}`, policy);
+export async function createDiscountPolicy(
+    this: SDK,
+    storeId: string,
+    policy: DiscountDto,
+    productId?: string
+): Promise<DiscountDto> {
+    const response = await this.post(
+        `${storeController}/${storeId}${
+            productId ? `/${productResource}/${productId}` : ""
+        }/${policyResource}`,
+        policy
+    );
 
     if (!response.ok) {
         const error = await response.text();
@@ -73,12 +91,19 @@ export async function createDiscountPolicy(this: SDK, storeId: string, policy: D
     return result;
 }
 
-export async function deleteDiscountPolicy(this: SDK, storeId: string, policyId: string, productId?: string): Promise<void> {
-    const response = await this.delete(`${storeController}/${storeId}${
-        productId 
-        ? `/${productResource}/${productId}` 
-        : ""
-    }/${policyResource}/${policyId}`);
+export async function deleteDiscountPolicy(
+    this: SDK,
+    storeId: string,
+    policyId: string,
+    productId?: string
+): Promise<void> {
+    const response = await this.delete(
+        `${storeController}/${storeId}${
+            productId
+                ? `/${productResource}/${productId}/${policyResource}`
+                : `/${policyResource}/${policyId}`
+        }`
+    );
 
     if (!response.ok) {
         const error = await response.text();
