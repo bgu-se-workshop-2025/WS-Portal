@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Paper,
@@ -11,7 +12,7 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { ShoppingCartOutlined } from "@mui/icons-material";
+import { ShoppingCartOutlined, OpenInNewOutlined } from "@mui/icons-material";
 
 import useCart from "../../../../shared/hooks/useCart";
 import type {
@@ -23,6 +24,8 @@ import { sdk } from "../../../../sdk/sdk";
 const CartMenu: React.FC = () => {
   const [cartOpen, setCartOpen] = React.useState(false);
   const { cart, loading: cartLoading, error, refreshCart } = useCart();
+  const navigate = useNavigate();
+
 
   // Maps for storing fetched names
   const [storeNames, setStoreNames] = React.useState<Record<string, string>>(
@@ -128,6 +131,12 @@ const CartMenu: React.FC = () => {
               overflowY: "auto",
             }}
           >
+            <IconButton onClick={() => {
+              setCartOpen(false);
+              navigate("/cart");
+                        }}>
+                          <OpenInNewOutlined />
+              </IconButton>
             <Typography variant="h6" sx={{ p: 1 }}>
               Cart
             </Typography>

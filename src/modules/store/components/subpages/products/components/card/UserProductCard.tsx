@@ -13,13 +13,13 @@ import {
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
+import RatingComponent from "../../../../../../../shared/components/RatingComponent";
+import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
 
 const UserProductCard: React.FC<{
   product: ProductDto;
-}> = ({ product }) => {
-
-    const { storeId } = useParams<{ storeId: string }>();
-
+  setUpdateProducts?: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ product, setUpdateProducts }) => {
   const theme = useTheme();
   const {
     cart,
@@ -29,6 +29,9 @@ const UserProductCard: React.FC<{
     loading: cartLoading,
     error: cartError,
   } = useCart();
+
+  const { storeId } = useParams<{ storeId: string }>();
+  const isUserAuthenticated = isAuthenticated();
 
   // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
@@ -41,11 +44,17 @@ const UserProductCard: React.FC<{
 
   // When incrementing: if currentQty === 0, call addToCart; otherwise updateQuantity
   const handleIncrement = useCallback(async () => {
+    if (currentQty === product.quantity) {
+      console.log(
+        `Cannot add ${product.name} to cart: already at max quantity (${product.quantity})`
+      );
+      return;
+    }
     if (currentQty === 0) {
-      await addToCart(product.id, 1);
+      await addToCart(storeId as string, product.id, 1);
       console.log(`Added ${product.name} to cart (quantity = 1)`);
     } else {
-      await updateQuantity(product.id, currentQty + 1);
+      await updateQuantity(storeId as string, product.id, currentQty + 1);
       console.log(
         `Increased ${product.name} quantity to ${currentQty + 1} in cart`
       );
@@ -55,10 +64,10 @@ const UserProductCard: React.FC<{
   // When decrementing: if currentQty <= 1, remove entirely; otherwise updateQuantity
   const handleDecrement = useCallback(async () => {
     if (currentQty <= 1) {
-      await removeFromCart(product.id);
+      await removeFromCart(storeId as string, product.id);
       console.log(`Removed ${product.name} from cart`);
     } else {
-      await updateQuantity(product.id, currentQty - 1);
+      await updateQuantity(storeId as string, product.id, currentQty - 1);
       console.log(
         `Decreased ${product.name} quantity to ${currentQty - 1} in cart`
       );
@@ -102,12 +111,6 @@ const UserProductCard: React.FC<{
           </Typography>
         </Box>
 
-        {product.rating > 0 && (
-          <Typography variant="body2">
-            <strong>Rating:</strong> {product.rating.toFixed(1)}
-          </Typography>
-        )}
-
         {product.categories.length > 0 && (
           <Typography variant="body2">
             <strong>Categories:</strong> {product.categories.join(", ")}
@@ -119,6 +122,48 @@ const UserProductCard: React.FC<{
             {new Date(product.auctionEndDate).toLocaleString()}
           </Typography>
         )}
+
+        <Box
+          sx={{
+            mb: theme.spacing(1),
+            mt: theme.spacing(2),
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <RatingComponent
+            value={product.rating}
+            readOnly={!isUserAuthenticated}
+            size="small"
+            precision={1}
+            onChange={async (newValue) => {
+              if (!isUserAuthenticated) return;
+              if (!storeId) return;
+              try {
+                await sdk.createProductReview({
+                  id: null,
+                  productId: product.id,
+                  storeId: storeId,
+                  writerId: null,
+                  title: null,
+                  body: null,
+                  rating: Math.round(newValue),
+                  date: null,
+                });
+                setUpdateProducts && setUpdateProducts((v) => !v);
+                alert("Thank you for rating the product!");
+              } catch (err: any) {
+                const msg = "You must purchase this product before you can rate it.";
+                alert(msg);
+              }
+            }}
+          />
+          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+            {product.rating > 0 ? `(${product.rating.toFixed(1)})` : ""}
+          </Typography>
+        </Box>
+
         {cartError && (
           <Typography
             variant="caption"

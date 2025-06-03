@@ -18,6 +18,8 @@ import StoreIcon from "@mui/icons-material/Store";
 import { Link, Outlet, useParams, useLocation, Navigate } from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
 import { StoreDto } from "../../shared/types/dtos";
+import RatingComponent from "../../shared/components/RatingComponent";
+import { isAuthenticated } from "../../sdk/sdk";
 
 const UserStorePage: React.FC = () => {
   const theme   = useTheme();
@@ -27,6 +29,7 @@ const UserStorePage: React.FC = () => {
   const [store, setStore]       = useState<StoreDto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError]         = useState<string | null>(null);
+  const [isSeller, setIsSeller] = useState<boolean>(false);
 
   useEffect(() => {
     if (!storeId) return;
@@ -42,6 +45,22 @@ const UserStorePage: React.FC = () => {
         setStore(null);
       })
       .finally(() => setIsLoading(false));
+
+    // Check if user is a seller for this store
+    const checkSeller = async () => {
+      if (!storeId || isAuthenticated() === false) {
+        setIsSeller(false);
+        return;
+      }
+      try {
+        const me = await sdk.getCurrentUserProfileDetails();
+        const mySeller = await sdk.getSeller(storeId, me.id);
+        setIsSeller(!!mySeller);
+      } catch {
+        setIsSeller(false);
+      }
+    };
+    checkSeller();
   }, [storeId]);
 
   // Redirect “/store/:storeId” → “/store/:storeId/products”
@@ -92,18 +111,18 @@ const UserStorePage: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             color: "common.white",
+            flexDirection: "column",
           }}
         >
           <StoreIcon
             sx={{
               fontSize: { xs: 36, sm: 56 },
-              mr: theme.spacing(1),
+              mb: 1,
             }}
           />
           <Typography variant="h3" component="h1" sx={{ fontWeight: 600 }}>
             {isLoading ? "Loading Store…" : store?.name || "Store Not Found"}
           </Typography>
-
           {error && (
             <Chip
               label="Error"
@@ -117,6 +136,42 @@ const UserStorePage: React.FC = () => {
             />
           )}
         </Paper>
+        {/* Store rating: readonly for sellers and guests, rateable for non-sellers */}
+        {store && (
+          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+            <RatingComponent
+              value={store.rating}
+              readOnly={isSeller || !isAuthenticated()}
+              size="large"
+              precision={1}
+              onChange={async (newValue) => {
+                if (isSeller || !isAuthenticated()) return;
+                if (!storeId) return;
+                try {
+                  await sdk.createStoreReview({
+                    id: null, // let backend generate
+                    productId: null,
+                    storeId: storeId ?? null,
+                    writerId: null,
+                    title: null,
+                    body: null,
+                    rating: Math.round(newValue),
+                    date: null,
+                  });
+                  // Refresh store info after rating
+                  const updatedStore = await sdk.getStore(storeId);
+                  setStore(updatedStore);
+                  alert("Thank you for rating the store!");
+                } catch (err: any) {
+                  alert("You must purchase from this store before you can rate it.");
+                }
+              }}
+            />
+            <Typography variant="h6" mt={1}>
+              {store.rating > 0 ? `(${store.rating.toFixed(1)})` : ""}
+            </Typography>
+          </Box>
+        )}
 
         {/* ─── LOADING / ERROR / NO ID STATES ─────────────────────────────────────── */}
         {isLoading && (

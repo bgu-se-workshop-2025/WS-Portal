@@ -1,28 +1,16 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Container,
-  Breadcrumbs,
-  Link as MuiLink,
-  Tabs,
-  Tab,
-  Paper,
-  CircularProgress,
-  Alert,
-  Chip,
-  Divider,
-  useTheme,
-} from "@mui/material";
+import { Box, Typography, Container, Button, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, Divider, Alert } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { useParams, useLocation, Link, Navigate, Outlet } from "react-router-dom";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import MuiLink from "@mui/material/Link";
+import Paper from "@mui/material/Paper";
 import StoreIcon from "@mui/icons-material/Store";
-import {
-  Link,
-  Outlet,
-  useParams,
-  useLocation,
-  Navigate,
-} from "react-router-dom";
-import { sdk } from "../../sdk/sdk";
+import Chip from "@mui/material/Chip";
+import CircularProgress from "@mui/material/CircularProgress";
+import RatingComponent from "../../shared/components/RatingComponent";
+import { sdk, isAuthenticated } from "../../sdk/sdk";
+
 import { StoreDto } from "../../shared/types/dtos";
 
 type TabValue = "products" | "sellers" | "settings" | "discounts";
@@ -30,18 +18,54 @@ const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts"];
 
 const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
-  const { storeId } = useParams<{ storeId: string }>();
   const location = useLocation();
+  const { storeId: id } = useParams<{ storeId: string }>();
 
   const [store, setStore] = useState<StoreDto | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [rateDialogOpen, setRateDialogOpen] = useState(false);
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [rateError, setRateError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSeller, setIsSeller] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    setIsLoading(true);
+    setError(null);
+    sdk.getStore(id)
+      .then((result) => {
+        setStore(result);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch store:", err.message || err);
+        setError(err.message || "Unknown error occurred");
+        setStore(null);
+        setIsLoading(false);
+      });
+    // Check if user is a seller for this store
+    const checkSeller = async () => {
+      if (!id || isAuthenticated() === false) {
+        setIsSeller(false);
+        return;
+      }
+      try {
+        const me = await sdk.getCurrentUserProfileDetails();
+        const mySeller = await sdk.getSeller(id, me.id);
+        setIsSeller(!!mySeller);
+      } catch (err) {
+        setIsSeller(false);
+      }
+    };
+    checkSeller();
+  }, [id]);
 
   // Determine “activeTab” from the URL.
   // E.g. if pathname is "/store/123/sellers" → activeTab = "sellers".
   // Fallback to “products” if no match.
-  const activeTab: TabValue = React.useMemo(() => {
-    if (!location.pathname || !storeId) return "products";
+  const computedActiveTab: TabValue = React.useMemo(() => {
+    if (!location.pathname || !id) return "products";
 
     // location.pathname might be "/store/123/products", "/store/123/sellers", etc.
     const segments = location.pathname.split("/");
@@ -50,28 +74,37 @@ const SellerStoreLayout: React.FC = () => {
     return TAB_ORDER.includes(tabSegment as any)
       ? (tabSegment as TabValue)
       : "products";
-  }, [location.pathname, storeId]);
-
-  useEffect(() => {
-    if (!storeId) return;
-
-    setIsLoading(true);
-    setError(null);
-    sdk
-      .getStore(storeId)
-      .then((res) => setStore(res))
-      .catch((err) => {
-        console.error("Failed to fetch store:", err);
-        setError(err.message || "Unknown error occurred");
-        setStore(null);
-      })
-      .finally(() => setIsLoading(false));
-  }, [storeId]);
+  }, [location.pathname, id]);
 
   // If someone visits “/store/:storeId” exactly, redirect to “/store/:storeId/products”
-  if (location.pathname === `/store/${storeId}`) {
-    return <Navigate to={`/store/${storeId}/products`} replace />;
+  if (location.pathname === `/store/${id}`) {
+    return <Navigate to={`/store/${id}/products`} replace />;
   }
+
+  const handleRateStore = async () => {
+    if (!id || userRating == null) return;
+    setRateError("");
+    try {
+      await sdk.createStoreReview({
+        id: null, // let backend generate
+        productId: null, // not a product review
+        storeId: id ?? null,
+        writerId: null, // let backend use current user
+        title: null,
+        body: null,
+        rating: Math.round(userRating),
+        date: null,
+      });
+      // Refresh store info after rating
+      const updatedStore = await sdk.getStore(id);
+      setStore(updatedStore);
+      setRateDialogOpen(false);
+      setUserRating(null);
+      alert("Thank you for rating the store!");
+    } catch (err: any) {
+      setRateError(err.message || "You must purchase from this store before rating.");
+    }
+  };
 
   return (
     <Box
@@ -127,20 +160,74 @@ const SellerStoreLayout: React.FC = () => {
           <Typography variant="h3" component="h1" sx={{ fontWeight: 600 }}>
             {isLoading ? "Loading Store…" : store?.name || "Store Not Found"}
           </Typography>
+        </Paper>
 
-          {error && (
-            <Chip
-              label="Error"
-              color="error"
-              size="small"
-              sx={{
-                position: "absolute",
-                top: theme.spacing(1),
-                right: theme.spacing(1),
+        {/* ─── RATING SECTION ───────────────────────────────────────────────────────── */}
+        {store && (
+          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+            <RatingComponent
+              value={store.rating}
+              readOnly={isSeller || !isAuthenticated()}
+              size="large"
+              precision={1}
+              onChange={async (newValue) => {
+                if (isSeller || !isAuthenticated()) return;
+                if (!id) return;
+                try {
+                  await sdk.createStoreReview({
+                    id: null, // let backend generate
+                    productId: null,
+                    storeId: id ?? null,
+                    writerId: null,
+                    title: null,
+                    body: null,
+                    rating: Math.round(newValue),
+                    date: null,
+                  });
+                  // Refresh store info after rating
+                  const updatedStore = await sdk.getStore(id);
+                  setStore(updatedStore);
+                  alert("Thank you for rating the store!");
+                } catch (err: any) {
+                  alert("You must purchase from this store before you can rate it.");
+                }
               }}
             />
-          )}
-        </Paper>
+            <Typography variant="h6" mt={1}>
+              {store.rating > 0 ? `(${store.rating.toFixed(1)})` : ""}
+            </Typography>
+          </Box>
+        )}
+
+        <Dialog open={rateDialogOpen} onClose={() => setRateDialogOpen(false)}>
+          <DialogTitle>Rate This Store</DialogTitle>
+          <DialogContent>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
+              <RatingComponent value={userRating ?? 0} onChange={setUserRating} size="large" />
+              {rateError && <Typography color="error">{rateError}</Typography>}
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRateDialogOpen(false)}>Cancel</Button>
+            <Button onClick={async () => {
+  await handleRateStore();
+  // After rating, refresh store info (already handled in handleRateStore)
+}} disabled={userRating == null}>Submit</Button>
+          </DialogActions>
+        </Dialog>
+
+        {error && (
+          <Chip
+            label={error}
+            color="error"
+            size="small"
+            sx={{
+              position: "absolute",
+              top: theme.spacing(1),
+              right: theme.spacing(1),
+            }}
+          />
+        )}
 
         {/* ─── LOADING / ERROR / NO ID STATES ──────────────────────────────────────── */}
         {isLoading && (
@@ -155,7 +242,7 @@ const SellerStoreLayout: React.FC = () => {
           </Alert>
         )}
 
-        {!storeId && !isLoading && (
+        {!id && !isLoading && (
           <Alert severity="warning" sx={{ mb: theme.spacing(4) }}>
             No store ID provided. Please navigate via “My Stores” first.
           </Alert>
@@ -174,7 +261,7 @@ const SellerStoreLayout: React.FC = () => {
           >
             {/* ─── TABS NAVIGATION ─────────────────────────────────────────────── */}
             <Tabs
-              value={activeTab}
+              value={computedActiveTab}
               textColor="primary"
               indicatorColor="primary"
               centered
@@ -184,30 +271,28 @@ const SellerStoreLayout: React.FC = () => {
                 value="products"
                 label="Products"
                 component={Link}
-                to={`/store/${storeId}/products`}
+                to={`/store/${id}/products`}
               />
               <Tab
                 value="sellers"
                 label="Sellers"
                 component={Link}
-                to={`/store/${storeId}/sellers`}
+                to={`/store/${id}/sellers`}
               />
               <Tab
                 value="settings"
                 label="Settings"
                 component={Link}
-                to={`/store/${storeId}/settings`}
+                to={`/store/${id}/settings`}
               />
               <Tab
                 value="discounts"
                 label="Discounts"
                 component={Link}
-                to={`/store/${storeId}/discounts`}
+                to={`/store/${id}/discounts`}
               />
             </Tabs>
-
             <Divider sx={{ mb: theme.spacing(3) }} />
-
             <Outlet />
           </Paper>
         )}

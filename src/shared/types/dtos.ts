@@ -28,6 +28,7 @@ export interface StoreDto {
     id?: string;
     name: string;
     description: string;
+    rating: number;
 }
 
 export interface ProductDto {
@@ -120,7 +121,7 @@ export interface OrderRequestDetails {
 }
 
 export interface CartDto {
-    ownerId: string;
+    ownerId?: string;
     stores: CartStoreBasketDto[];
 }
 
