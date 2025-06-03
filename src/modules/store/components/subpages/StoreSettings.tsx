@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Box, Typography, TextField, Button, Stack } from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
 import { StoreDto } from "../../../../shared/types/dtos";
 
-const StoreSettings: React.FC<{ storeId?: string }> = ({ storeId }) => {
+const StoreSettings = () => {
+  const { storeId } = useParams();
+	if (!storeId) return;
+
   const [store, setStore] = useState<StoreDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
