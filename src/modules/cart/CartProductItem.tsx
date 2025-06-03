@@ -40,24 +40,24 @@ const CartProductItem: React.FC<CartProductItemProps> = ({
 
   const handleIncrement = useCallback(async () => {
     if (currentQty === 0) {
-      await addToCart(product.id, 1);
+      await addToCart(product.storeId,product.id, 1);
     } else {
-      await updateQuantity(product.id, currentQty + 1);
+      await updateQuantity(product.storeId,product.id, currentQty + 1);
     }
     onQuantityChange();
   }, [addToCart, updateQuantity, currentQty, product.id, onQuantityChange]);
 
   const handleDecrement = useCallback(async () => {
     if (currentQty <= 1) {
-      await removeFromCart(product.id);
+      await removeFromCart(product.storeId,product.id);
     } else {
-      await updateQuantity(product.id, currentQty - 1);
+      await updateQuantity(product.storeId,product.id, currentQty - 1);
     }
     onQuantityChange();
   }, [removeFromCart, updateQuantity, currentQty, product.id, onQuantityChange]);
 
   const handleRemove = useCallback(async () => {
-    await removeFromCart(product.id);
+    await removeFromCart(product.storeId,product.id);
     onQuantityChange();
   }, [removeFromCart, product.id, onQuantityChange]);
 
