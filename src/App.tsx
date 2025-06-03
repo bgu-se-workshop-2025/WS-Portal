@@ -18,7 +18,6 @@ import RequireAdmin from "./modules/user/admin/RequireAdmin";
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
 import BidRequestPage from "./modules/Bidding/BidRequestPage";
 import BidPage from "./modules/Bidding/BidPage";
-import DevPage from "./modules/Bidding/DevPage";
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
@@ -37,12 +36,6 @@ const App: React.FC = () => {
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
-
-          // TODO - remove later
-          <Route path="/bids/requests/:storeId" element={<BidRequestPage mode="store" />} />
-          <Route path="/bids/:storeId" element={<BidPage mode="store" />} />
-
 
           <Route path="/store/:storeId/*" element={<StorePage />}>
             <Route index element={<Navigate to="products" replace />} />
@@ -55,14 +48,16 @@ const App: React.FC = () => {
           </Route>
 
           <Route path="/notifications" element={<NotificationPage />} />
-          
+
           <Route path="/admin" element={<RequireAdmin />}>
             <Route index element={<AdminPage />} />
           </Route>
           <Route path="/profile" element={<RequireAuth />}>
             <Route element={<UserProfilePage />} />
+            <Route path="bids" element={<BidPage mode="user" />} />
+            <Route path="bids/requests" element={<BidRequestPage mode="user" />} />
           </Route>
-          
+
           <Route path="*" element={<MainPage />} />
         </Routes>
       </Box>

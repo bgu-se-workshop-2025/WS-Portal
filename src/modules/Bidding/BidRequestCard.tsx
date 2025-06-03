@@ -14,8 +14,8 @@ import {
   Chip,
   useTheme,
 } from '@mui/material';
-import { sdk } from '../../sdk/sdk';
 import { BidRequestDto, ProductDto, StoreDto } from '../../shared/types/dtos';
+import useBid from "./hooks/useBid";
 
 interface BidRequestCardProps {
   bidRequest: BidRequestDto;
@@ -40,6 +40,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
   onAction,
 }) => {
   const theme = useTheme();
+  const { acceptBidRequest, rejectBidRequest, submitAlternativePrice, loading, error } = useBid();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [newPrice, setNewPrice] = useState('');
@@ -49,11 +50,11 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const productResult = await sdk.getProduct(bidRequest.productId);
-        setProduct(productResult);
+        // const productResult = await sdk.getProduct(bidRequest.productId);
+        // setProduct(productResult);
 
-        const storeResult = await sdk.getStore(bidRequest.storeId);
-        setStore(storeResult);
+        // const storeResult = await sdk.getStore(bidRequest.storeId);
+        // setStore(storeResult);
       } catch (err) {
         console.warn('Failed to fetch product or store details', err);
       }
@@ -64,7 +65,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleAccept = async () => {
     try {
-      await sdk.acceptBidRequest(bidRequest.bidRequestId);
+      await acceptBidRequest(bidRequest.bidRequestId);
       onAction?.();
     } catch (err) {
       alert(`Error accepting bid: ${err}`);
@@ -73,7 +74,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleReject = async () => {
     try {
-      await sdk.rejectBidRequest(bidRequest.bidRequestId);
+      await rejectBidRequest(bidRequest.bidRequestId);
       onAction?.();
     } catch (err) {
       alert(`Error rejecting bid: ${err}`);
@@ -82,7 +83,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleDelete = async () => {
     try {
-      await sdk.deleteBidRequest(bidRequest.bidRequestId);
+      //await sdk.deleteBidRequest(bidRequest.bidRequestId); //deleteBidRequest is not in useBid hook
       onAction?.();
     } catch (err) {
       alert(`Error deleting bid request: ${err}`);
@@ -91,7 +92,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
 
   const handleSuggestPrice = async () => {
     try {
-      await sdk.submitAlternativePrice(
+      await submitAlternativePrice(
         bidRequest.bidRequestId,
         parseFloat(newPrice)
       );
@@ -148,22 +149,30 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
                   variant="contained"
                   color="success"
                   onClick={handleAccept}
-                  disabled={isFinalStatus}
+                  disabled={isFinalStatus || loading}
                 >
                   Accept
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAccept}
+                  disabled={isFinalStatus || loading}
+                >
+                  Approve
                 </Button>
                 <Button
                   variant="outlined"
                   color="error"
                   onClick={handleReject}
-                  disabled={isFinalStatus}
+                  disabled={isFinalStatus || loading}
                 >
                   Reject
                 </Button>
                 <Button
                   variant="outlined"
                   onClick={() => setDialogOpen(true)}
-                  disabled={isFinalStatus}
+                  disabled={isFinalStatus || loading}
                 >
                   Suggest Price
                 </Button>
@@ -177,7 +186,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
                   variant="outlined"
                   color="error"
                   onClick={() => setConfirmDialogOpen(true)}
-                  disabled={isFinalStatus}
+                  disabled={isFinalStatus || loading}
                 >
                   Cancel
                 </Button>
@@ -207,6 +216,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
             onClick={handleSuggestPrice}
             variant="contained"
             color="primary"
+            disabled={loading}
           >
             Submit
           </Button>
@@ -233,6 +243,7 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
             }}
             color="error"
             variant="contained"
+            disabled={loading}
           >
             Yes, Cancel
           </Button>
