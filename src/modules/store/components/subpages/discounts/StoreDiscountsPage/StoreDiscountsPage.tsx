@@ -38,7 +38,7 @@ const CommandBar = ({ createDiscount, disabled }: {
 	</Stack>
 }
 
-const StoreDiscountsPage = () => {
+const StoreDiscountsPage = ({}) => {
 	const { storeId } = useParams();
 	if (!storeId) return;
 
