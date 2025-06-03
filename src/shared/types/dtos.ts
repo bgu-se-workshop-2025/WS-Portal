@@ -28,6 +28,7 @@ export interface StoreDto {
     id?: string;
     name: string;
     description: string;
+    rating: number;
 }
 
 export interface ProductDto {

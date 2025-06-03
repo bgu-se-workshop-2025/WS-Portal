@@ -13,13 +13,13 @@ import {
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
+import RatingComponent from "../../../../../../../shared/components/RatingComponent";
+import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
 
 const UserProductCard: React.FC<{
   product: ProductDto;
-}> = ({ product }) => {
-
-    const { storeId } = useParams<{ storeId: string }>();
-
+  setUpdateProducts?: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ product, setUpdateProducts }) => {
   const theme = useTheme();
   const {
     cart,
@@ -29,6 +29,9 @@ const UserProductCard: React.FC<{
     loading: cartLoading,
     error: cartError,
   } = useCart();
+
+  const { storeId } = useParams<{ storeId: string }>();
+  const isUserAuthenticated = isAuthenticated();
 
   // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
@@ -108,12 +111,6 @@ const UserProductCard: React.FC<{
           </Typography>
         </Box>
 
-        {product.rating > 0 && (
-          <Typography variant="body2">
-            <strong>Rating:</strong> {product.rating.toFixed(1)}
-          </Typography>
-        )}
-
         {product.categories.length > 0 && (
           <Typography variant="body2">
             <strong>Categories:</strong> {product.categories.join(", ")}
@@ -125,6 +122,48 @@ const UserProductCard: React.FC<{
             {new Date(product.auctionEndDate).toLocaleString()}
           </Typography>
         )}
+
+        <Box
+          sx={{
+            mb: theme.spacing(1),
+            mt: theme.spacing(2),
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <RatingComponent
+            value={product.rating}
+            readOnly={!isUserAuthenticated}
+            size="small"
+            precision={1}
+            onChange={async (newValue) => {
+              if (!isUserAuthenticated) return;
+              if (!storeId) return;
+              try {
+                await sdk.createProductReview({
+                  id: null,
+                  productId: product.id,
+                  storeId: storeId,
+                  writerId: null,
+                  title: null,
+                  body: null,
+                  rating: Math.round(newValue),
+                  date: null,
+                });
+                setUpdateProducts && setUpdateProducts((v) => !v);
+                alert("Thank you for rating the product!");
+              } catch (err: any) {
+                const msg = "You must purchase this product before you can rate it.";
+                alert(msg);
+              }
+            }}
+          />
+          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+            {product.rating > 0 ? `(${product.rating.toFixed(1)})` : ""}
+          </Typography>
+        </Box>
+
         {cartError && (
           <Typography
             variant="caption"
