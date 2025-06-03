@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useBid from "./hooks/useBid";
 import {
   Dialog,
   DialogTitle,
@@ -14,7 +15,6 @@ import {
   Snackbar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { sdk } from "../../sdk/sdk";
 import { BidRequestDto } from "../../shared/types/dtos";
 
 interface CreateBidRequestDialogProps {
@@ -33,28 +33,20 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
   onBidCreated,
 }) => {
   const theme = useTheme();
-
+  const { createBidRequest, loading, error } = useBid();
   const [price, setPrice] = useState<number | undefined>(undefined);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | undefined>(undefined);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setPrice(undefined);
-      setSubmitError(undefined);
-      setSubmitting(false);
     }
   }, [open]);
 
   const handleSubmit = async () => {
     if (price === undefined || price <= 0) {
-      setSubmitError("Please enter a valid bid price.");
       return;
     }
-
-    setSubmitting(true);
-    setSubmitError(undefined);
 
     try {
       const bidRequest: BidRequestDto = {
@@ -65,21 +57,17 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
         requestStatus: "PENDING" as any,
       };
 
-      console.log("Creating bid request:", bidRequest);
-      await sdk.createBidRequest(bidRequest);
+      await createBidRequest(bidRequest);
 
       onBidCreated?.();
-      onClose();               // Close the dialog first
-      setShowSuccess(true);    // Then show the snackbar
+      onClose();
+      setShowSuccess(true);
     } catch (err: any) {
       console.error("Error creating bid request:", err);
-      setSubmitError(err.message || "Failed to create bid request.");
-    } finally {
-      setSubmitting(false);
     }
   };
 
-  const isSubmitDisabled = submitting || price === undefined || price <= 0;
+  const isSubmitDisabled = loading || price === undefined || price <= 0;
 
   return (
     <>
@@ -103,7 +91,7 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
         <DialogContent>
           <Box sx={{ mt: theme.spacing(1) }}>
             <Grid container spacing={2}>
-              <Grid container size={{xs: 12}}>
+              <Grid container size={{ xs: 12 }}>
                 <TextField
                   label="Bid Price"
                   type="number"
@@ -113,15 +101,15 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
                   }
                   fullWidth
                   required
-                  disabled={submitting}
+                  disabled={loading}
                   InputProps={{ inputProps: { min: 0, step: 0.01 } }}
                 />
               </Grid>
 
-              {submitError && (
-                <Grid container size={{xs: 12}}>
+              {error && (
+                <Grid container size={{ xs: 12 }}>
                   <Alert severity="error" variant="outlined">
-                    {submitError}
+                    {error}
                   </Alert>
                 </Grid>
               )}
@@ -130,7 +118,7 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
         </DialogContent>
 
         <DialogActions sx={{ px: theme.spacing(3), pb: theme.spacing(2) }}>
-          <Button onClick={onClose} disabled={submitting}>
+          <Button onClick={onClose} disabled={loading}>
             Cancel
           </Button>
           <Button
@@ -138,7 +126,7 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
             onClick={handleSubmit}
             disabled={isSubmitDisabled}
           >
-            {submitting ? "Submitting…" : "Submit Bid"}
+            {loading ? "Submitting…" : "Submit Bid"}
           </Button>
         </DialogActions>
       </Dialog>
