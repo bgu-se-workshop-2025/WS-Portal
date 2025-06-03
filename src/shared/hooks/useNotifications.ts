@@ -1,53 +1,26 @@
-// src/hooks/useAuthentications.ts
-import { useEffect, useState } from 'react';
-import { Client, IMessage } from '@stomp/stompjs';
+import { useEffect, useState } from "react";
 import {
-  baseurl,
-  userNotificationsChannel,
-  allUsersNotificationsChannel,
-} from '../../sdk/modules/notification/notification';
+  generateClient,
+  subscribeToNotifications,
+} from "../../sdk/modules/notification/notification";
+import { NotificationPayload } from "../../shared/types/responses";
+import { TokenService } from "../../shared/utils/token";
 
-export interface NotificationPayload {
-  // adjust these fields to whatever your backend sends
-  id: string;
-  title: string;
-  message: string;
-  timestamp: number;
-}
-
-export function useAuthentications() {
+export const useNotifications = () => {
   const [notifications, setNotifications] = useState<NotificationPayload[]>([]);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const client = new Client({
-      brokerURL: baseurl,
-      reconnectDelay: 5_000,        // retry every 5s if connection drops
-    });
+    const client = generateClient();
 
     client.onConnect = () => {
       setConnected(true);
-
-      // user-specific notifications
-      client.subscribe(userNotificationsChannel, (msg: IMessage) => {
-        if (msg.body) {
-          const notif = JSON.parse(msg.body) as NotificationPayload;
-          setNotifications((prev) => [...prev, notif]);
-        }
-      });
-
-      // broadcast to all users
-      client.subscribe(allUsersNotificationsChannel, (msg: IMessage) => {
-        if (msg.body) {
-          const notif = JSON.parse(msg.body) as NotificationPayload;
-          setNotifications((prev) => [...prev, notif]);
-        }
-      });
+      subscribeToNotifications(client, TokenService.username, setNotifications);
     };
 
     client.onStompError = (frame) => {
-      console.error('Broker reported error:', frame.headers['message']);
-      console.error('Additional details:', frame.body);
+      console.error("Broker reported error:", frame.headers["message"]);
+      console.error("Additional details:", frame.body);
     };
 
     client.activate();
@@ -56,7 +29,7 @@ export function useAuthentications() {
       client.deactivate();
       setConnected(false);
     };
-  }, []); // run once on mount / cleanup on unmount
+  }, []);
 
   return { connected, notifications };
 }

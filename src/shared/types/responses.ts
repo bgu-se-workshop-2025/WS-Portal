@@ -7,3 +7,12 @@ export interface GeneralAuthResponse {
     authorities?: string[];
     token?: string;
 }
+
+export interface NotificationPayload {
+  id: string;
+  content: string;
+  createdAt: number;
+  resourceId?: string;
+  resourceType?: string;
+  userIds: string[];
+}

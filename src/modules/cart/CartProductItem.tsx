@@ -1,13 +1,14 @@
-import React, { useState } from "react";
-import { ProductDto } from "../../shared/types/dtos";
-import { sdk } from "../../sdk/sdk";
+import React, { useMemo, useCallback } from "react";
 import {
   Typography,
   Button,
   Stack,
   Snackbar,
   Paper,
+  CircularProgress,
 } from "@mui/material";
+import { ProductDto } from "../../shared/types/dtos";
+import useCart from "../../shared/hooks/useCart";
 
 interface CartProductItemProps {
   product: ProductDto;
@@ -17,31 +18,48 @@ interface CartProductItemProps {
 
 const CartProductItem: React.FC<CartProductItemProps> = ({
   product,
-  quantity,
   onQuantityChange,
 }) => {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const {
+    cart,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    loading: cartLoading,
+    error: cartError,
+  } = useCart();
 
-  const handleRemove = async () => {
-    try {
-      await sdk.removeProductFromCart(product.id);
-      onQuantityChange();
-    } catch (error: any) {
-      console.error("Error removing product:", error);
-      setErrorMessage(error.message || "Failed to remove product from cart.");
-    }
-  };
+  const currentQty = useMemo(() => {
+    if (!cart) return 0;
+    const storeEntry = cart.stores.find((store) =>
+      store.products.some((p) => p.productId === product.id)
+    );
+    const productEntry = storeEntry?.products.find((p) => p.productId === product.id);
+    return productEntry?.quantity ?? 0;
+  }, [cart, product.id]);
 
-  const handleUpdate = async (newQty: number) => {
-    try {
-      if (newQty <= 0) return handleRemove();
-      await sdk.updateProductInCart(product.id, { quantity: newQty });
-      onQuantityChange();
-    } catch (error: any) {
-      console.error("Error updating product quantity:", error);
-      setErrorMessage(error.message || "Failed to update product quantity.");
+  const handleIncrement = useCallback(async () => {
+    if (currentQty === 0) {
+      await addToCart(product.id, 1);
+    } else {
+      await updateQuantity(product.id, currentQty + 1);
     }
-  };
+    onQuantityChange();
+  }, [addToCart, updateQuantity, currentQty, product.id, onQuantityChange]);
+
+  const handleDecrement = useCallback(async () => {
+    if (currentQty <= 1) {
+      await removeFromCart(product.id);
+    } else {
+      await updateQuantity(product.id, currentQty - 1);
+    }
+    onQuantityChange();
+  }, [removeFromCart, updateQuantity, currentQty, product.id, onQuantityChange]);
+
+  const handleRemove = useCallback(async () => {
+    await removeFromCart(product.id);
+    onQuantityChange();
+  }, [removeFromCart, product.id, onQuantityChange]);
 
   return (
     <Paper
@@ -63,14 +81,19 @@ const CartProductItem: React.FC<CartProductItemProps> = ({
         {product.description}
       </Typography>
 
-      <Typography variant="body2" gutterBottom sx={{ color: "#003366", fontWeight: 600 }}>
+      <Typography
+        variant="body2"
+        gutterBottom
+        sx={{ color: "#003366", fontWeight: 600 }}
+      >
         Price: ${product.price}
       </Typography>
 
       <Stack direction="row" spacing={1.5} alignItems="center" mt={2}>
         <Button
           variant="outlined"
-          onClick={() => handleUpdate(quantity - 1)}
+          onClick={handleDecrement}
+          disabled={cartLoading || currentQty === 0}
           sx={{
             minWidth: 36,
             borderColor: "#003366",
@@ -84,11 +107,12 @@ const CartProductItem: React.FC<CartProductItemProps> = ({
           −
         </Button>
 
-        <Typography fontWeight={600}>{quantity}</Typography>
+        <Typography fontWeight={600}>{currentQty}</Typography>
 
         <Button
           variant="outlined"
-          onClick={() => handleUpdate(quantity + 1)}
+          onClick={handleIncrement}
+          disabled={cartLoading}
           sx={{
             minWidth: 36,
             borderColor: "#003366",
@@ -105,6 +129,7 @@ const CartProductItem: React.FC<CartProductItemProps> = ({
         <Button
           variant="outlined"
           onClick={handleRemove}
+          disabled={cartLoading}
           sx={{
             color: "#b22222",
             borderColor: "#b22222",
@@ -116,27 +141,28 @@ const CartProductItem: React.FC<CartProductItemProps> = ({
         >
           Remove
         </Button>
+
+        {cartLoading && <CircularProgress size={20} sx={{ ml: 1 }} />}
       </Stack>
 
-      <Snackbar
-      open={!!errorMessage}
-      autoHideDuration={4000}
-      onClose={() => setErrorMessage(null)}
-      message={errorMessage}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      ContentProps={{
-        sx: {
-          backgroundColor: "#ffe0e0",     // Light red background
-          color: "#b22222",               // Dark red text
-          fontWeight: 500,
-          px: 3,
-          py: 1.5,
-          borderRadius: "12px",
-          boxShadow: 3,
-        },
-      }}
-    />
-
+      {cartError && (
+        <Snackbar
+          open={true}
+          message={cartError}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          ContentProps={{
+            sx: {
+              backgroundColor: "#ffe0e0",
+              color: "#b22222",
+              fontWeight: 500,
+              px: 3,
+              py: 1.5,
+              borderRadius: "12px",
+              boxShadow: 3,
+            },
+          }}
+        />
+      )}
     </Paper>
   );
 };

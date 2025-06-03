@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Box, Typography, TextField, Button, Stack } from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
 import { StoreDto } from "../../../../shared/types/dtos";
 
-const StoreSettings: React.FC<{ storeId?: string }> = ({ storeId }) => {
+const StoreSettings = () => {
+  const { storeId } = useParams();
+	if (!storeId) return;
+
   const [store, setStore] = useState<StoreDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -59,9 +63,7 @@ const StoreSettings: React.FC<{ storeId?: string }> = ({ storeId }) => {
         ⚙️ Store Settings
       </Typography>
 
-      {errorMsg ? (
-        <Typography color="error.main">{errorMsg}</Typography>
-      ) : !store ? (
+      {!store ? (
         <Typography color="text.secondary">Loading store details...</Typography>
       ) : (
         <Stack spacing={3}>
@@ -86,14 +88,16 @@ const StoreSettings: React.FC<{ storeId?: string }> = ({ storeId }) => {
             rows={4}
           />
 
-          {/* Reserve space for status messages */}
+          {/* Show messages below the fields */}
           <Box height={30} display="flex" alignItems="center">
+            {errorMsg && (
+              <Typography color="error.main">{errorMsg}</Typography>
+            )}
             {successMsg && (
               <Typography color="success.main">{successMsg}</Typography>
             )}
           </Box>
 
-          {/* Fixed button size to prevent shrinking */}
           <Button
             variant="contained"
             onClick={handleUpdate}

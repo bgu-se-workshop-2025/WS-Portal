@@ -13,101 +13,68 @@ import CartProductItem from "./CartProductItem";
 import { useNavigate } from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
 
-const mockProducts: ProductDto[] = [
-  {
-    id: "1",
-    name: "Apple Watch",
-    description: "Smartwatch from Store A",
-    price: 299.99,
-    quantity: 50,
-    storeId: "store-a",
-    rating: 4.2,
-    categories: ["electronics"],
-    auctionEndDate: "",
-  },
-  {
-    id: "2",
-    name: "Nike Shoes",
-    description: "Running shoes from Store B",
-    price: 119.99,
-    quantity: 30,
-    storeId: "store-b",
-    rating: 4.6,
-    categories: ["fashion"],
-    auctionEndDate: "",
-  },
-  {
-    id: "3",
-    name: "Coffee Maker",
-    description: "Appliance from Store C",
-    price: 89.99,
-    quantity: 20,
-    storeId: "store-c",
-    rating: 4.0,
-    categories: ["kitchen"],
-    auctionEndDate: "",
-  },
-  {
-    id: "4",
-    name: "T-shirt",
-    description: "Cotton T-shirt from Store B",
-    price: 39.99,
-    quantity: 100,
-    storeId: "store-b",
-    rating: 4.3,
-    categories: ["fashion"],
-    auctionEndDate: "",
-  },
-];
-
-const mockCart: CartDto = {
-  ownerId: "test-user",
-  stores: [
-    {
-      storeId: "store-a",
-      products: [{ productId: "1", quantity: 1 }],
-    },
-    {
-      storeId: "store-b",
-      products: [
-        { productId: "2", quantity: 2 },
-        { productId: "4", quantity: 1 },
-      ],
-    },
-    {
-      storeId: "store-c",
-      products: [{ productId: "3", quantity: 1 }],
-    },
-  ],
-};
-
 const CartMainPage = () => {
   const [cart, setCart] = useState<CartDto | null>(null);
+  const [productsMap, setProductsMap] = useState<Record<string, ProductDto>>({});
+  const [storeNames, setStoreNames] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const cartFromServer = await sdk.getCart();
-        setCart(cartFromServer);
-      } catch (error) {
-        console.error("Failed to fetch cart from server, using mock cart:", error);
-        setCart(mockCart);
-      }
-    };
+  const fetchCart = async () => {
+    try {
+      const cartFromServer = await sdk.getCart();
+      setCart(cartFromServer);
 
+      const productIds = new Set<string>();
+      const storeIds = new Set<string>();
+
+      cartFromServer.stores.forEach((store) => {
+        store.products.forEach((item) => productIds.add(item.productId));
+        storeIds.add(store.storeId);
+      });
+
+      const productEntries = await Promise.all(
+        Array.from(productIds).map(async (id) => {
+          try {
+            const product = await sdk.getProduct(id);
+            return [id, product] as const;
+          } catch {
+            return null;
+          }
+        })
+      );
+      const filteredProductEntries = productEntries.filter(Boolean) as [string, ProductDto][];
+      setProductsMap(Object.fromEntries(filteredProductEntries));
+
+      const storeEntries = await Promise.all(
+        Array.from(storeIds).map(async (id) => {
+          try {
+            const store = await sdk.getStore(id);
+            return [id, store.name] as const;
+          } catch {
+            return null;
+          }
+        })
+      );
+      const filteredStoreEntries = storeEntries.filter(Boolean) as [string, string][];
+      setStoreNames(Object.fromEntries(filteredStoreEntries));
+    } catch (error) {
+      console.error("Failed to fetch cart or products:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchCart();
   }, []);
 
-  const handleQuantityChange = () => {
-    console.log("Quantity changed");
+  const handleQuantityChange = async () => {
+    await fetchCart();
   };
 
   const calculateSubtotal = (): number => {
     let total = 0;
     cart?.stores.forEach((store) => {
       store.products.forEach((item) => {
-        const product = mockProducts.find((p) => p.id === item.productId);
+        const product = productsMap[item.productId];
         if (product) {
           total += product.price * item.quantity;
         }
@@ -117,7 +84,7 @@ const CartMainPage = () => {
   };
 
   const handleCheckout = () => {
-    navigate("/public/orders");
+    navigate("/payment");
   };
 
   if (!cart || cart.stores.length === 0) {
@@ -166,14 +133,12 @@ const CartMainPage = () => {
                   color="primary"
                   gutterBottom
                 >
-                  🏬 Store: {store.storeId}
+                  🏬 Store: {storeNames[store.storeId] ?? store.storeId}
                 </Typography>
                 <Divider sx={{ mb: 1 }} />
                 <Stack spacing={1.5}>
                   {store.products.map((entry) => {
-                    const product = mockProducts.find(
-                      (p) => p.id === entry.productId
-                    );
+                    const product = productsMap[entry.productId];
                     if (!product) return null;
 
                     return (
