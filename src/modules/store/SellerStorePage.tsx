@@ -33,10 +33,12 @@ const SellerStoreLayout: React.FC = () => {
     if (!id) return;
     setIsLoading(true);
     setError(null);
+    console.log("[SellerStorePage] useEffect triggered. id:", id);
     sdk.getStore(id)
       .then((result) => {
         setStore(result);
         setIsLoading(false);
+        console.log("[SellerStorePage] Store loaded:", result);
       })
       .catch((err) => {
         console.error("Failed to fetch store:", err.message || err);
@@ -48,18 +50,47 @@ const SellerStoreLayout: React.FC = () => {
     const checkSeller = async () => {
       if (!id || isAuthenticated() === false) {
         setIsSeller(false);
+        console.log("[SellerStorePage] Not authenticated or no id. isSeller set to false.");
         return;
       }
       try {
         const me = await sdk.getCurrentUserProfileDetails();
         const mySeller = await sdk.getSeller(id, me.id);
         setIsSeller(!!mySeller);
-      } catch {
+        console.log("[SellerStorePage] Seller check complete. isSeller:", !!mySeller);
+      } catch (err) {
         setIsSeller(false);
+        console.log("[SellerStorePage] Seller check failed. isSeller set to false.");
       }
     };
     checkSeller();
   }, [id]);
+
+  // Debug: log state on every render
+  useEffect(() => {
+    console.log("[SellerStorePage] Render state:", {
+      isSeller,
+      store,
+      isLoading,
+      error,
+      id,
+    });
+  });
+
+  // Determine “activeTab” from the URL.
+  // E.g. if pathname is "/store/123/sellers" → activeTab = "sellers".
+  // Fallback to “products” if no match.
+  const computedActiveTab: TabValue = React.useMemo(() => {
+    if (!location.pathname || !id) return "products";
+
+    // location.pathname might be "/store/123/products", "/store/123/sellers", etc.
+    const segments = location.pathname.split("/");
+    // ["", "store", "123", "sellers", …]
+    const tabSegment = segments[3] as TabValue | undefined;
+    return TAB_ORDER.includes(tabSegment as any)
+      ? (tabSegment as TabValue)
+      : "products";
+  }, [location.pathname, id]);
 
   // If someone visits “/store/:storeId” exactly, redirect to “/store/:storeId/products”
   if (location.pathname === `/store/${id}`) {
@@ -90,21 +121,6 @@ const SellerStoreLayout: React.FC = () => {
       setRateError(err.message || "You must purchase from this store before rating.");
     }
   };
-
-  // Determine “activeTab” from the URL.
-  // E.g. if pathname is "/store/123/sellers" → activeTab = "sellers".
-  // Fallback to “products” if no match.
-  const computedActiveTab: TabValue = React.useMemo(() => {
-    if (!location.pathname || !id) return "products";
-
-    // location.pathname might be "/store/123/products", "/store/123/sellers", etc.
-    const segments = location.pathname.split("/");
-    // ["", "store", "123", "sellers", …]
-    const tabSegment = segments[3] as TabValue | undefined;
-    return TAB_ORDER.includes(tabSegment as any)
-      ? (tabSegment as TabValue)
-      : "products";
-  }, [location.pathname, id]);
 
   return (
     <Box

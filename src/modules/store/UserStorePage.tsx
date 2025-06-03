@@ -29,7 +29,7 @@ const UserStorePage: React.FC = () => {
   const [store, setStore]       = useState<StoreDto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError]         = useState<string | null>(null);
-  const [isSeller, setIsSeller] = useState<boolean | null>(null);
+  const [isSeller, setIsSeller] = useState<boolean>(false);
 
   useEffect(() => {
     if (!storeId) return;

@@ -22,7 +22,7 @@ const StoreProducts: React.FC = () => {
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
 
-  const [isSeller, setIsSeller] = useState<boolean | null>(null);
+  const [isSeller, setIsSeller] = useState<boolean>(false);
 
   // “Add Product” dialog open/close
   const [addOpen, setAddOpen] = useState<boolean>(false);
@@ -113,6 +113,7 @@ const StoreProducts: React.FC = () => {
         loading={loading}
         error={error}
         setUpdateProducts={setUpdateProducts}
+        isSeller={isSeller}
       />
 
       {/* PAGINATION BAR */}

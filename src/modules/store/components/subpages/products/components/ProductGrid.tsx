@@ -15,6 +15,7 @@ export interface ProductsGridProps {
   loading: boolean;
   error?: string;
   setUpdateProducts: React.Dispatch<React.SetStateAction<boolean>>;
+  isSeller: boolean;
 }
 
 const ProductsGrid: React.FC<ProductsGridProps> = ({
@@ -22,6 +23,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   loading,
   error,
   setUpdateProducts,
+  isSeller,
 }) => {
   const theme = useTheme();
 
@@ -29,7 +31,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
     return (
       <Grid container spacing={3}>
         {Array.from({ length: 6 }).map((_, idx) => (
-          <Grid key={idx} container size={{ xs: 12, sm: 6, md: 4 }}>
+          <Grid key={idx} item xs={12} sm={6} md={4}>
             <Box
               sx={{
                 height: "100%",
@@ -71,8 +73,8 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   return (
     <Grid container spacing={3}>
       {products.map((p) => (
-        <Grid key={p.id} container size={{ xs: 12, sm: 6, md: 4 }}>
-          <ProductCard product={p} setUpdateProducts={setUpdateProducts} />
+        <Grid key={p.id} item xs={12} sm={6} md={4}>
+          <ProductCard product={p} setUpdateProducts={setUpdateProducts} isSeller={isSeller} />
         </Grid>
       ))}
     </Grid>
