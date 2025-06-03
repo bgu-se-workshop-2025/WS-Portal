@@ -41,11 +41,17 @@ const UserProductCard: React.FC<{
 
   // When incrementing: if currentQty === 0, call addToCart; otherwise updateQuantity
   const handleIncrement = useCallback(async () => {
+    if (currentQty === product.quantity) {
+      console.log(
+        `Cannot add ${product.name} to cart: already at max quantity (${product.quantity})`
+      );
+      return;
+    }
     if (currentQty === 0) {
-      await addToCart(product.id, 1);
+      await addToCart(storeId as string, product.id, 1);
       console.log(`Added ${product.name} to cart (quantity = 1)`);
     } else {
-      await updateQuantity(product.id, currentQty + 1);
+      await updateQuantity(storeId as string, product.id, currentQty + 1);
       console.log(
         `Increased ${product.name} quantity to ${currentQty + 1} in cart`
       );
@@ -55,10 +61,10 @@ const UserProductCard: React.FC<{
   // When decrementing: if currentQty <= 1, remove entirely; otherwise updateQuantity
   const handleDecrement = useCallback(async () => {
     if (currentQty <= 1) {
-      await removeFromCart(product.id);
+      await removeFromCart(storeId as string, product.id);
       console.log(`Removed ${product.name} from cart`);
     } else {
-      await updateQuantity(product.id, currentQty - 1);
+      await updateQuantity(storeId as string, product.id, currentQty - 1);
       console.log(
         `Decreased ${product.name} quantity to ${currentQty - 1} in cart`
       );
