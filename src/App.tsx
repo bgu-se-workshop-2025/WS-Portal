@@ -48,7 +48,7 @@ const App: React.FC = () => {
           <Route path="/admin" element={<RequireAdmin />}>
             <Route index element={<AdminPage />} />
           </Route>
-          <Route path="/profile" element={<RequireAuth />}>
+          <Route path="/profile" element={<UserProfilePage />}>
             <Route element={<UserProfilePage />} />
           </Route>
           
