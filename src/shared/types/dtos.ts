@@ -119,7 +119,7 @@ export interface OrderRequestDetails {
 }
 
 export interface CartDto {
-    ownerId: string;
+    ownerId?: string;
     stores: CartStoreBasketDto[];
 }
 
