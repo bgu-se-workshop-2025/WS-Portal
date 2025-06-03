@@ -34,7 +34,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       }
     };
     fetchData();
-  }, [storeId]);
+  }, [storeId, setUpdateProducts, isAuthenticated()]);
 
   if (isSeller === null) {
     return <div>Loading…</div>;
