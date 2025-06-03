@@ -16,6 +16,7 @@ import AdminPage from "./modules/user/admin/pages/AdminPage";
 import RequireAdmin from "./modules/user/admin/RequireAdmin";
 
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
+import PaymentPage from "./modules/order/PaymentPage";
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
@@ -46,6 +47,8 @@ const App: React.FC = () => {
             <Route path="settings" element={<StoreSettingsPage />} />
             <Route path="discounts" element={<StoreDiscountsPage />} />
           </Route>
+
+          <Route path="/payment" element={<PaymentPage />} />
 
           <Route path="/notifications" element={<NotificationPage />} />
           
