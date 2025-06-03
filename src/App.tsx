@@ -9,7 +9,6 @@ import StorePage from "./modules/store/StorePage";
 import LoginPage from "./modules/user/login/LoginPage";
 import RegisterPage from "./modules/user/register/RegisterPage";
 import UserProfilePage from "./modules/user/profile/UserProfilePage";
-import RequireAuth from "./shared/utils/RequireAuth";
 import MainPage from "./modules/main/MainPage";
 import NotificationPage from "./modules/user/notification/NotificationPage";
 import AdminPage from "./modules/user/admin/pages/AdminPage";
@@ -21,7 +20,6 @@ import StoreProductsPage from "./modules/store/components/subpages/products/Stor
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
 import CartMainPage from "./modules/cart/CartMainPage";
-import PaymentPage from "./modules/order/PayemntPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
