@@ -49,4 +49,10 @@ export class TokenService {
       return;
     }
   }
+
+  /** Returns the JWT subject (username), or undefined if no valid token */
+  static get username(): string | undefined {
+    const payload = this.payload;
+    return payload?.sub;
+  }
 }

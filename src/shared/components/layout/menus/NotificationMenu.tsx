@@ -12,15 +12,29 @@ import {
   Divider,
 } from "@mui/material";
 
-import { NotificationsOutlined } from "@mui/icons-material";
+import { NotificationsOutlined, OpenInNewOutlined } from "@mui/icons-material";
 
-import { useAuthentications, NotificationPayload } from "../../../../shared/hooks/useNotifications";
+import { useNavigate } from "react-router-dom";
+
+import { useNotifications } from "../../../../shared/hooks/useNotifications";
+import { NotificationPayload } from "../../../../shared/types/responses";
 
 const NotificationMenu: React.FC = () => {
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
 
-  const { connected, notifications } = useAuthentications();
+  const { notifications } = useNotifications();
+  const { connected } = useNotifications();
 
+  const navigate = useNavigate();
+
+  if (!connected) {
+    return (
+      <Box p={2}>
+        <Typography color="error">Not connected to notifications.</Typography>
+      </Box>
+    );
+  }
+  
   return (
     <ClickAwayListener onClickAway={() => setNotificationsOpen(false)}>
       <Box position="relative">
@@ -45,37 +59,50 @@ const NotificationMenu: React.FC = () => {
               overflow: "auto",
             }}
           >
-            <List dense>
-          {notifications.map((n: NotificationPayload) => (
-            <React.Fragment key={n.id}>
-              <ListItem alignItems="flex-start">
-                <ListItemText
-                  primary={n.title}
-                  secondary={
-                    <>
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        color="text.primary"
-                      >
-                        {n.message}
-                      </Typography>
-                      <Typography
-                        component="span"
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ display: 'block' }}
-                      >
-                        {new Date(n.timestamp).toLocaleString()}
-                      </Typography>
-                    </>
-                  }
-                />
-              </ListItem>
-              <Divider component="li" />
-            </React.Fragment>
-          ))}
-        </List>
+            <IconButton onClick={() => {
+              setNotificationsOpen(false);
+              navigate("/notifications");
+            }}>
+              <OpenInNewOutlined />
+            </IconButton>
+            {notifications.length === 0 ? (
+              <Box p={2} textAlign="center">
+                <Typography variant="body2" color="text.secondary">
+                  No notifications
+                </Typography>
+              </Box>
+            ) : (
+              <List dense>
+                {notifications.map((n: NotificationPayload) => (
+                  <React.Fragment key={n.id}>
+                    <ListItem alignItems="flex-start">
+                      <ListItemText
+                        primary={
+                          <>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                            >
+                              {n.content}
+                            </Typography>
+                            <Typography
+                              component="span"
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: "block" }}
+                            >
+                              {new Date(n.createdAt).toLocaleString()}
+                            </Typography>
+                          </>
+                        }
+                      />
+                    </ListItem>
+                    <Divider component="li" />
+                  </React.Fragment>
+                ))}
+              </List>
+            )}
           </Paper>
         </Collapse>
       </Box>
