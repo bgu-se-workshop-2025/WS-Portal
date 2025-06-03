@@ -1,12 +1,9 @@
 import { ReviewDto } from "../../../shared/types/dtos.ts";
 import { SDK } from "../../sdk.ts";
 
-const storeController = "store";
-const productController = "product";
-
 
 export async function createStoreReview(this: SDK, payload: ReviewDto): Promise<ReviewDto> {
-    const response = await this.post(`${storeController}/${payload.storeId}/`, payload);
+    const response = await this.post(`/review/store/${payload.storeId}`, payload);
 
     if (!response.ok) {
         const err = await response.text();
@@ -18,7 +15,7 @@ export async function createStoreReview(this: SDK, payload: ReviewDto): Promise<
 
 export async function createProductReview(this: SDK, payload: ReviewDto): Promise<ReviewDto> {
     const response = await this.post(
-        `${storeController}/${payload.storeId}/${productController}/${payload.productId}`,
+        `/review/store/${payload.storeId}/product/${payload.productId}`,
         payload
     );
 

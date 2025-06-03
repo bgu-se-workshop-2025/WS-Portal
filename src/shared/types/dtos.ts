@@ -28,6 +28,7 @@ export interface StoreDto {
     id?: string;
     name: string;
     description: string;
+    rating: number;
 }
 
 export interface ProductDto {
@@ -102,14 +103,14 @@ export interface ShippingAddressDto {
 }
 
 export interface ReviewDto {
-    id: string;
-    productId: string;  
-    storeId: string;
-    writerId: string;
-    title: string;
-    body: string;
+    id: string | null;
+    productId: string | null;  
+    storeId: string | null;
+    writerId: string | null;
+    title: string | null;
+    body: string | null;
     rating: number;
-    date: string;
+    date: string | null;
 }
 
 export interface OrderRequestDetails {

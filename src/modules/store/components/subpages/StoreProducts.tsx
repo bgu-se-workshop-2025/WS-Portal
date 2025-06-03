@@ -17,6 +17,7 @@ import {
 import { ProductDto } from "../../../../shared/types/dtos";
 import { GetProductsPayload } from "../../../../shared/types/requests";
 import { sdk } from "../../../../sdk/sdk";
+import RatingComponent from "../../../../shared/components/RatingComponent";
 
 interface StoreProductsProps {
   storeId?: string;
@@ -133,7 +134,32 @@ export const StoreProducts: React.FC<StoreProductsProps> = ({ storeId }) => {
                   </Typography>
                   <Typography>Price: ${p.price}</Typography>
                   <Typography>Quantity: {p.quantity}</Typography>
-                  <Typography>Rating: {p.rating.toFixed(1)}</Typography>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <RatingComponent
+                      value={p.rating}
+                      readOnly={false}
+                      size="medium"
+                      precision={1}
+                      onChange={async (newValue) => {
+                        try {
+                          await sdk.createProductReview({
+                            id: null, // let backend generate
+                            productId: p.id,
+                            storeId: p.storeId,
+                            writerId: null, // let backend use current user
+                            title: null,
+                            body: null,
+                            rating: Math.round(newValue),
+                            date: null,
+                          });
+                          alert("Thank you for rating!");
+                        } catch (err: any) {
+                          alert("You must purchase this product before you can rate it.");
+                        }
+                      }}
+                    />
+                    <Typography variant="body2">({p.rating.toFixed(1)})</Typography>
+                  </Box>
                   <Typography>
                     Categories: {p.categories.join(", ") || "—"}
                   </Typography>
