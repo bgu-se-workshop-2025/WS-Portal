@@ -19,6 +19,7 @@ import {
   Skeleton,
   Alert,
 } from "@mui/material";
+import { useParams } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -26,11 +27,10 @@ import { ProductDto } from "../../../../shared/types/dtos";
 import { GetProductsPayload } from "../../../../shared/types/requests";
 import { sdk, isAuthenticated } from "../../../../sdk/sdk";
 
-interface StoreProductsProps {
-  storeId?: string;
-}
+export const StoreProducts = () => {
+  const { storeId } = useParams();
+    if (!storeId) return;
 
-export const StoreProducts: React.FC<StoreProductsProps> = ({ storeId }) => {
   const theme = useTheme();
   const [products, setProducts] = useState<ProductDto[]>([]);
   const [loading, setLoading] = useState<boolean>(false);

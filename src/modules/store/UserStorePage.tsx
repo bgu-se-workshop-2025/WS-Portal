@@ -4,74 +4,74 @@ import {
   Typography,
   Container,
   Breadcrumbs,
-  Link,
+  Link as MuiLink,
+  Tabs,
+  Tab,
   Paper,
   CircularProgress,
   Alert,
   Chip,
+  Divider,
   useTheme,
-  Grow,
 } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
-
-import StoreProducts from "./components/subpages/StoreProducts";
-import { StoreDto } from "../../shared/types/dtos";
+import { Link, Outlet, useParams, useLocation, Navigate } from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
+import { StoreDto } from "../../shared/types/dtos";
 
-interface UserStorePageProps {
-  id?: string;
-}
+const UserStorePage: React.FC = () => {
+  const theme   = useTheme();
+  const { storeId } = useParams<{ storeId: string }>();
+  const location    = useLocation();
 
-const UserStorePage: React.FC<UserStorePageProps> = ({ id }) => {
-  const theme = useTheme();
-  const [store, setStore] = useState<StoreDto | null>(null);
+  const [store, setStore]       = useState<StoreDto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]         = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
-      setStore(null);
-      return;
-    }
-
+    if (!storeId) return;
     setIsLoading(true);
     setError(null);
 
     sdk
-      .getStore(id)
-      .then((result) => {
-        setStore(result);
-      })
-      .catch((err: any) => {
+      .getStore(storeId)
+      .then((res) => setStore(res))
+      .catch((err) => {
         console.error("Failed to fetch store:", err);
-        setError(err.message || "Unknown error");
+        setError(err.message || "Unknown error occurred");
         setStore(null);
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [id]);
+      .finally(() => setIsLoading(false));
+  }, [storeId]);
+
+  // Redirect “/store/:storeId” → “/store/:storeId/products”
+  if (location.pathname === `/store/${storeId}`) {
+    return <Navigate to={`/store/${storeId}/products`} replace />;
+  }
 
   return (
     <Box
       sx={{
-        width: "100%",
         minHeight: "100vh",
         bgcolor: theme.palette.background.default,
-        pt: theme.spacing(2),
-        pb: theme.spacing(4),
+        py: theme.spacing(4),
       }}
     >
-      <Container maxWidth="md">
-        {/* ─── BREADCRUMBS ───────────────────────────────────────────────────────── */}
+      <Container maxWidth="lg">
+        {/* ─── BREADCRUMBS ─────────────────────────────────────────────────────────── */}
         <Box sx={{ mb: theme.spacing(2) }}>
           <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/">
+            <MuiLink underline="hover" color="inherit" component={Link} to="/">
               Home
-            </Link>
-            <Link underline="hover" color="inherit" href="/stores">
-              Stores
-            </Link>
+            </MuiLink>
+            <MuiLink
+              underline="hover"
+              color="inherit"
+              component={Link}
+              to="/user/dashboard"
+            >
+              My Stores
+            </MuiLink>
             <Typography color="text.primary">
               {isLoading ? "Loading…" : store?.name || "Store Not Found"}
             </Typography>
@@ -83,7 +83,8 @@ const UserStorePage: React.FC<UserStorePageProps> = ({ id }) => {
           elevation={0}
           sx={{
             position: "relative",
-            height: { xs: 100, sm: 140 },
+            height: { xs: 120, sm: 160 },
+            bgcolor: "transparent",
             background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`,
             borderRadius: 2,
             mb: theme.spacing(4),
@@ -117,34 +118,55 @@ const UserStorePage: React.FC<UserStorePageProps> = ({ id }) => {
           )}
         </Paper>
 
-        {/* ─── LOADING STATE ───────────────────────────────────────────────────────── */}
+        {/* ─── LOADING / ERROR / NO ID STATES ─────────────────────────────────────── */}
         {isLoading && (
           <Box display="flex" justifyContent="center" my={6}>
             <CircularProgress color="primary" size={48} />
           </Box>
         )}
 
-        {/* ─── ERROR STATE ──────────────────────────────────────────────────────────── */}
         {!isLoading && error && (
           <Alert severity="error" sx={{ mb: theme.spacing(4) }}>
             {`Failed to load store: ${error}`}
           </Alert>
         )}
 
-        {/* ─── NO ID PROVIDED ───────────────────────────────────────────────────────── */}
-        {!id && !isLoading && (
+        {!storeId && !isLoading && (
           <Alert severity="warning" sx={{ mb: theme.spacing(4) }}>
-            No store ID provided. Please select a store from the list.
+            No store ID provided. Please navigate via “My Stores” first.
           </Alert>
         )}
 
-        {/* ─── MAIN CONTENT: PRODUCTS ───────────────────────────────────────────────── */}
+        {/* ─── **Only one “Products” Tab** + Outlet ───────────────────────────────── */}
         {!isLoading && !error && store && (
-          <Grow in timeout={400}>
-            <Box>
-              <StoreProducts storeId={id} />
-            </Box>
-          </Grow>
+          <Paper
+            elevation={3}
+            sx={{
+              p: theme.spacing(4),
+              borderRadius: 2,
+              bgcolor: theme.palette.background.paper,
+              boxShadow: theme.shadows[2],
+            }}
+          >
+            <Tabs
+              value="products"
+              textColor="primary"
+              indicatorColor="primary"
+              centered
+              sx={{ mb: theme.spacing(3) }}
+            >
+              <Tab
+                value="products"
+                label="Products"
+                component={Link}
+                to={`/store/${storeId}/products`}
+              />
+            </Tabs>
+
+            <Divider sx={{ mb: theme.spacing(3) }} />
+            
+            <Outlet />
+          </Paper>
         )}
       </Container>
     </Box>

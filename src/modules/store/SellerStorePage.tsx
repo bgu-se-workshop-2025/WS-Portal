@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
   Container,
   Breadcrumbs,
-  Link,
+  Link as MuiLink,
   Tabs,
   Tab,
   Paper,
@@ -13,61 +13,65 @@ import {
   Chip,
   Divider,
   useTheme,
-  Card,
-  CardContent,
-  Grid,
-  Grow,
 } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
-
-import StoreProducts from "../store/components/subpages/StoreProducts";
-import StoreSellers from "../store/components/subpages/StoreSellers";
-import StoreSettings from "../store/components/subpages/StoreSettings";
-import StoreDiscounts from "./components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
-
-import { StoreDto } from "../../shared/types/dtos";
+import {
+  Link,
+  Outlet,
+  useParams,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
+import { StoreDto } from "../../shared/types/dtos";
 
-type Tab = "products" | "sellers" | "settings" | "discounts";
-const DEFAULT_TAB: Tab = "products";
+type TabValue = "products" | "sellers" | "settings" | "discounts";
+const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts"];
 
-const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
+const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState<Tab>(DEFAULT_TAB);
+  const { storeId } = useParams<{ storeId: string }>();
+  const location = useLocation();
+
   const [store, setStore] = useState<StoreDto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleTabChange = useCallback(
-    (_: React.SyntheticEvent, newTab: Tab) => {
-      setActiveTab(newTab);
-    },
-    []
-  );
+  // Determine “activeTab” from the URL.
+  // E.g. if pathname is "/store/123/sellers" → activeTab = "sellers".
+  // Fallback to “products” if no match.
+  const activeTab: TabValue = React.useMemo(() => {
+    if (!location.pathname || !storeId) return "products";
+
+    // location.pathname might be "/store/123/products", "/store/123/sellers", etc.
+    const segments = location.pathname.split("/");
+    // ["", "store", "123", "sellers", …]
+    const tabSegment = segments[3] as TabValue | undefined;
+    return TAB_ORDER.includes(tabSegment as any)
+      ? (tabSegment as TabValue)
+      : "products";
+  }, [location.pathname, storeId]);
 
   useEffect(() => {
-    if (!id) {
-      setStore(null);
-      return;
-    }
+    if (!storeId) return;
 
     setIsLoading(true);
     setError(null);
-
     sdk
-      .getStore(id)
-      .then((result) => {
-        setStore(result);
-      })
+      .getStore(storeId)
+      .then((res) => setStore(res))
       .catch((err) => {
         console.error("Failed to fetch store:", err);
         setError(err.message || "Unknown error occurred");
         setStore(null);
       })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [id]);
+      .finally(() => setIsLoading(false));
+  }, [storeId]);
+
+  // If someone visits “/store/:storeId” exactly, redirect to “/store/:storeId/products”
+  if (location.pathname === `/store/${storeId}`) {
+    return <Navigate to={`/store/${storeId}/products`} replace />;
+  }
 
   return (
     <Box
@@ -81,16 +85,17 @@ const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
         {/* ─── BREADCRUMBS ─────────────────────────────────────────────────────────── */}
         <Box sx={{ mb: theme.spacing(2) }}>
           <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/">
+            <MuiLink underline="hover" color="inherit" component={Link} to="/">
               Home
-            </Link>
-            <Link
+            </MuiLink>
+            <MuiLink
               underline="hover"
               color="inherit"
-              href="/seller/dashboard"
+              component={Link}
+              to="/seller/dashboard"
             >
               My Stores
-            </Link>
+            </MuiLink>
             <Typography color="text.primary">
               {isLoading ? "Loading…" : store?.name || "Store Not Found"}
             </Typography>
@@ -119,11 +124,7 @@ const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
               mr: theme.spacing(1),
             }}
           />
-          <Typography
-            variant="h3"
-            component="h1"
-            sx={{ fontWeight: 600 }}
-          >
+          <Typography variant="h3" component="h1" sx={{ fontWeight: 600 }}>
             {isLoading ? "Loading Store…" : store?.name || "Store Not Found"}
           </Typography>
 
@@ -141,143 +142,78 @@ const SellerStorePage: React.FC<{ id?: string }> = ({ id }) => {
           )}
         </Paper>
 
-        {/* ─── LOADING STATE ────────────────────────────────────────────────────────── */}
+        {/* ─── LOADING / ERROR / NO ID STATES ──────────────────────────────────────── */}
         {isLoading && (
           <Box display="flex" justifyContent="center" my={6}>
             <CircularProgress color="primary" size={48} />
           </Box>
         )}
 
-        {/* ─── ERROR STATE (ID PROVIDED BUT FETCH FAILED) ───────────────────────────── */}
         {!isLoading && error && (
           <Alert severity="error" sx={{ mb: theme.spacing(4) }}>
             {`Failed to load store: ${error}`}
           </Alert>
         )}
 
-        {/* ─── NO ID SUPPLIED ───────────────────────────────────────────────────────── */}
-        {!id && !isLoading && (
+        {!storeId && !isLoading && (
           <Alert severity="warning" sx={{ mb: theme.spacing(4) }}>
             No store ID provided. Please navigate via “My Stores” first.
           </Alert>
         )}
 
-        {/* ─── MAIN CONTENT ──────────────────────────────────────────────────────────── */}
+        {/* ─── TABS + OUTLET ───────────────────────────────────────────────────────── */}
         {!isLoading && !error && store && (
-          <Grow in timeout={400}>
-            <Paper
-              elevation={3}
-              sx={{
-                p: theme.spacing(4),
-                borderRadius: 2,
-                bgcolor: theme.palette.background.paper,
-                boxShadow: theme.shadows[2],
-              }}
+          <Paper
+            elevation={3}
+            sx={{
+              p: theme.spacing(4),
+              borderRadius: 2,
+              bgcolor: theme.palette.background.paper,
+              boxShadow: theme.shadows[2],
+            }}
+          >
+            {/* ─── TABS NAVIGATION ─────────────────────────────────────────────── */}
+            <Tabs
+              value={activeTab}
+              textColor="primary"
+              indicatorColor="primary"
+              centered
+              sx={{ mb: theme.spacing(3) }}
             >
-              {/* ─── TABS NAVIGATION ─────────────────────────────────────────────── */}
-              <Tabs
-                value={activeTab}
-                onChange={handleTabChange}
-                centered
-                textColor="primary"
-                indicatorColor="primary"
-                sx={{ mb: theme.spacing(3) }}
-              >
-                <Tab value="products" label="Products" />
-                <Tab value="sellers" label="Sellers" />
-                <Tab value="settings" label="Settings" />
-                <Tab value="discounts" label="Discounts" />
-              </Tabs>
+              <Tab
+                value="products"
+                label="Products"
+                component={Link}
+                to={`/store/${storeId}/products`}
+              />
+              <Tab
+                value="sellers"
+                label="Sellers"
+                component={Link}
+                to={`/store/${storeId}/sellers`}
+              />
+              <Tab
+                value="settings"
+                label="Settings"
+                component={Link}
+                to={`/store/${storeId}/settings`}
+              />
+              <Tab
+                value="discounts"
+                label="Discounts"
+                component={Link}
+                to={`/store/${storeId}/discounts`}
+              />
+            </Tabs>
 
-              <Divider sx={{ mb: theme.spacing(3) }} />
+            <Divider sx={{ mb: theme.spacing(3) }} />
 
-              {/* ─── TAB CONTENT PANELS ───────────────────────────────────────────── */}
-              {activeTab === "products" && (
-                <Grid container spacing={3}>
-                  <Grid container size={{ xs: 12 }}>
-                    <Card
-                      sx={{
-                        width: "100%",
-                        borderRadius: 2,
-                        boxShadow: theme.shadows[1],
-                        transition: "transform 0.2s, box-shadow 0.2s",
-                        "&:hover": {
-                          transform: "translateY(-2px)",
-                          boxShadow: theme.shadows[3],
-                        },
-                      }}
-                    >
-                      <CardContent>
-                        <Typography variant="h6" gutterBottom>
-                          All Products
-                        </Typography>
-                        <Divider sx={{ mb: theme.spacing(2) }} />
-                        <StoreProducts storeId={id} />
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                </Grid>
-              )}
-
-              {activeTab === "sellers" && (
-                <Card
-                  sx={{
-                    mb: theme.spacing(2),
-                    borderRadius: 2,
-                    boxShadow: theme.shadows[1],
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Store Sellers
-                    </Typography>
-                    <Divider sx={{ mb: theme.spacing(2) }} />
-                    <StoreSellers storeId={id} />
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeTab === "settings" && (
-                <Card
-                  sx={{
-                    mb: theme.spacing(2),
-                    borderRadius: 2,
-                    boxShadow: theme.shadows[1],
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Store Settings
-                    </Typography>
-                    <Divider sx={{ mb: theme.spacing(2) }} />
-                    <StoreSettings storeId={id} />
-                  </CardContent>
-                </Card>
-              )}
-
-              {activeTab === "discounts" && (
-                <Card
-                  sx={{
-                    mb: theme.spacing(2),
-                    borderRadius: 2,
-                    boxShadow: theme.shadows[1],
-                  }}
-                >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Store Discounts
-                    </Typography>
-                    <Divider sx={{ mb: theme.spacing(2) }} />
-                    <StoreDiscounts storeId={id} />
-                  </CardContent>
-                </Card>
-              )}
-            </Paper>
-          </Grow>
+            <Outlet />
+          </Paper>
         )}
       </Container>
     </Box>
   );
 };
 
-export default SellerStorePage;
+export default SellerStoreLayout;

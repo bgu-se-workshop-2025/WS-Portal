@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Box } from "@mui/material";
 
 import Header from "./shared/components/layout/Header";
@@ -14,7 +14,11 @@ import MainPage from "./modules/main/MainPage";
 import NotificationPage from "./modules/user/notification/NotificationPage";
 import AdminPage from "./modules/user/admin/pages/AdminPage";
 import RequireAdmin from "./modules/user/admin/RequireAdmin";
+
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
+import StoreProductsPage from "./modules/store/components/subpages/StoreProducts";
+import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
+import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -29,30 +33,25 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/store/:id" element={<StorePage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/profile"
-            element={<RequireAuth />}
-          >
-            <Route element={<UserProfilePage />} />
+          
+          <Route path="/store/:storeId/*" element={<StorePage />}>
+            <Route index element={<Navigate to="products" replace />} />
+            <Route path="products" element={<StoreProductsPage />} />
+            <Route path="sellers" element={<StoreSellersPage />} />
+            <Route path="settings" element={<StoreSettingsPage />} />
+            <Route path="discounts" element={<StoreDiscountsPage />} />
           </Route>
+
           <Route path="/notifications" element={<NotificationPage />} />
-          <Route path="/admin" element={<RequireAdmin />} >
+          
+          <Route path="/admin" element={<RequireAdmin />}>
             <Route index element={<AdminPage />} />
           </Route>
-          <Route
-            path="/store/:storeId/sellers"
-            element={<RequireAuth />}
-          > {/* NEED TO ANOTHER "LAYOUT FILTER" HERE WHICH CHECKS WHETHER THE CURRENT USER IS A SELLER */}
-            <Route path="/store/:storeId/sellers/discounts" element={<StoreDiscountsPage />} />
-          </Route>
-          <Route
-            path="/profile"
-            element={<RequireAuth />}
-          >
+          <Route path="/profile" element={<RequireAuth />}>
             <Route element={<UserProfilePage />} />
           </Route>
+          
           <Route path="*" element={<MainPage />} />
         </Routes>
       </Box>
