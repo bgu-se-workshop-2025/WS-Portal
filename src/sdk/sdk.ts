@@ -87,7 +87,7 @@ export class SDK {
   public createOrder!: (payload: dtos.OrderRequestDetails) => Promise<dtos.UserOrderDto>;
 
   // Bidding SDK
-  public createRequest!: (payload: dtos.BidRequestDto) => Promise<dtos.BidRequestDto>;
+  public createBidRequest!: (payload: dtos.BidRequestDto) => Promise<dtos.BidRequestDto>;
   public acceptBidRequest!: (bidRequestId: string) => Promise<void>;
   public rejectBidRequest!: (bidRequestId: string) => Promise<void>;
   public submitAlternativePrice!: (bidRequestId: string, newPrice: number) => Promise<void>;
@@ -95,8 +95,10 @@ export class SDK {
   public getBid!: (bidRequestId: string) => Promise<dtos.BidDto>;
   public getBidsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
   public getBidsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
+  public getBidsOfStore!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.BidDto[]>;
   public getBidRequestsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
   public getBidRequestsOfUser!: (payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
+  public getBidRequestsOfStore!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
   public deleteBidRequest!: (bidRequestId: string) => Promise<void>;
   public deleteBid!: (bidRequestId: string) => Promise<void>;
 
