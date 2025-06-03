@@ -16,7 +16,7 @@ interface BidRequestPageProps {
 }
 
 const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
-  const { id } = useParams(); // userId or storeId
+  const { storeId } = useParams<{ storeId: string }>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [bidRequests, setBidRequests] = useState<BidRequestDto[]>([]);
@@ -28,20 +28,23 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
     const pageable: Pageable = { page: 0, size: 20 };
 
     try {
-      const user = await sdk.getCurrentUserProfileDetails();
-      const data =
-        mode === 'user'
-          ? await sdk.getBidRequestsOfUser(user.id, pageable)
-          : await sdk.getBidRequestsOfStore(id!, pageable);
-          console.log('Fetched bid requests:', data);
-      setBidRequests(data);
+      if (mode === 'user') {
+        const user = await sdk.getCurrentUserProfileDetails();
+        const data = await sdk.getBidRequestsOfUser(user.id, pageable);
+        setBidRequests(data);
+      } else if (storeId) {
+        const data = await sdk.getBidRequestsOfStore(storeId, pageable);
+        setBidRequests(data);
+      } else {
+        throw new Error('Missing storeId for store mode');
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load bid requests.');
       setBidRequests([]);
     } finally {
       setLoading(false);
     }
-  }, [id, mode]);
+  }, [storeId, mode]);
 
   useEffect(() => {
     fetchBidRequests();
@@ -64,7 +67,7 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
 
       <Grid container spacing={2} mt={2}>
         {bidRequests.map((request) => (
-          <Grid container size={{ xs: 12, sm: 6, md: 4 }} key={request.bidRequestId}>
+          <Grid container size={{xs: 12, sm: 6, md: 4}} key={request.bidRequestId}>
             <BidRequestCard
               bidRequest={request}
               mode={mode}

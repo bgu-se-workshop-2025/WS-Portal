@@ -129,7 +129,7 @@ export async function getBidRequestsOfUser(this: SDK, userId: string, pageable: 
 }
 
 export async function getBidRequestsOfStore(this: SDK, storeId: string, pageable: Pageable): Promise<BidRequestDto[]> {
-    const response = await this.get(`${biddingController}/requests/stores/${storeId}`, {storeId, pageable});
+    const response = await this.get(`${biddingController}/requests/stores/${storeId}`, pageable);
 
     if (!response.ok) {
         const error = await response.text();

@@ -40,8 +40,9 @@ const App: React.FC = () => {
           
 
           // TODO - remove later
-          <Route path="/bids" element={<BidRequestPage mode={"user"} />} />
-          <Route path="/dev" element={<DevPage />} /> 
+          <Route path="/bids/requests/:storeId" element={<BidRequestPage mode="store" />} />
+          <Route path="/bids/:storeId" element={<BidPage mode="store" />} />
+
 
           <Route path="/store/:storeId/*" element={<StorePage />}>
             <Route index element={<Navigate to="products" replace />} />
@@ -49,6 +50,8 @@ const App: React.FC = () => {
             <Route path="sellers" element={<StoreSellersPage />} />
             <Route path="settings" element={<StoreSettingsPage />} />
             <Route path="discounts" element={<StoreDiscountsPage />} />
+            <Route path="bids" element={<BidPage mode="store" />} />
+            <Route path="bids/requests" element={<BidRequestPage mode="store" />} />
           </Route>
 
           <Route path="/notifications" element={<NotificationPage />} />
