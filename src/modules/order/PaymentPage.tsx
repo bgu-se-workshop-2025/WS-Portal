@@ -144,14 +144,6 @@ const PaymentPage: React.FC = () => {
           </TextField>
 
           <TextField
-            label="External Payment ID"
-            name="externalId"
-            value={paymentDetails.externalId}
-            onChange={handlePaymentChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
             label="Payer Email"
             name="payerEmail"
             value={paymentDetails.payerEmail}
