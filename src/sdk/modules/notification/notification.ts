@@ -30,13 +30,18 @@ export const subscribeToNotifications = (
   setNotifications: React.Dispatch<React.SetStateAction<NotificationPayload[]>>
 ) => {
   // broadcast to all users
-  client.subscribe(allUsersNotificationsChannel, (msg: IMessage) => {
-    if (msg.body) {
-      console.debug("Received broadcast notification:", msg.body);
-      const notif = JSON.parse(msg.body) as NotificationPayload;
-      setNotifications((prev) => [...prev, notif]);
+  client.subscribe(allUsersNotificationsChannel, 
+    (msg: IMessage) => {
+      if (msg.body) {
+        console.debug("Received broadcast notification:", msg.body);
+        const notif = JSON.parse(msg.body) as NotificationPayload;
+        setNotifications((prev) => [...prev, notif]);
+      }
+    },
+    {
+      Authorization: `Bearer ${TokenService.token}`,
     }
-  });
+  );
 
   // user-specific notifications
   if (!username) {
@@ -55,6 +60,9 @@ export const subscribeToNotifications = (
         const notif = JSON.parse(msg.body) as NotificationPayload;
         setNotifications((prev) => [...prev, notif]);
       }
+    },
+    {
+      Authorization: `Bearer ${TokenService.token}`,
     }
   );
 };
