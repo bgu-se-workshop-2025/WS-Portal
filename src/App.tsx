@@ -33,7 +33,7 @@ const App: React.FC = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/profile"
-            element={<RequireAuth />}
+            element={<UserProfilePage />}
           >
             <Route element={<UserProfilePage />} />
           </Route>
