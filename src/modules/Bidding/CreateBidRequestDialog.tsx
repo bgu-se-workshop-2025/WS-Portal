@@ -11,6 +11,7 @@ import {
   IconButton,
   Box,
   Grid,
+  Snackbar,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { sdk } from "../../sdk/sdk";
@@ -36,6 +37,7 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
   const [price, setPrice] = useState<number | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | undefined>(undefined);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -60,18 +62,15 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
         productId,
         storeId,
         price,
-        requestStatus: 'PENDING' as any,
+        requestStatus: "PENDING" as any,
       };
 
       console.log("Creating bid request:", bidRequest);
-      console.log("price:", price);
       await sdk.createBidRequest(bidRequest);
 
-      if (onBidCreated) {
-        onBidCreated();
-      }
-
-      onClose();
+      onBidCreated?.();
+      onClose();               // Close the dialog first
+      setShowSuccess(true);    // Then show the snackbar
     } catch (err: any) {
       console.error("Error creating bid request:", err);
       setSubmitError(err.message || "Failed to create bid request.");
@@ -83,65 +82,75 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
   const isSubmitDisabled = submitting || price === undefined || price <= 0;
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>
-        Submit Bid Request
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            position: "absolute",
-            right: theme.spacing(1),
-            top: theme.spacing(1),
-            color: theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
+    <>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle>
+          Submit Bid Request
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            sx={{
+              position: "absolute",
+              right: theme.spacing(1),
+              top: theme.spacing(1),
+              color: theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-      <DialogContent>
-        <Box sx={{ mt: theme.spacing(1) }}>
-          <Grid container spacing={2}>
-            <Grid container size = {{xs: 12}}>
-              <TextField
-                label="Bid Price"
-                type="number"
-                value={price ?? ""}
-                onChange={(e) =>
-                  setPrice(e.target.value === "" ? undefined : +e.target.value)
-                }
-                fullWidth
-                required
-                disabled={submitting}
-                InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-              />
-            </Grid>
-
-            {submitError && (
-              <Grid container size = {{xs: 12}}>
-                <Alert severity="error" variant="outlined">
-                  {submitError}
-                </Alert>
+        <DialogContent>
+          <Box sx={{ mt: theme.spacing(1) }}>
+            <Grid container spacing={2}>
+              <Grid container size={{xs: 12}}>
+                <TextField
+                  label="Bid Price"
+                  type="number"
+                  value={price ?? ""}
+                  onChange={(e) =>
+                    setPrice(e.target.value === "" ? undefined : +e.target.value)
+                  }
+                  fullWidth
+                  required
+                  disabled={submitting}
+                  InputProps={{ inputProps: { min: 0, step: 0.01 } }}
+                />
               </Grid>
-            )}
-          </Grid>
-        </Box>
-      </DialogContent>
 
-      <DialogActions sx={{ px: theme.spacing(3), pb: theme.spacing(2) }}>
-        <Button onClick={onClose} disabled={submitting}>
-          Cancel
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isSubmitDisabled}
-        >
-          {submitting ? "Submitting…" : "Submit Bid"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+              {submitError && (
+                <Grid container size={{xs: 12}}>
+                  <Alert severity="error" variant="outlined">
+                    {submitError}
+                  </Alert>
+                </Grid>
+              )}
+            </Grid>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ px: theme.spacing(3), pb: theme.spacing(2) }}>
+          <Button onClick={onClose} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            disabled={isSubmitDisabled}
+          >
+            {submitting ? "Submitting…" : "Submit Bid"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccess(false)}
+        message="Created bid request successfully!"
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
+    </>
   );
 };
 
