@@ -64,17 +64,6 @@ export async function deleteProduct(this: SDK, storeId: string, productId: strin
     }
 }
 
-export async function getSeller(this: SDK, storeId: string, userId: string): Promise<SellerDto> {
-    const response = await this.get(`${storeController}/${storeId}/${sellerController}/${userId}`, {});
-
-    if(!response.ok) {
-        const err = await response.text();
-        throw new Error(`Failed to get seller ${userId}: ${err}`);
-    }
-
-    const result = (await response.json()) as SellerDto;
-    return result;
-}
 
 export async function addSeller(this: SDK, storeId: string, userId: string, seller: SellerDto): Promise<SellerDto> {
     const response = await this.post(`${storeController}/${storeId}/${sellerController}/${userId}`, seller);
@@ -88,12 +77,42 @@ export async function addSeller(this: SDK, storeId: string, userId: string, sell
     return result;
 }
 
-export async function removeSeller(this: SDK, storeId: string, userId: string): Promise<void> {
-    const response = await this.post(`${storeController}/${storeId}/${sellerController}/${userId}`, {});
+export async function removeSeller(this: SDK, storeId: string, sellerId: string): Promise<void> {
+    const response = await this.delete(`${storeController}/${storeId}/${sellerController}/${sellerId}`);
 
     if(!response.ok) {
         const err = await response.text();
-        throw new Error(`Failed to remove seller ${userId}: ${err}`);
+        throw new Error(`Failed to remove seller ${sellerId}: ${err}`);
     }
 }
+
+export async function getSeller(this: SDK, storeId: string, userId: string): Promise<SellerDto> {
+    const response = await this.get(`${storeController}/${storeId}/${sellerController}/${userId}`, {});
+
+    if(!response.ok) {
+        const err = await response.text();
+        throw new Error(`Failed to get seller ${userId}: ${err}`);
+    }
+
+    const result = (await response.json()) as SellerDto;
+    return result;
+}
+
+export async function updateManagerPermissions(
+  this: SDK,
+  storeId: string,
+  sellerId: string,
+  permissions: string[]
+){
+  const response = await this.patch(
+    `${storeController}/${storeId}/${sellerController}/${sellerId}`, 
+    permissions 
+  );
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to update manager permissions for ${sellerId}: ${err}`);
+  }
+}
+
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -15,23 +15,9 @@ import {
   Box,
 } from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
+import { SellerType } from "../../../../shared/types/dtos"; 
 
-// Permissions enum and types
-const ALL_PERMISSIONS = [
-  "CanAddDiscount",
-  "CanRemoveProduct",
-  "CanAddProduct",
-  "CanModifyPermissions",
-] as const;
-
-type Perm = typeof ALL_PERMISSIONS[number];
-
-type PermissionObject = {
-  CanAddDiscount: boolean;
-  CanRemoveProduct: boolean;
-  CanAddProduct: boolean;
-  CanModifyPermissions: boolean;
-};
+type PermissionObject = Record<string, boolean>; 
 
 interface Props {
   open: boolean;
@@ -39,7 +25,7 @@ interface Props {
   storeId: string;
   employerSellerId: string;
   onSuccess: (newSeller: {
-    id: string;
+    userId: string;
     name: string;
     role: string;
     isYou?: boolean;
@@ -47,17 +33,18 @@ interface Props {
   }) => void;
 }
 
-const SELLER_TYPE_LABELS: Record<0 | 1 | 2, string> = {
-  0: "Owner",
-  1: "Manager",
-  2: "Unknown",
+const SELLER_TYPE_LABELS: Record<SellerType, string> = {
+  [SellerType.OWNER]: "Owner",
+  [SellerType.MANAGER]: "Manager",
+  [SellerType.UNKNOWN]: "Unknown",
 };
+
 
 const formatLabel = (label: string): string =>
   label
-    .replace(/([A-Z])/g, " $1")
-    .trim()
-    .replace(/^./, (str) => str.toUpperCase());
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 
 const AddSellerDialog: React.FC<Props> = ({
   open,
@@ -66,61 +53,84 @@ const AddSellerDialog: React.FC<Props> = ({
   employerSellerId,
   onSuccess,
 }) => {
-  const [id, setId] = useState("");
-  const [userId, setUserId] = useState("");
-  const [sellerType, setSellerType] = useState<0 | 1 | 2>(1);
-  const [permissions, setPermissions] = useState<Perm[]>([]);
+  const [username, setUsername] = useState("");
+  const [allPermissions, setAllPermissions] = useState<string[]>([]);
+const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
+  const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const perms = await sdk.getStorePermissions();
+        setAllPermissions(perms);
+      } catch (e) {
+        console.error("Failed to fetch permissions. Using fallback." , e);
+      }
+    };
 
-  const togglePermission = (perm: Perm) => {
+    fetchPermissions();
+    setPermissions([]);
+  }, []);
+
+  const togglePermission = (perm: string) => {
     setPermissions((prev) =>
       prev.includes(perm)
-        ? (prev.filter((p) => p !== perm) as Perm[])
-        : ([...prev, perm] as Perm[])
+        ? prev.filter((p) => p !== perm)
+        : [...prev, perm]
     );
   };
 
   const handleAdd = async () => {
     setError(null);
-    if (!id.trim() || !userId.trim()) {
-      setError("Record ID and User ID are required.");
+
+    if (!username.trim()) {
+      setError("Username is required.");
       return;
     }
-
+    if (permissions.length === 0) {
+      setError("At least one permission must be selected.");
+      return;
+    }
     setLoading(true);
     try {
-      await sdk.addSeller(storeId, {
-        id: id.trim(),
-        userId: userId.trim(),
+      const user = await sdk.getPublicUserProfileDetailsByUsername(username.trim());
+      console.log("Fetched user:", user);
+      console.log("🟢 Adding seller with:");
+      console.log("  sellerType =", sellerType);
+      console.log("  typeof sellerType =", typeof sellerType);
+      console.log("  full payload =", {
+        userId: user.id,
         storeId,
         sellerType,
-        employerSellerId: employerSellerId.trim(),
+        employerSellerId,
+        permissions,
+      });
+      await sdk.addSeller(storeId, user.id,{
+        userId: user.id,
+        storeId,
+        type: sellerType,
+        employerSellerId,
         permissions,
       });
 
-      const permissionObject: PermissionObject = {
-        CanAddDiscount: false,
-        CanRemoveProduct: false,
-        CanAddProduct: false,
-        CanModifyPermissions: false,
-      };
-      permissions.forEach((p) => {
-        permissionObject[p] = true;
+
+      const permissionObject: PermissionObject = {};
+      allPermissions.forEach((perm) => {
+        permissionObject[perm] = permissions.includes(perm);
       });
 
       onSuccess({
-        id: id.trim(),
-        name: userId.trim(), // simulate display name
+        userId: user.id,
+        name: user.username,
         role: SELLER_TYPE_LABELS[sellerType],
         permissions: permissionObject,
-        isYou: false,
+        isYou: user.id === employerSellerId,
       });
 
-      // Reset form
-      setId("");
-      setUserId("");
-      setSellerType(1);
+      setUsername("");
+      setSellerType(SellerType.MANAGER);
       setPermissions([]);
       onClose();
     } catch (err: any) {
@@ -136,7 +146,6 @@ const AddSellerDialog: React.FC<Props> = ({
       }
 
       setError(msg);
-      console.error("Failed to add seller:", msg);
     } finally {
       setLoading(false);
     }
@@ -153,38 +162,31 @@ const AddSellerDialog: React.FC<Props> = ({
         )}
 
         <TextField
-          label="Record ID"
-          value={id}
-          onChange={(e) => setId(e.target.value)}
+          label="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           fullWidth
-          error={!id.trim()}
-          helperText={!id.trim() ? "Required" : ""}
+          error={!username.trim()}
+          helperText={!username.trim() ? "Required" : ""}
         />
 
         <TextField
-          label="User ID"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          required
-          fullWidth
-          error={!userId.trim()}
-          helperText={!userId.trim() ? "Required" : ""}
-        />
+        select
+        label="Seller Role"
+        value={sellerType}
+        onChange={(e) => setSellerType(Number(e.target.value) as SellerType)} 
+        fullWidth
+      >
+        {[SellerType.OWNER, SellerType.MANAGER, SellerType.UNKNOWN].map((type) => (
+          <MenuItem key={type} value={type}>
+            {SELLER_TYPE_LABELS[type]}
+          </MenuItem>
+        ))}
+      </TextField>
 
-        <TextField
-          select
-          label="Seller Role"
-          value={sellerType}
-          onChange={(e) => setSellerType(Number(e.target.value) as 0 | 1 | 2)}
-          fullWidth
-        >
-          {Object.entries(SELLER_TYPE_LABELS).map(([value, label]) => (
-            <MenuItem key={value} value={Number(value)}>
-              {label}
-            </MenuItem>
-          ))}
-        </TextField>
+
+
 
         <Box mt={3} mb={1}>
           <Typography variant="subtitle1" fontWeight={600}>
@@ -192,7 +194,7 @@ const AddSellerDialog: React.FC<Props> = ({
           </Typography>
           <Divider sx={{ mb: 1 }} />
           <FormGroup>
-            {ALL_PERMISSIONS.map((perm) => (
+            {allPermissions.map((perm) => (
               <FormControlLabel
                 key={perm}
                 control={
@@ -215,7 +217,7 @@ const AddSellerDialog: React.FC<Props> = ({
         <Button
           variant="contained"
           onClick={handleAdd}
-          disabled={!id.trim() || !userId.trim() || loading}
+          disabled={!username.trim() || loading}
         >
           {loading ? "Adding…" : "Add"}
         </Button>

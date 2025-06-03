@@ -39,3 +39,12 @@ export async function getStoreOfficials(this: SDK, storeId: string): Promise<Pub
     const result = (await response.json()) as PublicUserDto[];
     return result;
 }
+
+export async function getStorePermissions(this: SDK): Promise<string[]> {
+  const response = await this.get("stores/permissions", {});
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Error fetching store permissions: ${errorText}`);
+  }
+  return (await response.json()) as string[];
+}
