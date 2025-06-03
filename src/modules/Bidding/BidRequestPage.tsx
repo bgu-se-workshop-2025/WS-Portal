@@ -51,28 +51,28 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
           storeId: 'store-1',
           productId: 'product-123',
           price: 99.99,
-          bidRequestStatus: 0,
+          requestStatus: 0,
         },
         {
           bidRequestId: 'mock-user-2',
           storeId: 'store-2',
           productId: 'product-456',
           price: 149.5,
-          bidRequestStatus: 3,
+          requestStatus: 3,
         },
         {
           bidRequestId: 'mock-user-3',
           storeId: 'store-3',
           productId: 'product-789',
           price: 20,
-          bidRequestStatus: 4,
+          requestStatus: 4,
         },
         {
           bidRequestId: 'mock-user-4',
           storeId: 'store-4',
           productId: 'product-135',
           price: 600,
-          bidRequestStatus: 2,
+          requestStatus: 2,
         },
       ];
 
@@ -82,21 +82,21 @@ const BidRequestPage: React.FC<BidRequestPageProps> = ({ mode }) => {
           storeId: id ?? 'mock-store',
           productId: 'item-A',
           price: 75.0,
-          bidRequestStatus: 0,
+          requestStatus: 0,
         },
         {
           bidRequestId: 'mock-store-2',
           storeId: id ?? 'mock-store',
           productId: 'item-B',
           price: 120.5,
-          bidRequestStatus: 2,
+          requestStatus: 2,
         },
         {
           bidRequestId: 'mock-store-3',
           storeId: id ?? 'mock-store',
           productId: 'item-C',
           price: 59.99,
-          bidRequestStatus: 4,
+          requestStatus: 4,
         },
       ];
 

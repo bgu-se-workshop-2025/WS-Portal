@@ -47,7 +47,7 @@ const CreateBidRequestDialog: React.FC<CreateBidRequestDialogProps> = ({
         productId,
         price,
         storeId: '',
-        bidRequestStatus: BidRequestStatus.PENDING,
+        requestStatus: BidRequestStatus.PENDING,
       };
 
       await sdk.createBidRequest(bidRequest);

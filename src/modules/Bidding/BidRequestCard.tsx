@@ -103,8 +103,8 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
   };
 
   const isFinalStatus =
-    bidRequest.bidRequestStatus === BidRequestStatus.REJECTED ||
-    bidRequest.bidRequestStatus === BidRequestStatus.APPROVED;
+    bidRequest.requestStatus === BidRequestStatus.REJECTED ||
+    bidRequest.requestStatus === BidRequestStatus.APPROVED;
 
   return (
     <>
@@ -130,8 +130,8 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
           <Typography>Offered Price: ${bidRequest.price}</Typography>
           <Box mt={1}>
             <Chip
-              label={statusToString(bidRequest.bidRequestStatus)}
-              color={statusColorMap[bidRequest.bidRequestStatus]}
+              label={statusToString(bidRequest.requestStatus)}
+              color={statusColorMap[bidRequest.requestStatus]}
               variant="outlined"
             />
           </Box>

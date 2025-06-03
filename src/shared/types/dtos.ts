@@ -152,7 +152,7 @@ export interface BidRequestDto {
     storeId: string;
     productId: string;
     price: number;
-    bidRequestStatus: BidRequestStatus;
+    requestStatus: BidRequestStatus;
 }
 
 export enum BidRequestStatus {
