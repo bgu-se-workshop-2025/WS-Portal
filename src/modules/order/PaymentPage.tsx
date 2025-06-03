@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -11,16 +11,9 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import {
-  PaymentMethod,
-  OrderRequestDetails,
-  PaymentDetails,
-  ShippingAddressDto,
-  UserOrderDto,
-  CartDto,
-} from '../../shared/types/dtos';
-import { sdk } from '../../sdk/sdk';
+import { OrderRequestDetails, PaymentDetails, PaymentMethod, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
+import useCart from '../../shared/hooks/useCart';
+import useOrder from './hooks/useOrder';
 
 const paymentMethods = [
   { label: 'Credit Card', value: PaymentMethod.CREDIT_CARD },
@@ -29,59 +22,47 @@ const paymentMethods = [
   { label: 'Google Pay', value: PaymentMethod.GOOGLE_PAY },
 ];
 
-// ✅ Toggle this to use mock data or real cart from sdk
-const useMockCart = true;
-
-const mockCart: CartDto = {
-  ownerId: '123e4567-e89b-12d3-a456-426614174000',
-  stores: [
-    {
-      storeId: '11111111-1111-1111-1111-111111111111',
-      products: [
-        { productId: 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaaa', quantity: 2 },
-        { productId: 'bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbbb', quantity: 1 },
-      ],
-    },
-    {
-      storeId: '22222222-2222-2222-2222-222222222222',
-      products: [
-        { productId: 'ccccccc3-cccc-cccc-cccc-cccccccccccc', quantity: 3 },
-      ],
-    },
-  ],
-};
-
 const PaymentPage: React.FC = () => {
-  const navigate = useNavigate();
+  const cartHook = useCart();
+  const orderHook = useOrder();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<UserOrderDto | undefined>(undefined);
 
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
     paymentMethod: PaymentMethod.CREDIT_CARD,
-    externalId: '',
-    payerEmail: '',
-    payerId: '',
+    externalId: "",
+    payerEmail: "",
+    payerId: "",
   });
 
   const [shippingAddress, setShippingAddress] = useState<ShippingAddressDto>({
-    country: '',
-    city: '',
-    region: '',
-    street: '',
-    zipCode: '',
-    homeNumber: '',
-    apartmentNumber: '',
-    mailbox: '',
+    apartmentNumber: "",
+    homeNumber: "",
+    country: "",
+    mailbox: "",
+    zipCode: "",
+    street: "",
+    region: "",
+    city: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState<UserOrderDto | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    setLoading(cartHook.loading)
+    setError(cartHook.error ?? "")
+  }, [cartHook.loading, cartHook.error]);
 
-  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPaymentDetails(prev => ({
-      ...prev,
-      [name]: name === 'paymentMethod' ? Number(value) : value,
-    }));
+  const handlePaymentDetailsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const choice = event.target.value;
+    const options = paymentMethods.filter((item) => item.label === choice);
+    if (options.length === 1) {
+      setPaymentDetails({ ...paymentDetails, paymentMethod: options[0].value })
+    }
+  };
+
+  const handlePaymentEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setPaymentDetails({ ...paymentDetails, payerEmail: value })
   };
 
   const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,30 +74,25 @@ const PaymentPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+    if (cartHook.loading || cartHook.error || !cartHook.cart || orderHook.loading) {
+      return;
+    }
+
+    const createOrderRequest: OrderRequestDetails = {
+      cart: cartHook.cart,
+      paymentDetails: paymentDetails,
+      shippingAddress: shippingAddress
+    };
 
     try {
-      const cart = useMockCart ? mockCart : await sdk.getCart();
-
-      const orderRequest: OrderRequestDetails = {
-        cart,
-        paymentDetails,
-        shippingAddress,
-      };
-
-      const result = await sdk.createOrder(orderRequest);
-      setSuccess(result);
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+      const order = await orderHook.createOrder(createOrderRequest);
+      setSuccess(order);
+      console.log("Order created:", order);
+    } catch (error: any) {
+      setError(error.msg ?? "Unexpected error occurred");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleBack = () => {
-    navigate('/back'); // Replace with your actual back path
   };
 
   return (
@@ -132,7 +108,7 @@ const PaymentPage: React.FC = () => {
             label="Payment Method"
             name="paymentMethod"
             value={paymentDetails.paymentMethod}
-            onChange={handlePaymentChange}
+            onChange={handlePaymentDetailsChange}
             fullWidth
             disabled={loading}
           >
@@ -147,15 +123,7 @@ const PaymentPage: React.FC = () => {
             label="Payer Email"
             name="payerEmail"
             value={paymentDetails.payerEmail}
-            onChange={handlePaymentChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="Payer ID"
-            name="payerId"
-            value={paymentDetails.payerId}
-            onChange={handlePaymentChange}
+            onChange={handlePaymentEmailChange}
             fullWidth
             disabled={loading}
           />
@@ -248,17 +216,6 @@ const PaymentPage: React.FC = () => {
             ) : (
               'Purchase'
             )}
-          </Button>
-
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleBack}
-            fullWidth
-            sx={{ py: 1.5 }}
-            disabled={loading}
-          >
-            Back
           </Button>
         </Stack>
 
