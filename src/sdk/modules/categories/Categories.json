@@ -1,0 +1,255 @@
+[
+    {
+        "name": "ELECTRONICS",
+        "children": [
+            {
+                "name": "SMARTPHONES & ACCESSORIES",
+                "children": [
+                    { "name": "SMARTPHONES", "children": [] },
+                    { "name": "CASES & COVERS", "children": [] },
+                    { "name": "CHARGERS & CABLES", "children": [] }
+                ]
+            },
+            {
+                "name": "COMPUTERS & TABLETS",
+                "children": [
+                    { "name": "LAPTOPS", "children": [] },
+                    { "name": "DESKTOPS", "children": [] },
+                    { "name": "TABLETS", "children": [] },
+                    { "name": "COMPUTER COMPONENTS", "children": [] }
+                ]
+            },
+            {
+                "name": "TV, VIDEO & AUDIO",
+                "children": [
+                    { "name": "TELEVISIONS", "children": [] },
+                    { "name": "HEADPHONES", "children": [] },
+                    { "name": "SPEAKERS", "children": [] },
+                    { "name": "STREAMING DEVICES", "children": [] }
+                ]
+            },
+            {
+                "name": "CAMERAS & PHOTOGRAPHY",
+                "children": [
+                    { "name": "DIGITAL CAMERAS", "children": [] },
+                    { "name": "LENSES", "children": [] },
+                    { "name": "TRIPODS", "children": [] }
+                ]
+            },
+            {
+                "name": "WEARABLE TECH",
+                "children": [
+                    { "name": "SMARTWATCHES", "children": [] },
+                    { "name": "FITNESS TRACKERS", "children": [] }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "FASHION",
+        "children": [
+            {
+                "name": "WOMEN’S CLOTHING",
+                "children": [
+                    { "name": "TOPS & BLOUSES", "children": [] },
+                    { "name": "DRESSES", "children": [] },
+                    { "name": "WOMEN'S JEANS & PANTS", "children": [] }
+                ]
+            },
+            {
+                "name": "MEN’S CLOTHING",
+                "children": [
+                    { "name": "T-SHIRTS", "children": [] },
+                    { "name": "SUITS & BLAZERS", "children": [] },
+                    { "name": "MEN'S JEANS & PANTS", "children": [] }
+                ]
+            },
+            {
+                "name": "SHOES",
+                "children": [
+                    { "name": "WOMEN'S SHOES", "children": [] },
+                    { "name": "MEN'S SHOES", "children": [] },
+                    { "name": "SNEAKERS", "children": [] }
+                ]
+            },
+            {
+                "name": "FASHION ACCESSORIES",
+                "children": [
+                    { "name": "BAGS & PURSES", "children": [] },
+                    { "name": "WATCHES", "children": [] },
+                    { "name": "SUNGLASSES", "children": [] }
+                ]
+            },
+            {
+                "name": "JEWELRY",
+                "children": [
+                    { "name": "NECKLACES", "children": [] },
+                    { "name": "RINGS", "children": [] },
+                    { "name": "EARRINGS", "children": [] }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "HOME & GARDEN",
+        "children": [
+            {
+                "name": "FURNITURE",
+                "children": [
+                    { "name": "LIVING ROOM FURNITURE", "children": [] },
+                    { "name": "BEDROOM FURNITURE", "children": [] },
+                    { "name": "HOME OFFICE FURNITURE", "children": [] }
+                ]
+            },
+            {
+                "name": "HOME DÉCOR",
+                "children": [
+                    { "name": "LIGHTING", "children": [] },
+                    { "name": "WALL ART", "children": [] },
+                    { "name": "RUGS", "children": [] }
+                ]
+            },
+            {
+                "name": "KITCHEN & DINING",
+                "children": [
+                    { "name": "COOKWARE", "children": [] },
+                    { "name": "KITCHEN TOOLS", "children": [] },
+                    { "name": "TABLEWARE", "children": [] }
+                ]
+            },
+            {
+                "name": "GARDEN & OUTDOOR",
+                "children": [
+                    { "name": "OUTDOOR FURNITURE", "children": [] },
+                    { "name": "GRILLS & BBQS", "children": [] },
+                    { "name": "GARDENING TOOLS", "children": [] }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "HEALTH & BEAUTY",
+        "children": [
+            { "name": "SKINCARE", "children": [] },
+            { "name": "HAIRCARE", "children": [] },
+            { "name": "MAKEUP", "children": [] },
+            { "name": "FRAGRANCES", "children": [] },
+            { "name": "VITAMINS & SUPPLEMENTS", "children": [] }
+        ]
+    },
+    {
+        "name": "TOYS & HOBBIES",
+        "children": [
+            { "name": "ACTION FIGURES & DOLLS", "children": [] },
+            { "name": "PUZZLES & BOARD GAMES", "children": [] },
+            { "name": "BUILDING TOYS", "children": [] },
+            { "name": "RC TOYS & DRONES", "children": [] },
+            { "name": "ARTS & CRAFTS SUPPLIES", "children": [] }
+        ]
+    },
+    {
+        "name": "SPORTS & OUTDOORS",
+        "children": [
+            { "name": "EXERCISE & FITNESS EQUIPMENT", "children": [] },
+            { "name": "BICYCLES & ACCESSORIES", "children": [] },
+            { "name": "CAMPING & HIKING GEAR", "children": [] },
+            { "name": "TEAM SPORTS EQUIPMENT", "children": [] },
+            { "name": "WATER SPORTS", "children": [] }
+        ]
+    },
+    {
+        "name": "AUTOMOTIVE",
+        "children": [
+            {
+                "name": "CAR PARTS & ACCESSORIES",
+                "children": [
+                    { "name": "EXTERIOR ACCESSORIES", "children": [] },
+                    { "name": "INTERIOR ACCESSORIES", "children": [] }
+                ]
+            },
+            { "name": "TOOLS & EQUIPMENT", "children": [] },
+            { "name": "TIRES & WHEELS", "children": [] },
+            { "name": "MOTORCYCLE PARTS & GEAR", "children": [] }
+        ]
+    },
+    {
+        "name": "BABY",
+        "children": [
+            { "name": "STROLLERS & CAR SEATS", "children": [] },
+            { "name": "BABY CLOTHING", "children": [] },
+            { "name": "DIAPERING", "children": [] },
+            { "name": "FEEDING", "children": [] },
+            { "name": "NURSERY FURNITURE", "children": [] }
+        ]
+    },
+    {
+        "name": "BOOKS, MOVIES & MUSIC",
+        "children": [
+            {
+                "name": "BOOKS",
+                "children": [
+                    { "name": "FICTION", "children": [] },
+                    { "name": "NON-FICTION", "children": [] },
+                    { "name": "CHILDREN’S BOOKS", "children": [] }
+                ]
+            },
+            {
+                "name": "MOVIES & TV SHOWS",
+                "children": [{ "name": "DVDS & BLU-RAYS", "children": [] }]
+            },
+            {
+                "name": "MUSIC",
+                "children": [
+                    { "name": "VINYL", "children": [] },
+                    { "name": "CDS", "children": [] }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "VIDEO GAMES",
+        "children": [
+            { "name": "CONSOLES", "children": [] },
+            { "name": "GAMES", "children": [] },
+            { "name": "VIDEO GAMES ACCESSORIES", "children": [] },
+            { "name": "PC GAMING", "children": [] }
+        ]
+    },
+    {
+        "name": "PET SUPPLIES",
+        "children": [
+            { "name": "DOG SUPPLIES", "children": [] },
+            { "name": "CAT SUPPLIES", "children": [] },
+            { "name": "AQUARIUMS & FISH", "children": [] },
+            { "name": "PET FOOD", "children": [] }
+        ]
+    },
+    {
+        "name": "OFFICE SUPPLIES",
+        "children": [
+            { "name": "OFFICE FURNITURE", "children": [] },
+            { "name": "STATIONERY", "children": [] },
+            { "name": "PRINTERS & SCANNERS", "children": [] },
+            { "name": "OFFICE ELECTRONICS", "children": [] }
+        ]
+    },
+    {
+        "name": "GROCERIES & FOOD",
+        "children": [
+            { "name": "SNACKS & CANDY", "children": [] },
+            { "name": "COFFEE & TEA", "children": [] },
+            { "name": "PANTRY STAPLES", "children": [] },
+            { "name": "BEVERAGES", "children": [] }
+        ]
+    },
+    {
+        "name": "COLLECTIBLES & ART",
+        "children": [
+            { "name": "COINS & CURRENCY", "children": [] },
+            { "name": "COMIC BOOKS", "children": [] },
+            { "name": "TRADING CARDS", "children": [] },
+            { "name": "ART PRINTS & PAINTINGS", "children": [] },
+            { "name": "ANTIQUES", "children": [] }
+        ]
+    }
+]

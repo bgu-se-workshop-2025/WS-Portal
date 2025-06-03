@@ -2,6 +2,13 @@ export interface AdminDetailsDto {
     id: string;
 }
 
+export interface SuspensionTicketDto {
+    username: string;
+    issued: Date;
+    ends: Date;
+    status: string;
+}
+
 export interface PublicUserDto {
   id: string;
   username: string;
@@ -21,6 +28,7 @@ export interface StoreDto {
     id?: string;
     name: string;
     description: string;
+    rating: number;
 }
 
 export interface ProductDto {
@@ -112,7 +120,7 @@ export interface OrderRequestDetails {
 }
 
 export interface CartDto {
-    ownerId: string;
+    ownerId?: string;
     stores: CartStoreBasketDto[];
 }
 
@@ -138,4 +146,26 @@ export enum PaymentMethod {
     PAYPAL = 1,
     APPLE_PAY = 2,
     GOOGLE_PAY = 3,
+}
+
+export interface BidRequestDto {
+    storeId: string;
+    productId: string;
+    price: number;
+    bidRequestStatus: BidRequestStatus;
+}
+
+export enum BidRequestStatus {
+    PENDING = 0,
+    ACCEPTED = 1,
+    APPROVED = 2,
+    RECEIVED_ALTERNATIVE_PRICE = 3,
+    REJECTED = 4
+}
+
+export interface BidDto {
+    id: string;
+    userId: string;
+    productId: string;
+    price: number;
 }
