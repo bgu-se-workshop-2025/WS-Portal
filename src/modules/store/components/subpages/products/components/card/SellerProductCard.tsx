@@ -14,6 +14,7 @@ import { useParams } from "react-router-dom";
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import { sdk } from "../../../../../../../sdk/sdk";
 import UpdateProductDialog from "../UpdateProductDialog";
+import RatingComponent from "../../../../../../../shared/components/RatingComponent";
 
 interface SellerProductCardProps {
   product: ProductDto;
@@ -98,11 +99,18 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
             </Typography>
           </Box>
 
-          {product.rating > 0 && (
+          {/* Product rating: readonly for sellers and guests, rateable for non-sellers */}
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <RatingComponent
+              value={product.rating}
+              readOnly={true}
+              size="medium"
+              precision={1}
+            />
             <Typography variant="body2">
-              <strong>Rating:</strong> {product.rating.toFixed(1)}
+              {product.rating > 0 ? `(${product.rating.toFixed(1)})` : ""}
             </Typography>
-          )}
+          </Box>
 
           {product.categories.length > 0 && (
             <Typography variant="body2">

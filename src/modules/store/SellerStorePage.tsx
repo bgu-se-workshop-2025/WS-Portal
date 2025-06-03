@@ -9,7 +9,7 @@ import StoreIcon from "@mui/icons-material/Store";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import RatingComponent from "../../shared/components/RatingComponent";
-import { sdk } from "../../sdk/sdk";
+import { sdk, isAuthenticated } from "../../sdk/sdk";
 
 import { StoreDto } from "../../shared/types/dtos";
 
@@ -21,13 +21,13 @@ const SellerStoreLayout: React.FC = () => {
   const location = useLocation();
   const { storeId: id } = useParams<{ storeId: string }>();
 
-  const [activeTab, setActiveTab] = useState<TabValue>("products");
   const [store, setStore] = useState<StoreDto | null>(null);
   const [rateDialogOpen, setRateDialogOpen] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
   const [rateError, setRateError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSeller, setIsSeller] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -44,6 +44,21 @@ const SellerStoreLayout: React.FC = () => {
         setStore(null);
         setIsLoading(false);
       });
+    // Check if user is a seller for this store
+    const checkSeller = async () => {
+      if (!id || isAuthenticated() === false) {
+        setIsSeller(false);
+        return;
+      }
+      try {
+        const me = await sdk.getCurrentUserProfileDetails();
+        const mySeller = await sdk.getSeller(id, me.id);
+        setIsSeller(!!mySeller);
+      } catch {
+        setIsSeller(false);
+      }
+    };
+    checkSeller();
   }, [id]);
 
   // If someone visits “/store/:storeId” exactly, redirect to “/store/:storeId/products”
@@ -152,10 +167,11 @@ const SellerStoreLayout: React.FC = () => {
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <RatingComponent
               value={store.rating}
-              readOnly={false}
+              readOnly={isSeller || !isAuthenticated()}
               size="large"
               precision={1}
               onChange={async (newValue) => {
+                if (isSeller || !isAuthenticated()) return;
                 if (!id) return;
                 try {
                   await sdk.createStoreReview({
@@ -276,9 +292,7 @@ const SellerStoreLayout: React.FC = () => {
                 to={`/store/${id}/discounts`}
               />
             </Tabs>
-
             <Divider sx={{ mb: theme.spacing(3) }} />
-
             <Outlet />
           </Paper>
         )}

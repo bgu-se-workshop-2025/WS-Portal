@@ -40,10 +40,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
     return <div>Loading…</div>;
   }
 
-  return isSeller ? (
-    <SellerProductCard product={product} setUpdateProducts={setUpdateProducts} />
-  ) : (
-    <UserProductCard product={product} />
+  return (
+    <>
+      {isSeller ? (
+        <SellerProductCard product={product} setUpdateProducts={setUpdateProducts} />
+      ) : (
+        <UserProductCard product={product} setUpdateProducts={setUpdateProducts} />
+      )}
+    </>
   );
 };
 
