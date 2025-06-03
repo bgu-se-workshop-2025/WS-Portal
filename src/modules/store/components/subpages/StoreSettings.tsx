@@ -59,9 +59,7 @@ const StoreSettings: React.FC<{ storeId?: string }> = ({ storeId }) => {
         ⚙️ Store Settings
       </Typography>
 
-      {errorMsg ? (
-        <Typography color="error.main">{errorMsg}</Typography>
-      ) : !store ? (
+      {!store ? (
         <Typography color="text.secondary">Loading store details...</Typography>
       ) : (
         <Stack spacing={3}>
@@ -86,14 +84,16 @@ const StoreSettings: React.FC<{ storeId?: string }> = ({ storeId }) => {
             rows={4}
           />
 
-          {/* Reserve space for status messages */}
+          {/* Show messages below the fields */}
           <Box height={30} display="flex" alignItems="center">
+            {errorMsg && (
+              <Typography color="error.main">{errorMsg}</Typography>
+            )}
             {successMsg && (
               <Typography color="success.main">{successMsg}</Typography>
             )}
           </Box>
 
-          {/* Fixed button size to prevent shrinking */}
           <Button
             variant="contained"
             onClick={handleUpdate}

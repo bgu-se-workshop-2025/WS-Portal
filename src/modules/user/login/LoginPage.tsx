@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaneLayout from "../register/components/PaneLayout/PaneLayout";
 import { Button, Typography } from "@mui/material";
@@ -9,6 +9,7 @@ import { sdk } from "../../../sdk/sdk";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   const handleRegisterNav = () => {
     navigate("/register");
@@ -24,8 +25,9 @@ const LoginPage: React.FC = () => {
     try {
       await sdk.login({ username, password });
       navigate("/");
-    } catch (error) {
-      console.error("Login failed:", error);
+    } catch (ex) {
+      console.error("login: ", ex)
+      setError((ex as Error).message);
     }
   };
 
@@ -58,7 +60,7 @@ const LoginPage: React.FC = () => {
           onClick={() => navigate("/")}
           variant="contained"
           color="inherit"
-          sx={{ color: "black", borderRadius: "1rem", mt: "1rem"}}
+          sx={{ color: "black", borderRadius: "1rem", mt: "1rem" }}
         >
           {LoginPageResources.SidePanel.AsGuest}
         </Button>
@@ -86,6 +88,7 @@ const LoginPage: React.FC = () => {
             type="password"
             required
           />
+          {error && error.trim().length > 0 && <Typography color="error">{error}</Typography>}
           <Button
             variant="contained"
             type="submit"

@@ -23,7 +23,7 @@ import StoreIcon from "@mui/icons-material/Store";
 import StoreProducts from "../store/components/subpages/StoreProducts";
 import StoreSellers from "../store/components/subpages/StoreSellers";
 import StoreSettings from "../store/components/subpages/StoreSettings";
-import StoreDiscounts from "../store/components/subpages/StoreDiscounts";
+import StoreDiscounts from "./components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
 
 import { StoreDto } from "../../shared/types/dtos";
 import { sdk } from "../../sdk/sdk";
