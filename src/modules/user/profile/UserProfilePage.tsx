@@ -1,7 +1,7 @@
 import React from "react";
-import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText } from "@mui/material";
+import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, Button, Stack } from "@mui/material";
 import { sdk } from "../../../sdk/sdk";
-import { StoreDto, UserOrderDto, BidDto, BidRequestDto, PublicUserDto } from "../../../shared/types/dtos";
+import { StoreDto, UserOrderDto, PublicUserDto } from "../../../shared/types/dtos";
 
 const PAGE_SIZE = 25;
 
@@ -17,11 +17,6 @@ const UserProfilePage: React.FC<Props> = () => {
   const [orders, setOrders] = React.useState<UserOrderDto[]>([]);
   const [ordersLoading, setOrdersLoading] = React.useState(true);
   const [ordersError, setOrdersError] = React.useState<string | null>(null);
-
-  const [bids, setBids] = React.useState<BidDto[]>([]);
-  const [bidRequests, setBidRequests] = React.useState<BidRequestDto[]>([]);
-  const [bidsLoading, setBidsLoading] = React.useState(true);
-  const [bidsError, setBidsError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     document.title = "My Profile ";
@@ -85,39 +80,6 @@ const UserProfilePage: React.FC<Props> = () => {
         console.error('Orders fetch error:', err);
       })
       .finally(() => setOrdersLoading(false));
-  }, [user]);
-
-  React.useEffect(() => {
-    if (!user) return;
-    setBidsLoading(true);
-    setBidsError(null);
-    Promise.all([
-      sdk.getBidsOfUser({ page: 0, size: PAGE_SIZE }),
-      sdk.getBidRequestsOfUser({ page: 0, size: PAGE_SIZE })
-    ])
-      .then(([bids, bidRequests]) => {
-        setBids(bids);
-        setBidRequests(bidRequests);
-      })
-      .catch((err) => {
-        // If backend returns 404 or error message contains 'Failed to fetch', treat as empty
-        if (
-          (err.message && err.message.includes('404')) ||
-          (err.message && err.message.includes('Failed to fetch'))
-        ) {
-          setBids([]);
-          setBidRequests([]);
-        } else {
-          setBidsError(
-            typeof err === 'object' && err !== null && err.message
-              ? `Bids error: ${err.message}`
-              : `Bids error: ${JSON.stringify(err)}`
-          );
-        }
-        // eslint-disable-next-line no-console
-        console.error('Bids fetch error:', err);
-      })
-      .finally(() => setBidsLoading(false));
   }, [user]);
 
   // Check for guest (not logged in)
@@ -210,55 +172,29 @@ const UserProfilePage: React.FC<Props> = () => {
           )}
         </Box>
       </Box>
-      {/* Active Bids */}
+      {/* Active Bids (replaced with buttons) */}
       <Box mt={4} mb={4} p={3} borderRadius={3} boxShadow={3} bgcolor="#f8fafc">
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-          Active Bids
+          Bids
         </Typography>
-        {bidsLoading ? (
-          <Box display="flex" justifyContent="center" py={2}><CircularProgress size={28} /></Box>
-        ) : bidsError ? (
-          <Alert severity="error">{bidsError}</Alert>
-        ) : bids.length === 0 && bidRequests.length === 0 ? (
-          <Typography color="text.secondary">No active bids found.</Typography>
-        ) : (
-          <Box>
-            {bids.length > 0 && (
-              <>
-                <Typography variant="subtitle1" sx={{ fontWeight: 500, mt: 1 }}>Bids</Typography>
-                <List>
-                  {bids.map((bid) => (
-                    <ListItem key={bid.id} sx={{ borderRadius: 2, mb: 1, bgcolor: '#fff', boxShadow: 1 }}>
-                      <ListItemText
-                        primary={<Typography variant="subtitle2">{`Bid #${bid.id} - Product: ${bid.productId}`}</Typography>}
-                        secondary={<>
-                          <Typography component="span" color="text.secondary">Price: ${bid.price}</Typography>
-                        </>}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </>
-            )}
-            {bidRequests.length > 0 && (
-              <>
-                <Typography variant="subtitle1" sx={{ fontWeight: 500, mt: 2 }}>Bid Requests</Typography>
-                <List>
-                  {bidRequests.map((req) => (
-                    <ListItem key={req.storeId + '-' + req.productId} sx={{ borderRadius: 2, mb: 1, bgcolor: '#fff', boxShadow: 1 }}>
-                      <ListItemText
-                        primary={<Typography variant="subtitle2">{`Bid Request - Product: ${req.productId}`}</Typography>}
-                        secondary={<>
-                          <Typography component="span" color="text.secondary">Price: ${req.price} | Status: {req.bidRequestStatus}</Typography>
-                        </>}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </>
-            )}
-          </Box>
-        )}
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mt={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ minWidth: 180 }}
+            href="#BID_REQUESTS_PAGE_URL" // TODO: Replace with actual Bid Requests page URL
+          >
+            View Bid Requests
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{ minWidth: 180 }}
+            href="#APPROVED_BIDS_PAGE_URL" // TODO: Replace with actual Approved Bids page URL
+          >
+            View Approved Bids
+          </Button>
+        </Stack>
       </Box>
     </Box>
   );
