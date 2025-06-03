@@ -17,7 +17,7 @@ import {
 import { sdk } from "../../../../sdk/sdk";
 import { SellerType } from "../../../../shared/types/dtos"; 
 
-type PermissionObject = Record<string, boolean>; // 🔹 Dynamic permissions
+type PermissionObject = Record<string, boolean>; 
 
 interface Props {
   open: boolean;
@@ -25,7 +25,7 @@ interface Props {
   storeId: string;
   employerSellerId: string;
   onSuccess: (newSeller: {
-    id: string;
+    userId: string;
     name: string;
     role: string;
     isYou?: boolean;
@@ -59,8 +59,7 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // 🔹 useEffect must not be async directly
+  
   useEffect(() => {
     const fetchPermissions = async () => {
       try {
@@ -90,15 +89,28 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
       setError("Username is required.");
       return;
     }
-
+    if (permissions.length === 0) {
+      setError("At least one permission must be selected.");
+      return;
+    }
     setLoading(true);
     try {
       const user = await sdk.getPublicUserProfileDetailsByUsername(username.trim());
       console.log("Fetched user:", user);
-      await sdk.addSeller(storeId, user.id,{
+      console.log("🟢 Adding seller with:");
+      console.log("  sellerType =", sellerType);
+      console.log("  typeof sellerType =", typeof sellerType);
+      console.log("  full payload =", {
         userId: user.id,
         storeId,
         sellerType,
+        employerSellerId,
+        permissions,
+      });
+      await sdk.addSeller(storeId, user.id,{
+        userId: user.id,
+        storeId,
+        type: sellerType,
         employerSellerId,
         permissions,
       });
@@ -110,7 +122,7 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
       });
 
       onSuccess({
-        id: user.id,
+        userId: user.id,
         name: user.username,
         role: SELLER_TYPE_LABELS[sellerType],
         permissions: permissionObject,
@@ -134,7 +146,6 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
       }
 
       setError(msg);
-      console.error("Failed to add seller:", msg);
     } finally {
       setLoading(false);
     }
@@ -160,19 +171,21 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
           helperText={!username.trim() ? "Required" : ""}
         />
 
-              <TextField
+        <TextField
         select
         label="Seller Role"
         value={sellerType}
-        onChange={(e) => setSellerType(e.target.value as SellerType)}
+        onChange={(e) => setSellerType(Number(e.target.value) as SellerType)} 
         fullWidth
       >
-        {Object.entries(SELLER_TYPE_LABELS).map(([value, label]) => (
-          <MenuItem key={value} value={value}>
-            {label}
+        {[SellerType.OWNER, SellerType.MANAGER, SellerType.UNKNOWN].map((type) => (
+          <MenuItem key={type} value={type}>
+            {SELLER_TYPE_LABELS[type]}
           </MenuItem>
         ))}
       </TextField>
+
+
 
 
         <Box mt={3} mb={1}>

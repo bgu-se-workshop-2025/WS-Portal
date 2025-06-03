@@ -46,15 +46,15 @@ export interface SellerDto {
     id?: string;
     userId: string;
     storeId: string;
-    sellerType: SellerType;
+    type: SellerType;
     employerSellerId: string;
     permissions: string[];
 }
 
 export enum SellerType {
-  OWNER = "OWNER",
-  MANAGER = "MANAGER",
-  UNKNOWN = "UNKNOWN",
+  OWNER = 0,
+  MANAGER = 1,
+  UNKNOWN = 2,
 }
 
 

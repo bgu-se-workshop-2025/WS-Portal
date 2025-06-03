@@ -54,6 +54,7 @@ export class SDK {
   public getPublicUserProfileDetails!: (
     id: string
   ) => Promise<dtos.PublicUserDto>;
+  public getPublicUserProfileDetailsByUsername!: (username: string) => Promise<dtos.PublicUserDto>;
 
   // Message SDK
   public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
@@ -92,14 +93,16 @@ export class SDK {
     payload: dtos.ProductDto
   ) => Promise<dtos.ProductDto>;
   public deleteProduct!: (storeId: string, productId: string) => Promise<void>;
-  public addSeller!: (storeId: string, payload: dtos.SellerDto) => Promise<dtos.SellerDto>;
+  public addSeller!: (storeId: string,userId: string , payload: dtos.SellerDto) => Promise<dtos.SellerDto>;
   public removeSeller!: (storeId: string, sellerId: string) => Promise<void>;
+  public updateManagerPermissions!: (storeId: string, sellerId: string, permissions: string[]) => Promise<dtos.SellerDto>;
 
   // Public Store SDK
   public getStore!: (id: string) => Promise<dtos.StoreDto>;
   public getStores!: (pageable: dtos.Pageable) => Promise<dtos.StoreDto[]>;
   public getStoreOfficials!: (storeId: string) => Promise<dtos.PublicUserDto[]>;
-
+  public getStorePermissions!: () => Promise<string[]>;
+  public getSeller!: (storeId: string, userId: string) => Promise<dtos.SellerDto>;
   // Order SDK
   public getUserOrders!: (payload: dtos.Pageable) => Promise<dtos.UserOrderDto[]>;
   public getUserOrderById!: (id: string) => Promise<dtos.UserOrderDto>;
