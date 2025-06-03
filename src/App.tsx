@@ -19,6 +19,8 @@ import StoreDiscountsPage from "./modules/store/components/subpages/discounts/St
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
+import CartMainPage from "./modules/cart/CartMainPage";
+import PaymentPage from "./modules/order/PayemntPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -34,7 +36,9 @@ const App: React.FC = () => {
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
+             
+          <Route path="/cart" element={<CartMainPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
           <Route path="/store/:storeId/*" element={<StorePage />}>
             <Route index element={<Navigate to="products" replace />} />
             <Route path="products" element={<StoreProductsPage />} />
