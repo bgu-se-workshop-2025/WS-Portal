@@ -16,6 +16,7 @@ import RequireAdmin from "./modules/user/admin/RequireAdmin";
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
 import BidRequestPage from "./modules/Bidding/BidRequestPage";
 import BidPage from "./modules/Bidding/BidPage";
+import DevPage from "./modules/Bidding/DevPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -34,7 +35,8 @@ const App: React.FC = () => {
           <Route path="/register" element={<RegisterPage />} />
 
           // TODO - remove later
-          <Route path="/bids" element={<BidPage mode={"store"} />} />
+          <Route path="/bids" element={<BidRequestPage mode={"store"} />} />
+          <Route path="/dev" element={<DevPage />} /> 
 
           <Route path="/admin" element={<RequireAdmin />} >
             <Route index element={<AdminPage />} />
