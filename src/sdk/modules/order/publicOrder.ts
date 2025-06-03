@@ -1,7 +1,7 @@
 import { SDK } from '../../sdk';
 import { UserOrderDto, OrderRequestDetails } from "../../../shared/types/dtos.ts";
 
-const publicOrder = "public/order";
+const publicOrder = "public/orders";
 
 export async function createOrder(this: SDK, request: OrderRequestDetails): Promise<UserOrderDto> {
     const response = await this.post(`${publicOrder}`, request);

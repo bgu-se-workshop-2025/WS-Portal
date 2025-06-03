@@ -11,13 +11,14 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
-
+import { useNavigate } from 'react-router-dom';
 import {
   PaymentMethod,
   OrderRequestDetails,
   PaymentDetails,
   ShippingAddressDto,
   UserOrderDto,
+  CartDto,
 } from '../../shared/types/dtos';
 import { sdk } from '../../sdk/sdk';
 
@@ -28,7 +29,31 @@ const paymentMethods = [
   { label: 'Google Pay', value: PaymentMethod.GOOGLE_PAY },
 ];
 
+// ✅ Toggle this to use mock data or real cart from sdk
+const useMockCart = true;
+
+const mockCart: CartDto = {
+  ownerId: '123e4567-e89b-12d3-a456-426614174000',
+  stores: [
+    {
+      storeId: '11111111-1111-1111-1111-111111111111',
+      products: [
+        { productId: 'aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaaa', quantity: 2 },
+        { productId: 'bbbbbbb2-bbbb-bbbb-bbbb-bbbbbbbbbbbb', quantity: 1 },
+      ],
+    },
+    {
+      storeId: '22222222-2222-2222-2222-222222222222',
+      products: [
+        { productId: 'ccccccc3-cccc-cccc-cccc-cccccccccccc', quantity: 3 },
+      ],
+    },
+  ],
+};
+
 const PaymentPage: React.FC = () => {
+  const navigate = useNavigate();
+
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
     paymentMethod: PaymentMethod.CREDIT_CARD,
     externalId: '',
@@ -73,12 +98,14 @@ const PaymentPage: React.FC = () => {
     setSuccess(null);
 
     try {
-      const cart = await sdk.getCart();
+      const cart = useMockCart ? mockCart : await sdk.getCart();
+
       const orderRequest: OrderRequestDetails = {
         cart,
         paymentDetails,
         shippingAddress,
       };
+
       const result = await sdk.createOrder(orderRequest);
       setSuccess(result);
     } catch (err: any) {
@@ -86,6 +113,10 @@ const PaymentPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBack = () => {
+    navigate('/back'); // Replace with your actual back path
   };
 
   return (
@@ -211,16 +242,33 @@ const PaymentPage: React.FC = () => {
           />
         </Stack>
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={loading}
-          fullWidth
-          sx={{ mt: 4, py: 1.5 }}
-        >
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Purchase'}
-        </Button>
+        <Stack spacing={2} mt={4}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={loading}
+            fullWidth
+            sx={{ py: 1.5 }}
+          >
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Purchase'
+            )}
+          </Button>
+
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleBack}
+            fullWidth
+            sx={{ py: 1.5 }}
+            disabled={loading}
+          >
+            Back
+          </Button>
+        </Stack>
 
         {success && (
           <Alert severity="success" sx={{ mt: 3 }}>
