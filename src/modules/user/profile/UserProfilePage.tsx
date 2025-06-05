@@ -159,13 +159,25 @@ const UserProfilePage: React.FC<Props> = () => {
           ) : (
             <List>
               {orders.map((order) => (
-                <ListItem key={order.id} sx={{ borderRadius: 2, mb: 1, bgcolor: '#fff', boxShadow: 1 }}>
+                <ListItem key={order.id} sx={{ borderRadius: 2, mb: 1, bgcolor: '#fff', boxShadow: 1, flexDirection: 'column', alignItems: 'flex-start' }}>
                   <ListItemText
                     primary={<Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{`Order #${order.id}`}</Typography>}
                     secondary={<>
                       <Typography component="span" color="text.secondary">Date: {order.time}</Typography>
                     </>}
                   />
+                  {/* Product ratings for this order */}
+                  {/* TODO: Replace with actual products in the order when available */}
+                  {/* Example: order.products.map(product => ... ) */}
+                  {/* For now, show a placeholder for product rating */}
+                  <Box mt={1}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>Rate your products:</Typography>
+                    {/* Example product rating UI */}
+                    {/* Replace with real product data from order.cartSnapshot if available */}
+                    {/* <RatingComponent value={product.rating} onChange={...} readOnly={false} size="small" precision={1} /> */}
+                    {/* Example: */}
+                    {/* <RatingComponent value={0} onChange={(val) => handleRateProduct(product.id, val)} readOnly={false} size="small" precision={1} /> */}
+                  </Box>
                 </ListItem>
               ))}
             </List>
