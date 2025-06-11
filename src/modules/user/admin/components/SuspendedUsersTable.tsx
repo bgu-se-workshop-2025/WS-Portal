@@ -20,7 +20,7 @@ const SuspendedUsersTable = ({ useAdminResponse }: SuspendedUsersTableProps) => 
         getSuspensions(page, 25).then((value) => {
             setSuspensions(value);
         })
-    }, [page, loading]);
+    }, [page]);
 
     const handleCancel = async (username: string) => {
         await cancelSuspensionUser(username);
@@ -75,14 +75,14 @@ const SuspendedUsersTable = ({ useAdminResponse }: SuspendedUsersTableProps) => 
         <Stack justifyContent="center" direction="row">
             <ButtonGroup>
                 <Button
-                    disabled={page <= 0}
+                    disabled={page <= 0 || loading}
                     onClick={() => setPage(page - 1)}
                 >
                     {Resources.SuspendedUsersTable.PreviousPageButtonLabel}
                 </Button>
                 <Button disabled>{page}</Button>
                 <Button
-                    disabled={suspensions.length < 25}
+                    disabled={suspensions.length < 25 || loading}
                     onClick={() => setPage(page + 1)}
                 >
                     {Resources.SuspendedUsersTable.NextPageButtonLabel}
