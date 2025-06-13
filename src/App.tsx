@@ -9,18 +9,19 @@ import StorePage from "./modules/store/StorePage";
 import LoginPage from "./modules/user/login/LoginPage";
 import RegisterPage from "./modules/user/register/RegisterPage";
 import UserProfilePage from "./modules/user/profile/UserProfilePage";
-import RequireAuth from "./shared/utils/RequireAuth";
 import MainPage from "./modules/main/MainPage";
 import NotificationPage from "./modules/user/notification/NotificationPage";
 import AdminPage from "./modules/user/admin/pages/AdminPage";
 import RequireAdmin from "./modules/user/admin/RequireAdmin";
 
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
+import PaymentPage from "./modules/order/PaymentPage";
 import BidRequestPage from "./modules/Bidding/BidRequestPage";
 import BidPage from "./modules/Bidding/BidPage";
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
+import CartMainPage from "./modules/cart/CartMainPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -36,7 +37,9 @@ const App: React.FC = () => {
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-
+             
+          <Route path="/cart" element={<CartMainPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
           <Route path="/store/:storeId/*" element={<StorePage />}>
             <Route index element={<Navigate to="products" replace />} />
             <Route path="products" element={<StoreProductsPage />} />
@@ -47,12 +50,14 @@ const App: React.FC = () => {
             <Route path="bids/requests" element={<BidRequestPage mode="store" />} />
           </Route>
 
+          <Route path="/payment" element={<PaymentPage />} />
+
           <Route path="/notifications" element={<NotificationPage />} />
 
           <Route path="/admin" element={<RequireAdmin />}>
             <Route index element={<AdminPage />} />
           </Route>
-          <Route path="/profile" element={<RequireAuth />}>
+          <Route path="/profile" element={<UserProfilePage />}>
             <Route element={<UserProfilePage />} />
             <Route path="bids" element={<BidPage mode="user" />} />
             <Route path="bids/requests" element={<BidRequestPage mode="user" />} />

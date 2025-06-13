@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { StoreDto } from "../../shared/types/dtos";
-import { sdk } from "../../sdk/sdk";
+import { isAuthenticated, sdk } from "../../sdk/sdk";
 
 const PAGE_SIZE = 12;
 
@@ -91,6 +91,7 @@ const MainPage: React.FC = () => {
       id: undefined,
       name: newName,
       description: newDesc,
+      rating: 0
     };
     await sdk.createStore(newStore);
     closeDialog();
@@ -154,11 +155,13 @@ const MainPage: React.FC = () => {
           </Button>
         </Box>
 
-        <Box sx={{ textAlign: "center" }}>
-          <Button variant="contained" onClick={openDialog}>
-            Add Store
-          </Button>
-        </Box>
+        {isAuthenticated() &&
+          <Box sx={{ textAlign: "center" }}>
+            <Button variant="contained" onClick={openDialog}>
+              Add Store
+            </Button>
+          </Box>
+        }
       </Box>
 
       <Dialog open={dialogOpen} onClose={closeDialog}>

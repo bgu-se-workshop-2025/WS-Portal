@@ -13,12 +13,14 @@ import {
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
+import RatingComponent from "../../../../../../../shared/components/RatingComponent";
+import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
 import CreateBidRequestDialog from "../../../../../../Bidding/CreateBidRequestDialog"; // Adjust path as needed
 
 const UserProductCard: React.FC<{
   product: ProductDto;
-}> = ({ product }) => {
-  const { storeId } = useParams<{ storeId: string }>();
+  setUpdateProducts?: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ product, setUpdateProducts }) => {
   const theme = useTheme();
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
 
@@ -31,6 +33,9 @@ const UserProductCard: React.FC<{
     error: cartError,
   } = useCart();
 
+  const { storeId } = useParams<{ storeId: string }>();
+  const isUserAuthenticated = isAuthenticated();
+
   const currentQty = useMemo(() => {
     if (!cart) return 0;
     const basket = cart.stores.find((s) => s.storeId === storeId);
@@ -40,18 +45,32 @@ const UserProductCard: React.FC<{
   }, [cart, storeId, product.id]);
 
   const handleIncrement = useCallback(async () => {
+    if (currentQty === product.quantity) {
+      console.log(
+        `Cannot add ${product.name} to cart: already at max quantity (${product.quantity})`
+      );
+      return;
+    }
     if (currentQty === 0) {
-      await addToCart(product.id, 1);
+      await addToCart(storeId as string, product.id, 1);
+      console.log(`Added ${product.name} to cart (quantity = 1)`);
     } else {
-      await updateQuantity(product.id, currentQty + 1);
+      await updateQuantity(storeId as string, product.id, currentQty + 1);
+      console.log(
+        `Increased ${product.name} quantity to ${currentQty + 1} in cart`
+      );
     }
   }, [addToCart, currentQty, product.id, updateQuantity]);
 
   const handleDecrement = useCallback(async () => {
     if (currentQty <= 1) {
-      await removeFromCart(product.id);
+      await removeFromCart(storeId as string, product.id);
+      console.log(`Removed ${product.name} from cart`);
     } else {
-      await updateQuantity(product.id, currentQty - 1);
+      await updateQuantity(storeId as string, product.id, currentQty - 1);
+      console.log(
+        `Decreased ${product.name} quantity to ${currentQty - 1} in cart`
+      );
     }
   }, [currentQty, product.id, removeFromCart, updateQuantity]);
 
@@ -84,42 +103,78 @@ const UserProductCard: React.FC<{
             {product.description}
           </Typography>
 
-          <Box sx={{ mb: theme.spacing(1) }}>
-            <Typography variant="body2">
-              <strong>Price:</strong> ${product.price.toFixed(2)}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Available:</strong> {product.quantity}
-            </Typography>
-          </Box>
+        <Box sx={{ mb: theme.spacing(1) }}>
+          <Typography variant="body2">
+            <strong>Price:</strong> ${product.price.toFixed(2)}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Available:</strong> {product.quantity}
+          </Typography>
+        </Box>
 
-          {product.rating > 0 && (
-            <Typography variant="body2">
-              <strong>Rating:</strong> {product.rating.toFixed(1)}
-            </Typography>
-          )}
+        {product.categories.length > 0 && (
+          <Typography variant="body2">
+            <strong>Categories:</strong> {product.categories.join(", ")}
+          </Typography>
+        )}
+        {product.auctionEndDate && (
+          <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
+            <strong>Auction Ends:</strong>{" "}
+            {new Date(product.auctionEndDate).toLocaleString()}
+          </Typography>
+        )}
 
-          {product.categories.length > 0 && (
-            <Typography variant="body2">
-              <strong>Categories:</strong> {product.categories.join(", ")}
-            </Typography>
-          )}
-          {product.auctionEndDate && (
-            <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
-              <strong>Auction Ends:</strong>{" "}
-              {new Date(product.auctionEndDate).toLocaleString()}
-            </Typography>
-          )}
-          {cartError && (
-            <Typography
-              variant="caption"
-              color="error"
-              sx={{ mt: theme.spacing(1), display: "block" }}
-            >
-              {cartError}
-            </Typography>
-          )}
-        </CardContent>
+        <Box
+          sx={{
+            mb: theme.spacing(1),
+            mt: theme.spacing(2),
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <RatingComponent
+            value={product.rating}
+            readOnly={!isUserAuthenticated}
+            size="small"
+            precision={1}
+            onChange={async (newValue) => {
+              if (!isUserAuthenticated) return;
+              if (!storeId) return;
+              try {
+                // await sdk.createProductReview({
+                //   id: null,
+                //   productId: product.id,
+                //   storeId: storeId,
+                //   writerId: null,
+                //   title: null,
+                //   body: null,
+                //   rating: Math.round(newValue),
+                //   date: null,
+                // });
+                setUpdateProducts && setUpdateProducts((v) => !v);
+                alert("Thank you for rating the product!");
+              } catch (err: any) {
+                const msg = "You must purchase this product before you can rate it.";
+                alert(msg);
+              }
+            }}
+          />
+          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
+            {product.rating > 0 ? `(${product.rating.toFixed(1)})` : ""}
+          </Typography>
+        </Box>
+
+        {cartError && (
+          <Typography
+            variant="caption"
+            color="error"
+            sx={{ mt: theme.spacing(1), display: "block" }}
+          >
+            {cartError}
+          </Typography>
+        )}
+      </CardContent>
 
         <CardActions
           sx={{

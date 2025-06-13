@@ -1,23 +1,20 @@
 import { useEffect, useState } from "react";
+import { Box, Typography, Stack, Button , Snackbar} from "@mui/material";
 import { useParams } from "react-router-dom";
-import { Box, Typography, Stack, Button } from "@mui/material";
 import SellerCard from "./SellerCard";
 import SellerPermissionsDialog from "./SellerPermissionsDialog";
 import AddSellerDialog from "./AddSellerDialog";
 import RemoveSellerDialog from "./RemoveSellerDialog";
 import { sdk } from "../../../../sdk/sdk";
-import { PublicUserDto } from "../../../../shared/types/dtos";
+import {
+  PublicUserDto,
+  SellerDto,
+} from "../../../../shared/types/dtos";
 
-// Permissions structure
-type PermissionObject = {
-  CanAddDiscount: boolean;
-  CanRemoveProduct: boolean;
-  CanAddProduct: boolean;
-  CanModifyPermissions: boolean;
-};
+type PermissionObject = Record<string, boolean>;
 
 interface Seller {
-  id: string;
+  userId: string;
   name: string;
   role: string;
   isYou?: boolean;
@@ -35,38 +32,88 @@ const StoreSellers = () => {
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
   const [selectedSellerToRemove, setSelectedSellerToRemove] = useState<Seller | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null); 
+  const [errorOpen, setErrorOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [allPermissions, setAllPermissions] = useState<string[]>([]); 
 
-  const currentUserId = "1"; // Replace with real current user ID
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const user = await sdk.getCurrentUserProfileDetails();
+        setCurrentUserId(user?.id || "");
+      } catch (err) {
+        console.error("Failed to get current user ", err);
+        setCurrentUserId("");
+      }
+    };
 
+    fetchUserId();
+  }, []);
 
+  useEffect(() => {
+    sdk.getStorePermissions()
+      .then(setAllPermissions)
+      .catch((err) => {
+        console.error("Failed to fetch store permissions ", err);
+        setAllPermissions([]);
+      });
+  }, []);
 
-  
-  const fetchSellers = () => {
-    if (!storeId) return;
+  const fetchSellers = async () => {
+    if (!storeId) {
+      setSellers([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
-    sdk.getStoreOfficials(storeId)
-      .then((officials: PublicUserDto[]) => {
-        const result: Seller[] = officials.map((u) => ({
-          id: u.id,
-          name: u.username,
-          role: "Manager", // You can replace with u.role if available
-          isYou: u.id === currentUserId,
-          permissions: {
-            CanAddDiscount: false,
-            CanRemoveProduct: false,
-            CanAddProduct: false,
-            CanModifyPermissions: false,
-          },
-        }));
-        setSellers(result);
-      })
-      .catch(() => setSellers([]))
-      .finally(() => setLoading(false));
+    setFetchError("");
+
+    try {
+      const officials: PublicUserDto[] = await sdk.getStoreOfficials(storeId);
+      const detailedSellers: Seller[] = (
+        await Promise.all(
+          officials.map(async (u) => {
+            try {
+              const sellerDto: SellerDto = await sdk.getSeller(storeId, u.id);
+              const roleName = sellerDto.type.toString() ?? "Unknown";
+
+              const permsObj: PermissionObject = {};
+              (sellerDto.permissions || []).forEach((perm) => {
+                permsObj[perm] = true;
+              });
+
+              return {
+                userId: u.id,
+                name: u.username,
+                role: roleName,
+                isYou: u.id === currentUserId,
+                permissions: permsObj,
+              };
+            } catch (innerErr) {
+              console.error(`Failed to fetch seller data for ${u.id} `, innerErr);
+              return { userId: "", name: "", role: "", isYou: false, permissions: {} };
+            }
+          })
+        )
+      ).filter((s) => s.userId !== "");
+
+      setSellers(detailedSellers);
+    } catch (err: any) {
+      setSellers([]);
+      const msg = err.message || String(err);
+      setFetchError(msg.startsWith("Error fetching") ? msg : `Error fetching store officials: ${msg}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(fetchSellers, [storeId]);
+  useEffect(() => {
+    fetchSellers();
+  }, [storeId, currentUserId]);
 
-  // Permissions dialog handlers
   const handleOpenPerms = (seller: Seller) => {
     setSelectedSeller(seller);
     setPermDialogOpen(true);
@@ -77,38 +124,60 @@ const StoreSellers = () => {
     setSelectedSeller(null);
   };
 
-  const handleSavePerms = (newPerms: PermissionObject) => {
-    if (!selectedSeller) return;
-    // Optional: update backend with new permissions here via sdk
-    setSellers((prev) =>
-      prev.map((s) =>
-        s.id === selectedSeller.id ? { ...s, permissions: newPerms } : s
-      )
-    );
-    handleClosePerms();
+  const handleSavePerms = async (newPerms: PermissionObject) => {
+    if (!selectedSeller || !storeId) return;
+
+    try {
+      const updatedPermissions: string[] = Object.entries(newPerms)
+        .filter(([_, isEnabled]) => isEnabled)
+        .map(([perm]) => perm);
+
+      const sellerDto = await sdk.getSeller(storeId, selectedSeller.userId);
+      const sellerId = sellerDto.id;
+
+      if (!sellerId) throw new Error("Seller ID not found.");
+
+      await sdk.updateManagerPermissions(storeId, sellerId, updatedPermissions);
+
+      setSellers((prev) =>
+        prev.map((s) =>
+          s.userId === selectedSeller.userId
+            ? { ...s, permissions: newPerms }
+            : s
+        )
+      );
+    } catch (err: any) {
+      console.error("Failed to update manager permissions ", err);
+      setErrorMsg("Failed to save permissions " + (err.message || "Unknown error."));
+      setErrorOpen(true); 
+    } finally {
+      handleClosePerms();
+    }
   };
 
-  // Add seller success
   const handleAddSuccess = (newSeller: Seller) => {
     setSellers((prev) => [...prev, newSeller]);
     setAddDialogOpen(false);
   };
 
-  // Remove seller flow
   const handleDeleteSellerClick = (seller: Seller) => {
     setSelectedSellerToRemove(seller);
     setRemoveDialogOpen(true);
   };
 
   const handleConfirmRemove = async () => {
-    if (!selectedSellerToRemove) return;
+    if (!selectedSellerToRemove || !storeId) return;
+
     try {
-      await sdk.removeSeller(storeId!, selectedSellerToRemove.id);
-      setSellers((prev) =>
-        prev.filter((s) => s.id !== selectedSellerToRemove.id)
-      );
+      const sellerDto = await sdk.getSeller(storeId, selectedSellerToRemove.userId);
+      const sellerId = sellerDto.id;
+      if (!sellerId) throw new Error("Seller ID could not be determined for removal.");
+
+      await sdk.removeSeller(storeId, sellerId);
+      setSellers((prev) => prev.filter((s) => s.userId !== selectedSellerToRemove.userId));
     } catch (err: any) {
-      alert(err.message || "Failed to remove seller");
+      setErrorMsg("Failed to remove seller " + (err.message || "Unknown error."));
+      setErrorOpen(true);
     } finally {
       setRemoveDialogOpen(false);
       setSelectedSellerToRemove(null);
@@ -117,22 +186,19 @@ const StoreSellers = () => {
 
   return (
     <Box width="100%" display="flex" flexDirection="column" alignItems="center">
-      <Typography variant="h6" mb={2}>
-        👥 Store Sellers
-      </Typography>
+      <Typography variant="h6" mb={2}>👥 Store Sellers</Typography>
 
-      <Button
-        variant="contained"
-        onClick={() => setAddDialogOpen(true)}
-        sx={{ mb: 3 }}
-      >
+      <Button variant="contained" onClick={() => setAddDialogOpen(true)} sx={{ mb: 3 }}>
         Add Seller
       </Button>
 
       <Stack spacing={2} width="100%" maxWidth="500px">
-        {sellers.map((seller) => (
+        {fetchError && (
+          <Typography color="error.main" align="center">{fetchError}</Typography>
+        )}
+        {!loading && !fetchError && sellers.map((seller) => (
           <SellerCard
-            key={seller.id}
+            key={seller.userId}
             name={seller.name}
             role={seller.role}
             isYou={seller.isYou}
@@ -140,15 +206,14 @@ const StoreSellers = () => {
             onDeleteClick={() => handleDeleteSellerClick(seller)}
           />
         ))}
-
-        {!loading && sellers.length === 0 && (
+        {!loading && !fetchError && sellers.length === 0 && (
           <Typography color="textSecondary" align="center">
             No sellers yet for this store.
           </Typography>
         )}
+        {loading && <Typography align="center">Loading sellers…</Typography>}
       </Stack>
 
-      {/* Add Seller Dialog */}
       {storeId && (
         <AddSellerDialog
           open={addDialogOpen}
@@ -158,26 +223,50 @@ const StoreSellers = () => {
           onSuccess={handleAddSuccess}
         />
       )}
-
-      {/* Permissions Dialog */}
       {selectedSeller && (
         <SellerPermissionsDialog
           open={permDialogOpen}
           sellerName={selectedSeller.name}
           permissions={selectedSeller.permissions}
-          canEdit={true}
+          allPermissions={allPermissions}
+          canEdit={!selectedSeller.isYou}
+          isOwner={selectedSeller.role === "OWNER"}
           onClose={handleClosePerms}
           onSave={handleSavePerms}
         />
       )}
-
-      {/* Remove Seller Dialog */}
       <RemoveSellerDialog
         open={removeDialogOpen}
         sellerName={selectedSellerToRemove?.name || ""}
         onClose={() => setRemoveDialogOpen(false)}
         onConfirm={handleConfirmRemove}
       />
+
+      {/*Snackbar pop-up for error */}
+      <Snackbar
+      open={errorOpen}
+      autoHideDuration={6000}
+      onClose={() => setErrorOpen(false)}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+    >
+      <Box
+        sx={{
+          backgroundColor: "#fdecea", // ⬅️ Lighter red background
+          color: "#611a15",           // ⬅️ Dark red text for readability
+          px: 2,
+          py: 1.5,
+          borderRadius: 1,
+          boxShadow: 3,
+          fontWeight: 500,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+        }}
+      >
+        <span style={{ fontSize: "1.2rem" }}>❌</span> {errorMsg}
+      </Box>
+    </Snackbar>
+
     </Box>
   );
 };

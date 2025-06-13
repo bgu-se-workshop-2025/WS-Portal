@@ -28,6 +28,7 @@ export interface StoreDto {
     id?: string;
     name: string;
     description: string;
+    rating: number;
 }
 
 export interface ProductDto {
@@ -43,10 +44,10 @@ export interface ProductDto {
 }
 
 export interface SellerDto {
-    id: string;
+    id?: string;
     userId: string;
     storeId: string;
-    sellerType: SellerType;
+    type: SellerType;
     employerSellerId: string;
     permissions: string[];
 }
@@ -54,8 +55,9 @@ export interface SellerDto {
 export enum SellerType {
   OWNER = 0,
   MANAGER = 1,
-  UNKNOWN = 2
+  UNKNOWN = 2,
 }
+
 
 export interface MessageDto {
     recipientId: string;
@@ -119,7 +121,7 @@ export interface OrderRequestDetails {
 }
 
 export interface CartDto {
-    ownerId: string;
+    ownerId?: string;
     stores: CartStoreBasketDto[];
 }
 
