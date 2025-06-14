@@ -54,3 +54,12 @@ export async function getStoreOrders(this: SDK, storeId: string, pageable: Pagea
     return result;
     
 }
+
+export async function getCartSnapshotById(this: SDK, snapshotId: string): Promise<any> {
+  const response = await this.get(`orders/cart-snapshots/${snapshotId}`, {});
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Error fetching cart snapshot: ${error}`);
+  }
+  return await response.json();
+}
