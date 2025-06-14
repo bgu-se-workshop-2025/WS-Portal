@@ -158,8 +158,13 @@ export class SDK {
     };
   }
 
+  // Helper to build URLs without double slashes
+  private buildUrl(endpoint: string): string {
+    return `${this.options.baseUrl.replace(/\/+$/, '')}/${endpoint.replace(/^\/+/, '')}`;
+  }
+
   public async post(endpoint: string, payload: any): Promise<Response> {
-    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+    return await fetch(this.buildUrl(endpoint), {
       method: "POST",
       headers: this.getHeaders(),
       body: JSON.stringify(payload),
@@ -167,7 +172,7 @@ export class SDK {
   }
 
   public async patch(endpoint: string, payload: any): Promise<Response> {
-    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+    return await fetch(this.buildUrl(endpoint), {
       method: "PATCH",
       headers: this.getHeaders(),
       body: JSON.stringify(payload),
@@ -179,14 +184,17 @@ export class SDK {
     params: Record<string, any>
   ): Promise<Response> {
     const queryString = new URLSearchParams(params).toString();
-    return await fetch(`${this.options.baseUrl}/${endpoint}?${queryString}`, {
-      method: "GET",
-      headers: this.getHeaders(),
-    });
+    return await fetch(
+      `${this.buildUrl(endpoint)}?${queryString}`,
+      {
+        method: "GET",
+        headers: this.getHeaders(),
+      }
+    );
   }
 
   public async delete(endpoint: string): Promise<Response> {
-    return await fetch(`${this.options.baseUrl}/${endpoint}`, {
+    return await fetch(this.buildUrl(endpoint), {
       method: "DELETE",
       headers: this.getHeaders(),
     });
