@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, Button, Stack, Tabs, Tab, Divider } from "@mui/material";
 import { sdk } from "../../../sdk/sdk";
 import { StoreDto, UserOrderDto, PublicUserDto } from "../../../shared/types/dtos";
+import RatingComponent from '../../../shared/components/RatingComponent';
 
 const PAGE_SIZE = 25;
 
@@ -466,9 +467,35 @@ const UserProfilePage: React.FC<Props> = () => {
                                     )}
                                   </Typography>
                                   <Box sx={{ mt: 0.5, mb: 1 }}>
-                                    <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                      [Store rating placeholder]
-                                    </Typography>
+                                    <RatingComponent
+                                      value={store.rating ?? 0}
+                                      size="small"
+                                      onChange={async (newValue) => {
+                                        try {
+                                          await sdk.createStoreReview({
+                                            id: null,
+                                            productId: null,
+                                            storeId: store.storeId,
+                                            writerId: null,
+                                            title: '',
+                                            body: '',
+                                            rating: Math.round(newValue),
+                                            date: null,
+                                          });
+                                          // Refresh the store rating in the UI
+                                          if (typeof setLiveStoreNames === 'function') {
+                                            const updated = await sdk.getStore(store.storeId);
+                                            setLiveStoreNames((prev: any) => ({ ...prev, [store.storeId]: updated.name }));
+                                          }
+                                          if (typeof setOrders === 'function') {
+                                            const updatedOrders = await sdk.getUserOrders({ page: 0, size: PAGE_SIZE });
+                                            setOrders(updatedOrders);
+                                          }
+                                        } catch (err: any) {
+                                          alert('Failed to submit store rating. ' + (err?.message || err));
+                                        }
+                                      }}
+                                    />
                                   </Box>
                                   {Array.isArray(store.products) && store.products.length > 0 ? (
                                     <List disablePadding sx={{ ml: 1 }}>
@@ -481,9 +508,31 @@ const UserProfilePage: React.FC<Props> = () => {
                                             </Typography>
                                           </Box>
                                           <Box sx={{ ml: 2 }}>
-                                            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                              [Product rating placeholder]
-                                            </Typography>
+                                            <RatingComponent
+                                              value={product.rating ?? 0}
+                                              size="small"
+                                              onChange={async (newValue) => {
+                                                try {
+                                                  await sdk.createProductReview({
+                                                    id: null,
+                                                    productId: product.productId,
+                                                    storeId: store.storeId,
+                                                    writerId: null,
+                                                    title: '',
+                                                    body: '',
+                                                    rating: Math.round(newValue),
+                                                    date: null,
+                                                  });
+                                                  // Refresh the product rating in the UI
+                                                  if (typeof setOrders === 'function') {
+                                                    const updatedOrders = await sdk.getUserOrders({ page: 0, size: PAGE_SIZE });
+                                                    setOrders(updatedOrders);
+                                                  }
+                                                } catch (err: any) {
+                                                  alert('Failed to submit product rating. ' + (err?.message || err));
+                                                }
+                                              }}
+                                            />
                                           </Box>
                                         </ListItem>
                                       ))}
