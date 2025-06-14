@@ -136,40 +136,15 @@ const UserStorePage: React.FC = () => {
             />
           )}
         </Paper>
-        {/* Store rating: readonly for sellers and guests, rateable for non-sellers */}
         {store && (
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <RatingComponent
-              value={store.rating}
-              readOnly={isSeller || !isAuthenticated()}
+              value={typeof store.rating === "number" && store.rating > 0 ? store.rating : 0}
+              readOnly={true}
               size="large"
-              precision={1}
-              onChange={async (newValue) => {
-                if (isSeller || !isAuthenticated()) return;
-                if (!storeId) return;
-                try {
-                  await sdk.createStoreReview({
-                    id: null, // let backend generate
-                    productId: null,
-                    storeId: storeId ?? null,
-                    writerId: null,
-                    title: null,
-                    body: null,
-                    rating: Math.round(newValue),
-                    date: null,
-                  });
-                  // Refresh store info after rating
-                  const updatedStore = await sdk.getStore(storeId);
-                  setStore(updatedStore);
-                  alert("Thank you for rating the store!");
-                } catch (err: any) {
-                  alert("You must purchase from this store before you can rate it.");
-                }
-              }}
+              precision={0.1}
+              key={`readonly-store-rating-${store.rating}`}
             />
-            <Typography variant="h6" mt={1}>
-              {store.rating > 0 ? `(${store.rating.toFixed(1)})` : ""}
-            </Typography>
           </Box>
         )}
 

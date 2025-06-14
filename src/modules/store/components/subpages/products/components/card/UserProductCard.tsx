@@ -132,36 +132,13 @@ const UserProductCard: React.FC<{
             alignItems: "center",
           }}
         >
+          {/* Always show partial stars for viewing */}
           <RatingComponent
             value={product.rating}
-            readOnly={!isUserAuthenticated}
+            readOnly={true}
             size="small"
-            precision={1}
-            onChange={async (newValue) => {
-              if (!isUserAuthenticated) return;
-              if (!storeId) return;
-              try {
-                await sdk.createProductReview({
-                  id: null,
-                  productId: product.id,
-                  storeId: storeId,
-                  writerId: null,
-                  title: null,
-                  body: null,
-                  rating: Math.round(newValue),
-                  date: null,
-                });
-                setUpdateProducts && setUpdateProducts((v) => !v);
-                alert("Thank you for rating the product!");
-              } catch (err: any) {
-                const msg = "You must purchase this product before you can rate it.";
-                alert(msg);
-              }
-            }}
+            precision={0.1}
           />
-          <Typography variant="body2" sx={{ fontSize: '0.75rem' }}>
-            {product.rating > 0 ? `(${product.rating.toFixed(1)})` : ""}
-          </Typography>
         </Box>
 
         {cartError && (
