@@ -295,13 +295,13 @@ const SellerStoreLayout: React.FC = () => {
                 value="bids"
                 label="Bids"
                 component={Link}
-                to={`/store/${storeId}/bids`}
+                to={`/store/${id}/bids`}
               />
               <Tab
                 value="bidRequests"
                 label="Bid Requests"
                 component={Link}
-                to={`/store/${storeId}/bids/requests`}
+                to={`/store/${id}/bids/requests`}
               />
             </Tabs>
             <Divider sx={{ mb: theme.spacing(3) }} />
