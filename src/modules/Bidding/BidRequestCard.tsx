@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -14,8 +14,8 @@ import {
   Chip,
   useTheme,
 } from '@mui/material';
-import { BidRequestDto, ProductDto, StoreDto } from '../../shared/types/dtos';
-import useBid from "./hooks/useBid";
+import { BidRequestDto } from '../../shared/types/dtos';
+import useBid from './hooks/useBid';
 
 interface BidRequestCardProps {
   bidRequest: BidRequestDto;
@@ -23,156 +23,99 @@ interface BidRequestCardProps {
   onAction?: () => void;
 }
 
-const statusColorMap: Record<
-  string,
-  'default' | 'primary' | 'success' | 'warning' | 'error'
-> = {
-  ["PENDING"]: 'default',
-  ["ACCEPTED"]: 'primary',
-  ["APPROVED"]: 'success',
-  ["RECEIVED_ALTERNATIVE_PRICE"]: 'warning',
-  ["REJECTED"]: 'error',
+const statusColorMap: Record<BidRequestDto['requestStatus'], 'default' | 'primary' | 'success' | 'warning' | 'error'> = {
+  PENDING: 'default',
+  ACCEPTED: 'primary',
+  APPROVED: 'success',
+  RECEIVED_ALTERNATIVE_PRICE: 'warning',
+  REJECTED: 'error',
 };
 
-const BidRequestCard: React.FC<BidRequestCardProps> = ({
-  bidRequest,
-  mode,
-  onAction,
-}) => {
+const BidRequestCard: React.FC<BidRequestCardProps> = ({ bidRequest, mode, onAction }) => {
   const theme = useTheme();
-  const { acceptBidRequest, rejectBidRequest, submitAlternativePrice, loading, error } = useBid();
+  const { acceptBidRequest, rejectBidRequest, submitAlternativePrice, loading } = useBid();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  const [newPrice, setNewPrice] = useState('');
-  const [product, setProduct] = useState<ProductDto | null>(null);
-  const [store, setStore] = useState<StoreDto | null>(null);
+  const [newPrice, setNewPrice] = useState<string>('');
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        // const productResult = await sdk.getProduct(bidRequest.productId);
-        // setProduct(productResult);
-
-        // const storeResult = await sdk.getStore(bidRequest.storeId);
-        // setStore(storeResult);
-      } catch (err) {
-        console.warn('Failed to fetch product or store details', err);
-      }
-    };
-
-    fetchDetails();
-  }, [bidRequest.productId, bidRequest.storeId]);
+  const isFinal = ['REJECTED','APPROVED'].includes(bidRequest.requestStatus);
 
   const handleAccept = async () => {
-    try {
-      await acceptBidRequest(bidRequest.bidRequestId);
-      onAction?.();
-    } catch (err) {
-      alert(`Error accepting bid: ${err}`);
-    }
+    await acceptBidRequest(bidRequest.bidRequestId);
+    onAction?.();
   };
 
   const handleReject = async () => {
-    try {
-      await rejectBidRequest(bidRequest.bidRequestId);
-      onAction?.();
-    } catch (err) {
-      alert(`Error rejecting bid: ${err}`);
-    }
+    await rejectBidRequest(bidRequest.bidRequestId);
+    onAction?.();
   };
 
-  const handleDelete = async () => {
-    try {
-      //await sdk.deleteBidRequest(bidRequest.bidRequestId); //deleteBidRequest is not in useBid hook
-      onAction?.();
-    } catch (err) {
-      alert(`Error deleting bid request: ${err}`);
-    }
+  const handleSuggest = async () => {
+    await submitAlternativePrice(bidRequest.bidRequestId, Number(newPrice));
+    setDialogOpen(false);
+    setNewPrice('');
+    onAction?.();
   };
-
-  const handleSuggestPrice = async () => {
-    try {
-      await submitAlternativePrice(
-        bidRequest.bidRequestId,
-        parseFloat(newPrice)
-      );
-      setDialogOpen(false);
-      setNewPrice('');
-      onAction?.();
-    } catch (err) {
-      alert(`Error suggesting price: ${err}`);
-    }
-  };
-
-  const isFinalStatus =
-    bidRequest.requestStatus === "REJECTED" ||
-    bidRequest.requestStatus === "APPROVED";
 
   return (
     <>
       <Card
         sx={{
-          minHeight: 160,
+          minHeight: 180,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          backgroundColor: '#ffffff',
-          transition: 'transform 0.2s, box-shadow 0.2s',
           '&:hover': {
             boxShadow: theme.shadows[6],
             transform: 'translateY(-4px)',
           },
+          transition: 'transform 0.2s, box-shadow 0.2s',
         }}
       >
         <CardContent>
-          <Typography variant="subtitle1">
-            Product: {product?.name || bidRequest.productId}
+          <Typography variant="subtitle1" fontWeight={600}>
+            Product: {bidRequest.productId}
           </Typography>
-          <Typography>
-            Store: {store?.name || bidRequest.storeId}
+          <Typography variant="body2">
+            Store: {bidRequest.storeId}
           </Typography>
-          <Typography>Offered Price: ${bidRequest.price}</Typography>
+          <Typography variant="body1" mt={1}>
+            <strong>Price:</strong> ${bidRequest.price.toFixed(2)}
+          </Typography>
           <Box mt={1}>
             <Chip
-              label={bidRequest.requestStatus}
+              label={bidRequest.requestStatus.replace(/_/g, ' ')}
               color={statusColorMap[bidRequest.requestStatus]}
               variant="outlined"
             />
           </Box>
         </CardContent>
 
-        <Box px={2} pb={2}>
-          <Stack direction="row" spacing={1}>
+        <Box sx={{ p: 2 }}>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
             {mode === 'store' && (
               <>
                 <Button
                   variant="contained"
                   color="success"
                   onClick={handleAccept}
-                  disabled={isFinalStatus || loading}
+                  disabled={isFinal || loading}
                 >
                   Accept
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleAccept}
-                  disabled={isFinalStatus || loading}
-                >
-                  Approve
                 </Button>
                 <Button
                   variant="outlined"
                   color="error"
                   onClick={handleReject}
-                  disabled={isFinalStatus || loading}
+                  disabled={isFinal || loading}
                 >
                   Reject
                 </Button>
                 <Button
                   variant="outlined"
                   onClick={() => setDialogOpen(true)}
-                  disabled={isFinalStatus || loading}
+                  disabled={isFinal || loading}
                 >
                   Suggest Price
                 </Button>
@@ -180,17 +123,15 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
             )}
 
             {mode === 'user' && (
-              <Box sx={{ width: '100%' }}>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  color="error"
-                  onClick={() => setConfirmDialogOpen(true)}
-                  disabled={isFinalStatus || loading}
-                >
-                  Cancel
-                </Button>
-              </Box>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={() => setConfirmDialogOpen(true)}
+                disabled={isFinal || loading}
+              >
+                Cancel Request
+              </Button>
             )}
           </Stack>
         </Box>
@@ -207,39 +148,34 @@ const BidRequestCard: React.FC<BidRequestCardProps> = ({
             variant="outlined"
             margin="normal"
             value={newPrice}
-            onChange={(e) => setNewPrice(e.target.value)}
+            onChange={e => setNewPrice(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
           <Button
-            onClick={handleSuggestPrice}
+            onClick={handleSuggest}
             variant="contained"
-            color="primary"
-            disabled={loading}
+            disabled={loading || !newPrice}
           >
             Submit
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={confirmDialogOpen}
-        onClose={() => setConfirmDialogOpen(false)}
-      >
-        <DialogTitle>Confirm Cancellation</DialogTitle>
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)}>
+        <DialogTitle>Cancel Bid Request</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to cancel this bid request?
-          </Typography>
+          <Typography>Are you sure you want to cancel this bid?</Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmDialogOpen(false)}>No</Button>
           <Button
-            onClick={() => {
+            onClick={async () => {
               setConfirmDialogOpen(false);
-              handleDelete();
+              await rejectBidRequest(bidRequest.bidRequestId);
+              onAction?.();
             }}
             color="error"
             variant="contained"

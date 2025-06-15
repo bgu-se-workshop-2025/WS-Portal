@@ -57,11 +57,10 @@ const App: React.FC = () => {
           <Route path="/admin" element={<RequireAdmin />}>
             <Route index element={<AdminPage />} />
           </Route>
-          <Route path="/profile" element={<UserProfilePage />}>
-            <Route element={<UserProfilePage />} />
-            <Route path="bids" element={<BidPage mode="user" />} />
-            <Route path="bids/requests" element={<BidRequestPage mode="user" />} />
-          </Route>
+          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/profile/bids" element={<BidPage mode="user" />} />
+          <Route path="/profile/bids/requests" element={<BidRequestPage mode="user" />} />
+
 
           <Route path="*" element={<MainPage />} />
         </Routes>
