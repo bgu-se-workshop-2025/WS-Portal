@@ -36,7 +36,8 @@ export async function rejectBidRequest(this: SDK, bidRequestId: string): Promise
 }
 
 export async function submitAlternativePrice(this: SDK, bidRequestId: string, newPrice: number): Promise<void> {
-    const response = await this.post(`${biddingController}/${bidRequestId}`, { newPrice });
+    const url = `${biddingController}/${bidRequestId}?newPrice=${encodeURIComponent(newPrice)}`;
+    const response = await this.post(url, null);
 
     if (!response.ok) {
         const error = await response.text();
@@ -93,7 +94,7 @@ export async function getBidsOfUser(this: SDK, userId: string, pageable: Pageabl
 }
 
 export async function getBidsOfStore(this: SDK, storeId: string, pageable: Pageable): Promise<BidDto[]> {
-    const response = await this.get(`${biddingController}/stores/${storeId}`, {storeId, pageable});
+    const response = await this.get(`${biddingController}/stores/${storeId}`, pageable);
 
     if (!response.ok) {
         const error = await response.text();
