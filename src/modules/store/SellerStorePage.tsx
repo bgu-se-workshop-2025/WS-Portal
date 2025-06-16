@@ -125,14 +125,12 @@ const SellerStoreLayout: React.FC = () => {
         {store && (
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <RatingComponent
-              value={store.rating}
+              value={typeof store.rating === "number" && store.rating > 0 ? store.rating : 0}
               readOnly={true}
               size="large"
-              precision={1}
+              precision={0.1}
+              key={`readonly-store-rating-${store.rating}`}
             />
-            <Typography variant="h6" mt={1}>
-              {store.rating > 0 ? `(${store.rating.toFixed(1)})` : ""}
-            </Typography>
           </Box>
         )}
 
