@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, Button, Stack, Tabs, Tab, Divider } from "@mui/material";
 import { sdk } from "../../../sdk/sdk";
-import { StoreDto, UserOrderDto, PublicUserDto } from "../../../shared/types/dtos";
+import { StoreDto, UserOrderDto, PublicUserDto, StoreSnapshotDto } from "../../../shared/types/dtos";
 import RatingComponent from '../../../shared/components/RatingComponent';
 
 const PAGE_SIZE = 25;
@@ -445,6 +445,8 @@ const UserProfilePage: React.FC<Props> = () => {
                               </Typography>
                             </Box>
                             {Array.isArray(cartSnapshot.storeSnapshots) && cartSnapshot.storeSnapshots.length > 0 && cartSnapshot.storeSnapshots.map((store: any) => {
+                              const typedStore = store as StoreSnapshotDto;
+                              const products = Array.isArray(typedStore.products) ? typedStore.products : [];
                               const liveName = liveStoreNames[store.storeId];
                               const storeDisplayName = liveName || (store.storeName && store.storeName !== store.storeId ? store.storeName : null);
                               return (
@@ -497,10 +499,10 @@ const UserProfilePage: React.FC<Props> = () => {
                                       }}
                                     />
                                   </Box>
-                                  {Array.isArray(store.products) && store.products.length > 0 ? (
+                                  {products.length > 0 ? (
                                     <List disablePadding sx={{ ml: 1 }}>
-                                      {store.products.map((product: any) => (
-                                        <ListItem key={product.productId} sx={{ pl: 0, pr: 0, py: 0.5, display: 'flex', alignItems: 'center', bgcolor: 'transparent', borderBottom: '1px solid #f1f5f9', mb: 0.5, flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
+                                      {products.map((product: any) => (
+                                        <ListItem key={product.productId || product.id} sx={{ pl: 0, pr: 0, py: 0.5, display: 'flex', alignItems: 'center', bgcolor: 'transparent', borderBottom: '1px solid #f1f5f9', mb: 0.5, flexDirection: { xs: 'column', sm: 'row' }, gap: 1 }}>
                                           <Box flex={1} display="flex" alignItems="center" gap={1} flexWrap="wrap">
                                             <Typography variant="body2" sx={{ fontWeight: 500, color: '#22223b' }}>{product.name}</Typography>
                                             <Typography variant="caption" color="text.secondary">
@@ -515,7 +517,7 @@ const UserProfilePage: React.FC<Props> = () => {
                                                 try {
                                                   await sdk.createProductReview({
                                                     id: null,
-                                                    productId: product.productId,
+                                                    productId: product.productId || product.id,
                                                     storeId: store.storeId,
                                                     writerId: null,
                                                     title: '',
@@ -523,7 +525,6 @@ const UserProfilePage: React.FC<Props> = () => {
                                                     rating: Math.round(newValue),
                                                     date: null,
                                                   });
-                                                  // Refresh the product rating in the UI
                                                   if (typeof setOrders === 'function') {
                                                     const updatedOrders = await sdk.getUserOrders({ page: 0, size: PAGE_SIZE });
                                                     setOrders(updatedOrders);
