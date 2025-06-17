@@ -170,3 +170,12 @@ export interface BidDto {
     productId: string;
     price: number;
 }
+
+export interface AuctionBidDto {
+  id?: string;
+  productId: string;
+  bidderId?: string;
+  bidPrice: number;
+  paymentDetails: PaymentDetails;
+  shippingAddress: ShippingAddressDto;
+}
