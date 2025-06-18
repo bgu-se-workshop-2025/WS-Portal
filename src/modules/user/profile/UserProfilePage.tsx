@@ -449,6 +449,13 @@ const UserProfilePage: React.FC<Props> = () => {
                               const products = Array.isArray(typedStore.products) ? typedStore.products : [];
                               const liveName = liveStoreNames[store.storeId];
                               const storeDisplayName = liveName || (store.storeName && store.storeName !== store.storeId ? store.storeName : null);
+                              // Calculate total order price for this store
+                              const totalOrderPrice = products.reduce((sum, product) => {
+                                if (product.discountPrice && product.discountPrice < product.price) {
+                                  return sum + product.discountPrice;
+                                }
+                                return sum + product.price;
+                              }, 0);
                               return (
                                 <Box key={store.storeId} mb={2} pl={1}>
                                   <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#58a6ff', mb: 0.5, display: 'flex', alignItems: 'center' }}>
@@ -553,6 +560,10 @@ const UserProfilePage: React.FC<Props> = () => {
                                   ) : (
                                     <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>No products found.</Typography>
                                   )}
+                                  <Typography variant="body2" sx={{ fontWeight: 500, color: 'gray', mt: 1 }}>
+                                    Store total: {totalOrderPrice.toFixed(2)}₪
+                                  </Typography>
+                                  <Divider sx={{ mt: 1, mb: 1, opacity: 0.2 }} />
                                 </Box>
                               );
                             })}
@@ -561,6 +572,22 @@ const UserProfilePage: React.FC<Props> = () => {
                           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Cart snapshot not available.</Typography>
                         )}
                         <Divider sx={{ mt: 2, width: '100%', bgcolor: '#e0e7ef' }} />
+                        {cartSnapshot && Array.isArray(cartSnapshot.storeSnapshots) && cartSnapshot.storeSnapshots.length > 0 && (
+                          <Typography variant="body1" sx={{ fontWeight: 600, color: '#1976d2', mt: 2, mb: 1, textAlign: 'right' }}>
+                            Order total: {
+                              cartSnapshot.storeSnapshots.reduce((orderSum: number, store: any) => {
+                                const products = Array.isArray(store.products) ? store.products : [];
+                                const storeTotal = products.reduce((sum: number, product: any) => {
+                                  if (product.discountPrice && product.discountPrice < product.price) {
+                                    return sum + product.discountPrice;
+                                  }
+                                  return sum + product.price;
+                                }, 0);
+                                return orderSum + storeTotal;
+                              }, 0).toFixed(2)
+                            }₪
+                          </Typography>
+                        )}
                       </ListItem>
                     );
                   })}
