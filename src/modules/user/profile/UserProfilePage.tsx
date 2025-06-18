@@ -506,7 +506,19 @@ const UserProfilePage: React.FC<Props> = () => {
                                           <Box flex={1} display="flex" alignItems="center" gap={1} flexWrap="wrap">
                                             <Typography variant="body2" sx={{ fontWeight: 500, color: '#22223b' }}>{product.name}</Typography>
                                             <Typography variant="caption" color="text.secondary">
-                                              × {product.quantity} @ ${product.price ? product.price.toFixed(2) : '?'} each
+                                              × {product.quantity} @ {product.discountPrice && product.discountPrice < product.price ? (
+                                                <>
+                                                  <span style={{ textDecoration: "line-through", color: "#888" }}>
+                                                    {product.price ? product.price.toFixed(2) : '?'}₪
+                                                  </span>
+                                                  &nbsp;
+                                                  <span style={{ color: "#388e3c", fontWeight: "bold" }}>
+                                                    {product.discountPrice.toFixed(2)}₪
+                                                  </span>
+                                                </>
+                                              ) : (
+                                                <span>{product.price ? product.price.toFixed(2) : '?'}₪</span>
+                                              )} each
                                             </Typography>
                                           </Box>
                                           <Box sx={{ ml: 2 }}>
