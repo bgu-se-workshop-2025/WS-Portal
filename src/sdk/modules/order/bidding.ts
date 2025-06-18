@@ -45,6 +45,15 @@ export async function submitAlternativePrice(this: SDK, bidRequestId: string, ne
     }
 }
 
+export async function cancelBidRequest(this: SDK, bidRequestId: string): Promise<void> {
+    const response = await this.post(`${biddingController}/requests/${bidRequestId}/cancel`, {});
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to cancel bid request: ${error}`);
+    }
+}
+
 export async function getBidRequest(this: SDK, bidRequestId: string): Promise<BidRequestDto> {
     const response = await this.get(`${biddingController}/${bidRequestId}`, {});
 

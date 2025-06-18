@@ -151,10 +151,11 @@ export enum PaymentMethod {
 
 export interface BidRequestDto {
     bidRequestId: string;
+    userId: string;
     storeId: string;
     productId: string;
     price: number;
-    requestStatus:  'PENDING' | 'ACCEPTED' | 'APPROVED' | 'RECEIVED_ALTERNATIVE_PRICE' | 'REJECTED';
+    requestStatus:  'PENDING' | 'ACCEPTED' | 'APPROVED' | 'RECEIVED_ALTERNATIVE_PRICE' | 'REJECTED' | 'CANCELLED';
 }
 
 export interface BidDto {
@@ -163,4 +164,5 @@ export interface BidDto {
     productId: string;
     price: number;
     storeId: string;
+    isPurcheased: boolean;
 }

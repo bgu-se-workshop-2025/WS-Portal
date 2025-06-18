@@ -9,13 +9,14 @@ import {
   useTheme,
   Box,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
 import RatingComponent from "../../../../../../../shared/components/RatingComponent";
 import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
-import CreateBidRequestDialog from "../../../../../../Bidding/CreateBidRequestDialog"; // Adjust path as needed
+import CreateBidRequestDialog from "../../../../../../Bidding/CreateBidRequestDialog";
 
 const UserProductCard: React.FC<{
   product: ProductDto;
@@ -45,32 +46,19 @@ const UserProductCard: React.FC<{
   }, [cart, storeId, product.id]);
 
   const handleIncrement = useCallback(async () => {
-    if (currentQty === product.quantity) {
-      console.log(
-        `Cannot add ${product.name} to cart: already at max quantity (${product.quantity})`
-      );
-      return;
-    }
+    if (currentQty === product.quantity) return;
     if (currentQty === 0) {
       await addToCart(storeId as string, product.id, 1);
-      console.log(`Added ${product.name} to cart (quantity = 1)`);
     } else {
       await updateQuantity(storeId as string, product.id, currentQty + 1);
-      console.log(
-        `Increased ${product.name} quantity to ${currentQty + 1} in cart`
-      );
     }
   }, [addToCart, currentQty, product.id, updateQuantity]);
 
   const handleDecrement = useCallback(async () => {
     if (currentQty <= 1) {
       await removeFromCart(storeId as string, product.id);
-      console.log(`Removed ${product.name} from cart`);
     } else {
       await updateQuantity(storeId as string, product.id, currentQty - 1);
-      console.log(
-        `Decreased ${product.name} quantity to ${currentQty - 1} in cart`
-      );
     }
   }, [currentQty, product.id, removeFromCart, updateQuantity]);
 
@@ -103,55 +91,54 @@ const UserProductCard: React.FC<{
             {product.description}
           </Typography>
 
-        <Box sx={{ mb: theme.spacing(1) }}>
-          <Typography variant="body2">
-            <strong>Price:</strong> ${product.price.toFixed(2)}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Available:</strong> {product.quantity}
-          </Typography>
-        </Box>
+          <Box sx={{ mb: theme.spacing(1) }}>
+            <Typography variant="body2">
+              <strong>Price:</strong> ${product.price.toFixed(2)}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Available:</strong> {product.quantity}
+            </Typography>
+          </Box>
 
-        {product.categories.length > 0 && (
-          <Typography variant="body2">
-            <strong>Categories:</strong> {product.categories.join(", ")}
-          </Typography>
-        )}
-        {product.auctionEndDate && (
-          <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
-            <strong>Auction Ends:</strong>{" "}
-            {new Date(product.auctionEndDate).toLocaleString()}
-          </Typography>
-        )}
+          {product.categories.length > 0 && (
+            <Typography variant="body2">
+              <strong>Categories:</strong> {product.categories.join(", ")}
+            </Typography>
+          )}
+          {product.auctionEndDate && (
+            <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
+              <strong>Auction Ends:</strong>{" "}
+              {new Date(product.auctionEndDate).toLocaleString()}
+            </Typography>
+          )}
 
-        <Box
-          sx={{
-            mb: theme.spacing(1),
-            mt: theme.spacing(2),
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {/* Always show partial stars for viewing */}
-          <RatingComponent
-            value={product.rating}
-            readOnly={true}
-            size="small"
-            precision={0.1}
-          />
-        </Box>
-
-        {cartError && (
-          <Typography
-            variant="caption"
-            color="error"
-            sx={{ mt: theme.spacing(1), display: "block" }}
+          <Box
+            sx={{
+              mb: theme.spacing(1),
+              mt: theme.spacing(2),
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
           >
-            {cartError}
-          </Typography>
-        )}
-      </CardContent>
+            <RatingComponent
+              value={product.rating}
+              readOnly={true}
+              size="small"
+              precision={0.1}
+            />
+          </Box>
+
+          {cartError && (
+            <Typography
+              variant="caption"
+              color="error"
+              sx={{ mt: theme.spacing(1), display: "block" }}
+            >
+              {cartError}
+            </Typography>
+          )}
+        </CardContent>
 
         <CardActions
           sx={{
@@ -159,9 +146,10 @@ const UserProductCard: React.FC<{
             alignItems: "center",
             px: theme.spacing(2),
             pb: theme.spacing(2),
+            flexWrap: "wrap",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
             <Button
               size="small"
               variant="outlined"
@@ -191,14 +179,19 @@ const UserProductCard: React.FC<{
             )}
           </Box>
 
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={() => setBidDialogOpen(true)}
-          >
-            Bid
-          </Button>
+          {isUserAuthenticated && (
+            <>
+              <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={() => setBidDialogOpen(true)}
+              >
+                Bid
+              </Button>
+            </>
+          )}
         </CardActions>
       </Card>
 

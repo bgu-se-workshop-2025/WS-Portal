@@ -13,8 +13,8 @@ import { sdk, isAuthenticated } from "../../sdk/sdk";
 
 import { StoreDto } from "../../shared/types/dtos";
 
-type TabValue = "products" | "sellers" | "settings" | "discounts";
-const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts"];
+type TabValue = "products" | "sellers" | "settings" | "discounts" | "bids" | "bidRequests";
+const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "bids", "bidRequests"];
 
 const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
@@ -68,9 +68,12 @@ const SellerStoreLayout: React.FC = () => {
     if (!location.pathname || !id) return "products";
 
     // location.pathname might be "/store/123/products", "/store/123/sellers", etc.
-    const segments = location.pathname.split("/");
+    const segments = location.pathname.split("/").filter(Boolean); // Remove empty segments
     // ["", "store", "123", "sellers", …]
-    const tabSegment = segments[3] as TabValue | undefined;
+    if (segments[2] === "bids" && segments[3] === "requests") {
+      return "bidRequests";
+    }
+    const tabSegment = segments[2] as TabValue | undefined;
     return TAB_ORDER.includes(tabSegment as any)
       ? (tabSegment as TabValue)
       : "products";

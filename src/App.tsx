@@ -22,10 +22,10 @@ import StoreProductsPage from "./modules/store/components/subpages/products/Stor
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
 import CartMainPage from "./modules/cart/CartMainPage";
-import UserBidRequestsPage from "./modules/Bidding/UserBidRequestsPage";
 import StoreBidRequestPage from "./modules/Bidding/pages/StoreBidRequestPage";
-import UserBidsPage from "./modules/Bidding/pages/UserBidPage";
-import StoreBidsPage from "./modules/Bidding/pages/StoreBidPage";
+import UserBidPage from "./modules/Bidding/pages/UserBidPage";
+import UserBidRequestPage from "./modules/Bidding/pages/UserBidRequestPage";
+import StoreBidPage from "./modules/Bidding/pages/StoreBidPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -50,7 +50,7 @@ const App: React.FC = () => {
             <Route path="sellers" element={<StoreSellersPage />} />
             <Route path="settings" element={<StoreSettingsPage />} />
             <Route path="discounts" element={<StoreDiscountsPage />} />
-            <Route path="bids" element={<StoreBidsPage />} />
+            <Route path="bids" element={<StoreBidPage />} />
             <Route path="bids/requests" element={<StoreBidRequestPage />} />
           </Route>
 
@@ -62,8 +62,8 @@ const App: React.FC = () => {
             <Route index element={<AdminPage />} />
           </Route>
           <Route path="/profile" element={<UserProfilePage />} />
-          <Route path="/profile/bids" element={<UserBidsPage />} />
-          <Route path="/profile/bids/requests" element={<UserBidRequestsPage />} />
+          <Route path="/profile/bids" element={<UserBidPage />} />
+          <Route path="/profile/bids/requests" element={<UserBidRequestPage />} />
 
 
           <Route path="*" element={<MainPage />} />

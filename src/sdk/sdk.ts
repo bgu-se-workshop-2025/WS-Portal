@@ -96,6 +96,7 @@ export class SDK {
   public acceptBidRequest!: (bidRequestId: string) => Promise<void>;
   public rejectBidRequest!: (bidRequestId: string) => Promise<void>;
   public submitAlternativePrice!: (bidRequestId: string, newPrice: number) => Promise<void>;
+  public cancelBidRequest!: (bidRequestId: string) => Promise<void>;
   public getBidRequest!: (bidRequestId: string) => Promise<dtos.BidRequestDto>;
   public getBid!: (bidRequestId: string) => Promise<dtos.BidDto>;
   public getBidsOfProduct!: (productId: string, payload: dtos.Pageable) => Promise<dtos.BidDto[]>;

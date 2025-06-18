@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { BidDto } from '../../../shared/types/dtos';
+import { sdk } from '../../../sdk/sdk';
 
 interface UserBidCardProps {
   bid: BidDto;
@@ -18,6 +19,18 @@ interface UserBidCardProps {
 const UserBidCard: React.FC<UserBidCardProps> = ({ bid, onAction }) => {
   const navigate = useNavigate();
   const theme = useTheme();
+  const [productName, setProductName] = useState<string>(bid.productId);
+  const [storeName, setStoreName] = useState<string>(bid.storeId);
+
+  useEffect(() => {
+    sdk.getProduct(bid.productId)
+      .then(p => setProductName(p.name))
+      .catch(() => {}); // fallback to ID
+
+    sdk.getStore(bid.storeId)
+      .then(s => setStoreName(s.name))
+      .catch(() => {}); // fallback to ID
+  }, [bid.productId, bid.storeId]);
 
   const handlePurchase = () => {
     navigate(`/payment?mode=bid&bidId=${bid.id}`);
@@ -32,26 +45,31 @@ const UserBidCard: React.FC<UserBidCardProps> = ({ bid, onAction }) => {
         flexDirection: 'column',
         justifyContent: 'space-between',
         backgroundColor: '#fff',
-        transition: 'transform 0.2s, box-shadow 0.2s',
+        transition: 'transform 0.2s, boxShadow 0.2s',
         '&:hover': {
           boxShadow: theme.shadows[6],
-          transform: 'translateY(-4px)'
-        }
+          transform: 'translateY(-4px)',
+        },
       }}
     >
       <CardContent>
         <Typography variant="subtitle1" fontWeight={600}>
-          Product ID: {bid.productId}
+          Product: {productName}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Store ID: {bid.storeId}
+          Store: {storeName}
         </Typography>
         <Typography variant="body1" mt={1}>
           Final Price: ${bid.price.toFixed(2)}
         </Typography>
       </CardContent>
       <CardActions sx={{ px: 2, pb: 2 }}>
-        <Button variant="contained" color="primary" onClick={handlePurchase} fullWidth>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handlePurchase}
+          fullWidth
+        >
           Purchase
         </Button>
       </CardActions>
