@@ -9,7 +9,7 @@ import StoreIcon from "@mui/icons-material/Store";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import RatingComponent from "../../shared/components/RatingComponent";
-import { sdk, isAuthenticated } from "../../sdk/sdk";
+import { sdk } from "../../sdk/sdk";
 
 import { StoreDto } from "../../shared/types/dtos";
 
@@ -40,18 +40,6 @@ const SellerStoreLayout: React.FC = () => {
         setStore(null);
         setIsLoading(false);
       });
-    // Check if user is a seller for this store
-    const checkSeller = async () => {
-      if (!id || isAuthenticated() === false) {
-        return;
-      }
-      try {
-        const me = await sdk.getCurrentUserProfileDetails();
-        const mySeller = await sdk.getSeller(id, me.id);
-      } catch (err) {
-      }
-    };
-    checkSeller();
   }, [id]);
 
   const computedActiveTab: TabValue = React.useMemo(() => {
