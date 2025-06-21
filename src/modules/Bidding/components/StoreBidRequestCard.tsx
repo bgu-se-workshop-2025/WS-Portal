@@ -7,7 +7,6 @@ import {
 import { BidRequestDto } from '../../../shared/types/dtos';
 import { sdk } from '../../../sdk/sdk';
 
-// Status-to-color mapping
 const statusColor: Record<BidRequestDto['requestStatus'], any> = {
   PENDING: 'default',
   ACCEPTED: 'primary',
@@ -89,10 +88,10 @@ const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
           flexDirection: 'column',
           justifyContent: 'space-between',
           transition: 'transform 0.2s, boxShadow 0.3s',
-          '&:hover': !isFinal ? {
+          '&:hover': {
             boxShadow: theme.shadows[6],
             transform: 'translateY(-4px)',
-          } : {},
+          }
         }}
       >
         <CardContent>
@@ -114,32 +113,32 @@ const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
         </CardContent>
 
         <Box sx={{ p: 2 }}>
-          <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
-            <Button
-              variant="contained"
-              color="success"
-              disabled={isFinal}
-              onClick={accept}
-              sx={{ minWidth: 100 }}
-            >
-              Accept
-            </Button>
-
-            <Button
-              variant="outlined"
-              color="error"
-              disabled={isFinal}
-              onClick={reject}
-              sx={{ minWidth: 100 }}
-            >
-              Reject
-            </Button>
-
+          <Stack spacing={1}>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                color="success"
+                disabled={isFinal}
+                onClick={accept}
+                fullWidth
+              >
+                Accept
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                disabled={isFinal}
+                onClick={reject}
+                fullWidth
+              >
+                Reject
+              </Button>
+            </Stack>
             <Button
               variant="outlined"
               disabled={isFinal}
               onClick={() => setDialogOpen(true)}
-              sx={{ minWidth: 130 }}
+              fullWidth
             >
               Suggest Price
             </Button>
@@ -147,7 +146,6 @@ const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
         </Box>
       </Card>
 
-      {/* Suggest Price Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
         <DialogTitle>Suggest Price</DialogTitle>
         <DialogContent>

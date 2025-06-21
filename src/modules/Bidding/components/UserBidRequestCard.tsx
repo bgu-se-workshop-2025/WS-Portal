@@ -24,7 +24,6 @@ interface Props {
 const UserBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
   const theme = useTheme();
   const [confirm, setConfirm] = useState(false);
-  const isFinal = ['REJECTED', 'APPROVED', 'CANCELLED'].includes(request.requestStatus);
 
   const [productName, setProductName] = useState<string>(request.productId);
   const [storeName, setStoreName] = useState<string>(request.storeId);
@@ -60,14 +59,10 @@ const UserBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
           flexDirection: 'column',
           justifyContent: 'space-between',
           transition: 'transform 0.2s, box-shadow 0.3s',
-          ...(isFinal
-            ? {}
-            : {
-              '&:hover': {
-                boxShadow: theme.shadows[6],
-                transform: 'translateY(-4px)',
-              },
-            }),
+          '&:hover': {
+            boxShadow: theme.shadows[6],
+            transform: 'translateY(-4px)',
+          },
         }}
       >
         <CardContent>
@@ -89,7 +84,7 @@ const UserBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
             variant="outlined"
             color="error"
             fullWidth
-            disabled={isFinal}
+            disabled={['REJECTED', 'APPROVED', 'CANCELLED'].includes(request.requestStatus)}
             onClick={() => setConfirm(true)}
           >
             Cancel Request
