@@ -1,113 +1,120 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Box, Typography, TextField, Button, Stack } from "@mui/material";
+import { useEffect, useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
+  Button,
+  Stack,
+  Alert,
+} from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
-import { StoreDto } from "../../../../shared/types/dtos";
+import type { StoreDto } from "../../../../shared/types/dtos";
 
-const StoreSettings = () => {
-  const { storeId } = useParams();
-	if (!storeId) return;
+const StoreSettings: React.FC = () => {
+  const { storeId } = useParams<{ storeId: string }>();
+  const navigate = useNavigate();
 
   const [store, setStore] = useState<StoreDto | null>(null);
   const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!storeId) return;
-
     sdk
       .getStore(storeId)
-      .then((data: StoreDto) => {
-        setStore(data);
-      })
-      .catch((err) => {
-        console.error("Failed to load store:", err);
-        setErrorMsg("Failed to load store from the backend.");
-      });
+      .then(setStore)
+      .catch(() =>
+        setMessage({ type: "error", text: "Failed to load store." })
+      );
   }, [storeId]);
 
-  const handleUpdate = async () => {
-    if (!storeId || !store) return;
-
+  const handleUpdate = useCallback(async () => {
+    if (!store) return;
     setLoading(true);
-    setSuccessMsg("");
-    setErrorMsg("");
-
+    setMessage(null);
     try {
-      const updated = await sdk.updateStore(storeId, {
-        id: storeId,
-        name: store.name,
-        description: store.description,
-      });
+      const updated = await sdk.updateStore(storeId!, store);
       setStore(updated);
-      setSuccessMsg("Store updated successfully.");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to update store.");
+      setMessage({ type: "success", text: "Store updated successfully." });
+    } catch {
+      setMessage({ type: "error", text: "Failed to update store." });
     } finally {
       setLoading(false);
     }
-  };
+  }, [store, storeId]);
+
+  const handleClose = useCallback(async () => {
+    if (!storeId) return;
+    if (!window.confirm("Are you sure you want to close this store? This action cannot be undone.")) return;
+    setLoading(true);
+    setMessage(null);
+    try {
+      await sdk.closeStore(storeId);
+      setMessage({ type: "success", text: "Store closed successfully." });
+      // Navigate away after a short delay to show success message
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } catch (err) {
+      setMessage({ type: "error", text: "Failed to close store." });
+    } finally {
+      setLoading(false);
+    }
+  }, [storeId, navigate]);
+
+  if (!storeId) return null;
 
   return (
-    <Box mt={2} maxWidth={600} sx={{ width: "30rem" }} alignItems="center">
-      <Typography
-        variant="h5"
-        fontWeight="600"
-        color="primary"
-        mb={3}
-        display="flex"
-        alignItems="center"
-        gap={1}
-      >
-        ⚙️ Store Settings
-      </Typography>
-
-      {!store ? (
-        <Typography color="text.secondary">Loading store details...</Typography>
-      ) : (
-        <Stack spacing={3}>
-          <TextField
-            label="Store Name"
-            value={store.name}
-            onChange={(e) =>
-              setStore({ ...store, name: e.target.value })
-            }
-            fullWidth
-            required
-          />
-
-          <TextField
-            label="Description"
-            value={store.description}
-            onChange={(e) =>
-              setStore({ ...store, description: e.target.value })
-            }
-            fullWidth
-            multiline
-            rows={4}
-          />
-
-          {/* Show messages below the fields */}
-          <Box height={30} display="flex" alignItems="center">
-            {errorMsg && (
-              <Typography color="error.main">{errorMsg}</Typography>
-            )}
-            {successMsg && (
-              <Typography color="success.main">{successMsg}</Typography>
-            )}
-          </Box>
-
+    <Box display="flex" justifyContent="center" mt={4} width="100%">
+      <Card sx={{ width: "100%" }}>
+        <CardContent>
+          <Stack spacing={2}>
+            <TextField
+              label="Name"
+              value={store?.name ?? ""}
+              onChange={(e) =>
+                store && setStore({ ...store, name: e.target.value })
+              }
+              fullWidth
+              required
+            />
+            <TextField
+              label="Description"
+              value={store?.description ?? ""}
+              onChange={(e) =>
+                store && setStore({ ...store, description: e.target.value })
+              }
+              fullWidth
+              multiline
+              rows={4}
+            />
+            {message && <Alert severity={message.type}>{message.text}</Alert>}
+          </Stack>
+        </CardContent>
+        <CardActions sx={{ justifyContent: "space-between", p: 2 }}>
           <Button
             variant="contained"
             onClick={handleUpdate}
-            disabled={loading || !store.name.trim()}
-            sx={{ minWidth: 160, height: 40 }}
+            disabled={loading || !store?.name.trim()}
           >
-            {loading ? "Updating..." : "Update Store"}
+            {loading ? "Saving…" : "Save"}
           </Button>
-        </Stack>
-      )}
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={handleClose}
+            disabled={loading}
+          >
+            Close Store
+          </Button>
+        </CardActions>
+      </Card>
     </Box>
   );
 };

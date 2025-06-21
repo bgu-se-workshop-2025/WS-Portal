@@ -104,14 +104,14 @@ export interface ShippingAddressDto {
 }
 
 export interface ReviewDto {
-    id: string | null;
-    productId: string | null;  
-    storeId: string;
-    writerId: string | null;
-    title: string;
-    body: string;
-    rating: number;
-    date: string | null;
+    id?: string;
+    productId?: string;  
+    storeId?: string;
+    writerId?: string;
+    title?: string;
+    body?: string;
+    rating?: number;
+    date?: string;
 }
 
 export interface OrderRequestDetails {

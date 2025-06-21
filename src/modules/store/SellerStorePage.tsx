@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Container, Button, Dialog, DialogTitle, DialogContent, DialogActions, Tabs, Tab, Divider, Alert } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Container,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tabs,
+  Tab,
+  Divider,
+  Alert,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useParams, useLocation, Link, Navigate, Outlet } from "react-router-dom";
+import {
+  useParams,
+  useLocation,
+  Link,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
@@ -14,7 +33,7 @@ import { sdk, isAuthenticated } from "../../sdk/sdk";
 import { StoreDto } from "../../shared/types/dtos";
 
 type TabValue = "products" | "sellers" | "settings" | "discounts";
-const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts"];
+const TAB_ORDER: TabValue[] = ["products", "discounts", "sellers", "settings"];
 
 const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
@@ -33,7 +52,8 @@ const SellerStoreLayout: React.FC = () => {
     if (!id) return;
     setIsLoading(true);
     setError(null);
-    sdk.getStore(id)
+    sdk
+      .getStore(id)
       .then((result) => {
         setStore(result);
         setIsLoading(false);
@@ -86,14 +106,14 @@ const SellerStoreLayout: React.FC = () => {
     setRateError("");
     try {
       await sdk.createStoreReview({
-        id: null, // let backend generate
-        productId: null, // not a product review
-        storeId: id ?? null,
-        writerId: null, // let backend use current user
-        title: null,
-        body: null,
+        id: undefined, // let backend generate
+        productId: undefined, // not a product review
+        storeId: id ?? undefined,
+        writerId: undefined, // let backend use current user
+        title: undefined,
+        body: undefined,
         rating: Math.round(userRating),
-        date: null,
+        date: undefined,
       });
       // Refresh store info after rating
       const updatedStore = await sdk.getStore(id);
@@ -102,7 +122,9 @@ const SellerStoreLayout: React.FC = () => {
       setUserRating(null);
       alert("Thank you for rating the store!");
     } catch (err: any) {
-      setRateError(err.message || "You must purchase from this store before rating.");
+      setRateError(
+        err.message || "You must purchase from this store before rating."
+      );
     }
   };
 
@@ -175,21 +197,23 @@ const SellerStoreLayout: React.FC = () => {
                 if (!id) return;
                 try {
                   await sdk.createStoreReview({
-                    id: null, // let backend generate
-                    productId: null,
-                    storeId: id ?? null,
-                    writerId: null,
-                    title: null,
-                    body: null,
+                    id: undefined, // let backend generate
+                    productId: undefined,
+                    storeId: id ?? undefined,
+                    writerId: undefined,
+                    title: undefined,
+                    body: undefined,
                     rating: Math.round(newValue),
-                    date: null,
+                    date: undefined,
                   });
                   // Refresh store info after rating
                   const updatedStore = await sdk.getStore(id);
                   setStore(updatedStore);
                   alert("Thank you for rating the store!");
                 } catch (err: any) {
-                  alert("You must purchase from this store before you can rate it.");
+                  alert(
+                    "You must purchase from this store before you can rate it."
+                  );
                 }
               }}
             />
@@ -202,17 +226,31 @@ const SellerStoreLayout: React.FC = () => {
         <Dialog open={rateDialogOpen} onClose={() => setRateDialogOpen(false)}>
           <DialogTitle>Rate This Store</DialogTitle>
           <DialogContent>
-            <Box display="flex" flexDirection="column" alignItems="center" gap={2}>
-              <RatingComponent value={userRating ?? 0} onChange={setUserRating} size="large" />
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={2}
+            >
+              <RatingComponent
+                value={userRating ?? 0}
+                onChange={setUserRating}
+                size="large"
+              />
               {rateError && <Typography color="error">{rateError}</Typography>}
             </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setRateDialogOpen(false)}>Cancel</Button>
-            <Button onClick={async () => {
-  await handleRateStore();
-  // After rating, refresh store info (already handled in handleRateStore)
-}} disabled={userRating == null}>Submit</Button>
+            <Button
+              onClick={async () => {
+                await handleRateStore();
+                // After rating, refresh store info (already handled in handleRateStore)
+              }}
+              disabled={userRating == null}
+            >
+              Submit
+            </Button>
           </DialogActions>
         </Dialog>
 
@@ -274,6 +312,12 @@ const SellerStoreLayout: React.FC = () => {
                 to={`/store/${id}/products`}
               />
               <Tab
+                value="discounts"
+                label="Discounts"
+                component={Link}
+                to={`/store/${id}/discounts`}
+              />
+              <Tab
                 value="sellers"
                 label="Sellers"
                 component={Link}
@@ -284,12 +328,6 @@ const SellerStoreLayout: React.FC = () => {
                 label="Settings"
                 component={Link}
                 to={`/store/${id}/settings`}
-              />
-              <Tab
-                value="discounts"
-                label="Discounts"
-                component={Link}
-                to={`/store/${id}/discounts`}
               />
             </Tabs>
             <Divider sx={{ mb: theme.spacing(3) }} />
