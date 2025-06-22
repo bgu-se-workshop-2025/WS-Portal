@@ -10,15 +10,26 @@ import {
   Paper,
   CircularProgress,
   useTheme,
+  Alert,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  Stack,
+  Divider,
 } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
 import { Link, Outlet, useParams, useLocation } from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
-import { StoreDto } from "../../shared/types/dtos";
+import { StoreDto, ProductDto, SellerDto } from "../../shared/types/dtos";
 import RatingComponent from "../../shared/components/RatingComponent";
 import { isAuthenticated } from "../../sdk/sdk";
 import ErrorDisplay from "../../shared/components/ErrorDisplay";
 import { useErrorHandler } from "../../shared/hooks/useErrorHandler";
+import { withErrorHandling } from "../../shared/utils/errorHandler";
+import { ErrorHandler } from "../../shared/utils/errorHandler";
 import { ErrorContext } from "../../shared/types/errors";
 
 const UserStorePage: React.FC = () => {
@@ -30,7 +41,7 @@ const UserStorePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSeller, setIsSeller] = useState<boolean>(false);
 
-  const { error, setError, clearError, withErrorHandling } = useErrorHandler();
+  const { error, setError, clearError } = useErrorHandler();
 
   useEffect(() => {
     if (!storeId) return;
@@ -47,7 +58,10 @@ const UserStorePage: React.FC = () => {
       const res = await sdk.getStore(storeId);
       setStore(res);
       setIsLoading(false);
-    }, context);
+    }, context, (error) => {
+      setError(error);
+      setIsLoading(false);
+    });
 
     // Check if user is a seller for this store
     const checkSeller = async () => {
@@ -159,7 +173,10 @@ const UserStorePage: React.FC = () => {
                 const result = await sdk.getStore(storeId);
                 setStore(result);
                 setIsLoading(false);
-              }, context);
+              }, context, (error) => {
+                setError(error);
+                setIsLoading(false);
+              });
             }
           }}
         />

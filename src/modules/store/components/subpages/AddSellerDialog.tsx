@@ -13,11 +13,15 @@ import {
   Typography,
   Divider,
   Box,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
-import { SellerType } from "../../../../shared/types/dtos"; 
+import { SellerType, SellerDto, PublicUserDto } from "../../../../shared/types/dtos"; 
 import ErrorDisplay from "../../../../shared/components/ErrorDisplay";
 import { useErrorHandler } from "../../../../shared/hooks/useErrorHandler";
+import { withErrorHandling } from "../../../../shared/utils/errorHandler";
+import { ErrorHandler } from "../../../../shared/utils/errorHandler";
 import { ErrorContext } from "../../../../shared/types/errors";
 
 type PermissionObject = Record<string, boolean>;
@@ -61,7 +65,7 @@ const AddSellerDialog: React.FC<Props> = ({
   const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   
-  const { error, setError, clearError, withErrorHandling } = useErrorHandler();
+  const { error, setError, clearError } = useErrorHandler();
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -146,7 +150,9 @@ const AddSellerDialog: React.FC<Props> = ({
       setSellerType(SellerType.MANAGER);
       setPermissions([]);
       onClose();
-    }, context);
+    }, context, (error) => {
+      setError(error);
+    });
   };
 
   return (

@@ -15,16 +15,27 @@ import {
   DialogActions,
   Button,
   useTheme,
+  Alert,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  Stack,
+  Divider,
 } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
 import { Link, Outlet, useParams, useLocation, useNavigate } from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
-import { StoreDto } from "../../shared/types/dtos";
+import { StoreDto, ProductDto, SellerDto } from "../../shared/types/dtos";
 import RatingComponent from "../../shared/components/RatingComponent";
 import { isAuthenticated } from "../../sdk/sdk";
 import ErrorDisplay from "../../shared/components/ErrorDisplay";
 import { useErrorHandler } from "../../shared/hooks/useErrorHandler";
+import { withErrorHandling } from "../../shared/utils/errorHandler";
+import { ErrorHandler } from "../../shared/utils/errorHandler";
 import { ErrorContext } from "../../shared/types/errors";
+import { Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
 type TabValue = "products" | "sellers" | "settings" | "discounts";
 
@@ -42,7 +53,7 @@ const SellerStoreLayout: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSeller, setIsSeller] = useState<boolean | null>(null);
 
-  const { error, setError, clearError, withErrorHandling } = useErrorHandler();
+  const { error, setError, clearError } = useErrorHandler();
 
   useEffect(() => {
     if (!id) return;
@@ -59,7 +70,10 @@ const SellerStoreLayout: React.FC = () => {
       const result = await sdk.getStore(id);
       setStore(result);
       setIsLoading(false);
-    }, context);
+    }, context, (error) => {
+      setError(error);
+      setIsLoading(false);
+    });
     
     // Check if user is a seller for this store
     const checkSeller = async () => {
@@ -104,7 +118,9 @@ const SellerStoreLayout: React.FC = () => {
       setStore(updatedStore);
       setRateDialogOpen(false);
       setUserRating(null);
-    }, context);
+    }, context, (error) => {
+      setError(error);
+    });
   };
 
   const getCurrentTab = (): TabValue => {
@@ -216,7 +232,10 @@ const SellerStoreLayout: React.FC = () => {
                 const result = await sdk.getStore(id);
                 setStore(result);
                 setIsLoading(false);
-              }, context);
+              }, context, (error) => {
+                setError(error);
+                setIsLoading(false);
+              });
             }
           }}
         />

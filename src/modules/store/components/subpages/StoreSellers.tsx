@@ -1,5 +1,28 @@
-import { useEffect, useState } from "react";
-import { Box, Typography, Stack, Button } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Person as PersonIcon,
+} from "@mui/icons-material";
 import { useParams } from "react-router-dom";
 import SellerCard from "./SellerCard";
 import SellerPermissionsDialog from "./SellerPermissionsDialog";
@@ -12,6 +35,8 @@ import {
 } from "../../../../shared/types/dtos";
 import ErrorDisplay from "../../../../shared/components/ErrorDisplay";
 import { useErrorHandler } from "../../../../shared/hooks/useErrorHandler";
+import { withErrorHandling } from "../../../../shared/utils/errorHandler";
+import { ErrorHandler } from "../../../../shared/utils/errorHandler";
 import { ErrorContext } from "../../../../shared/types/errors";
 
 type PermissionObject = Record<string, boolean>;
@@ -38,7 +63,7 @@ const StoreSellers = () => {
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [allPermissions, setAllPermissions] = useState<string[]>([]); 
 
-  const { error, setError, clearError, withErrorHandling } = useErrorHandler();
+  const { error, setError, clearError } = useErrorHandler();
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -110,7 +135,10 @@ const StoreSellers = () => {
 
       setSellers(detailedSellers);
       setLoading(false);
-    }, context);
+    }, context, (error) => {
+      setError(error);
+      setLoading(false);
+    });
   };
 
   useEffect(() => {
@@ -159,7 +187,9 @@ const StoreSellers = () => {
             : s
         )
       );
-    }, context);
+    }, context, (error) => {
+      setError(error);
+    });
   };
 
   const handleAddSuccess = (newSeller: Seller) => {
@@ -192,7 +222,9 @@ const StoreSellers = () => {
 
       await sdk.removeSeller(storeId, sellerId);
       setSellers((prev) => prev.filter((s) => s.userId !== selectedSellerToRemove.userId));
-    }, context);
+    }, context, (error) => {
+      setError(error);
+    });
   };
 
   return (
