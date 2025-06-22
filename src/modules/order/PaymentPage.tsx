@@ -10,16 +10,9 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
-import { OrderRequestDetails, PaymentDetails, PaymentMethod, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
+import { OrderRequestDetails, PaymentDetails, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
 import useCart from '../../shared/hooks/useCart';
 import useOrder from './hooks/useOrder';
-
-const paymentMethods = [
-  { label: 'Credit Card', value: PaymentMethod.CREDIT_CARD },
-  { label: 'PayPal', value: PaymentMethod.PAYPAL },
-  { label: 'Apple Pay', value: PaymentMethod.APPLE_PAY },
-  { label: 'Google Pay', value: PaymentMethod.GOOGLE_PAY },
-];
 
 const PaymentPage: React.FC = () => {
   const cartHook = useCart();
