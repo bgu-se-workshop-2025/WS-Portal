@@ -51,19 +51,6 @@ const PaymentPage: React.FC = () => {
     setError(cartHook.error ?? "")
   }, [cartHook.loading, cartHook.error]);
 
-
-
-  const handlePaymentDetailsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setPaymentDetails({
-      ...paymentDetails,
-      paymentData: {
-        ...paymentDetails.paymentData,
-        [name]: value,
-      },
-    });
-  };
-
   const handlePaymentEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
     setPaymentDetails({ ...paymentDetails, payerEmail: value })
