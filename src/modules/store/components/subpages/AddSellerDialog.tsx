@@ -16,8 +16,11 @@ import {
 } from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
 import { SellerType } from "../../../../shared/types/dtos"; 
+import ErrorDisplay from "../../../../shared/components/ErrorDisplay";
+import { useErrorHandler } from "../../../../shared/hooks/useErrorHandler";
+import { ErrorContext } from "../../../../shared/types/errors";
 
-type PermissionObject = Record<string, boolean>; 
+type PermissionObject = Record<string, boolean>;
 
 interface Props {
   open: boolean;
@@ -39,7 +42,6 @@ const SELLER_TYPE_LABELS: Record<SellerType, string> = {
   [SellerType.UNKNOWN]: "Unknown",
 };
 
-
 const formatLabel = (label: string): string =>
   label
     .toLowerCase()
@@ -55,11 +57,12 @@ const AddSellerDialog: React.FC<Props> = ({
 }) => {
   const [username, setUsername] = useState("");
   const [allPermissions, setAllPermissions] = useState<string[]>([]);
-const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
+  const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   
+  const { error, setError, clearError, withErrorHandling } = useErrorHandler();
+
   useEffect(() => {
     const fetchPermissions = async () => {
       try {
@@ -83,7 +86,7 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
   };
 
   const handleAdd = async () => {
-    setError(null);
+    clearError();
 
     if (!username.trim()) {
       setError("Username is required.");
@@ -93,9 +96,19 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
       setError("At least one permission must be selected.");
       return;
     }
-    setLoading(true);
-    try {
-      const user = await sdk.getPublicUserProfileDetailsByUsername(username.trim());
+
+    const context: ErrorContext = {
+      component: 'StoreModule',
+      action: 'addSeller',
+      additionalInfo: {
+        storeId,
+        username: username.trim(),
+        sellerType: sellerType.toString()
+      }
+    };
+
+    await withErrorHandling(async () => {
+      const user = await sdk.getPublicUserProfileDetailsByUsername(username.trim(), context);
       console.log("Fetched user:", user);
       console.log("🟢 Adding seller with:");
       console.log("  sellerType =", sellerType);
@@ -107,14 +120,14 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
         employerSellerId,
         permissions,
       });
-      await sdk.addSeller(storeId, user.id,{
+      
+      await sdk.addSeller(storeId, user.id, {
         userId: user.id,
         storeId,
         type: sellerType,
         employerSellerId,
         permissions,
       });
-
 
       const permissionObject: PermissionObject = {};
       allPermissions.forEach((perm) => {
@@ -133,22 +146,7 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
       setSellerType(SellerType.MANAGER);
       setPermissions([]);
       onClose();
-    } catch (err: any) {
-      let msg = "An unknown error occurred.";
-      if (err?.response?.data?.message) {
-        msg = err.response.data.message;
-      } else if (typeof err === "string") {
-        msg = err;
-      } else if (err instanceof Error) {
-        msg = err.message;
-      } else if (typeof err === "object" && err?.message) {
-        msg = err.message;
-      }
-
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+    }, context);
   };
 
   return (
@@ -156,9 +154,12 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
       <DialogTitle>Add Seller</DialogTitle>
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
         {error && (
-          <Typography color="error" sx={{ mt: 1 }}>
-            {error}
-          </Typography>
+          <ErrorDisplay
+            error={error}
+            variant="alert"
+            onClose={clearError}
+            showRetry={false}
+          />
         )}
 
         <TextField
@@ -172,21 +173,18 @@ const [sellerType, setSellerType] = useState<SellerType>(SellerType.MANAGER);
         />
 
         <TextField
-        select
-        label="Seller Role"
-        value={sellerType}
-        onChange={(e) => setSellerType(Number(e.target.value) as SellerType)} 
-        fullWidth
-      >
-        {[SellerType.OWNER, SellerType.MANAGER, SellerType.UNKNOWN].map((type) => (
-          <MenuItem key={type} value={type}>
-            {SELLER_TYPE_LABELS[type]}
-          </MenuItem>
-        ))}
-      </TextField>
-
-
-
+          select
+          label="Seller Role"
+          value={sellerType}
+          onChange={(e) => setSellerType(Number(e.target.value) as SellerType)} 
+          fullWidth
+        >
+          {[SellerType.OWNER, SellerType.MANAGER, SellerType.UNKNOWN].map((type) => (
+            <MenuItem key={type} value={type}>
+              {SELLER_TYPE_LABELS[type]}
+            </MenuItem>
+          ))}
+        </TextField>
 
         <Box mt={3} mb={1}>
           <Typography variant="subtitle1" fontWeight={600}>

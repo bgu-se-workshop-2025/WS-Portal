@@ -2,6 +2,8 @@ import React from "react";
 import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, Button, Stack } from "@mui/material";
 import { sdk } from "../../../sdk/sdk";
 import { StoreDto, UserOrderDto, PublicUserDto } from "../../../shared/types/dtos";
+import { AppError, ErrorType } from "../../../shared/types/errors";
+import { ErrorHandler } from "../../../shared/utils/errorHandler";
 
 const PAGE_SIZE = 25;
 
@@ -38,21 +40,26 @@ const UserProfilePage: React.FC<Props> = () => {
     setStoresError(null);
     sdk.getStores({ page: 0, size: PAGE_SIZE })
       .then(async (allStores) => {
-        // For each store, check if user is a seller
+        // For each store, check if user is a seller using getSeller method
         const sellerStoreIds: string[] = [];
         await Promise.all(
           allStores.map(async (store) => {
             try {
-              const officials = await sdk.getStoreOfficials(store.id!);
-              if (officials.some((o) => o.id === user.id)) {
+              const seller = await sdk.getSeller(store.id!, user.id);
+              if (seller) {
                 sellerStoreIds.push(store.id!);
               }
-            } catch {}
+            } catch {
+              // User is not a seller in this store, which is expected
+            }
           })
         );
         setStores(allStores.filter((s) => sellerStoreIds.includes(s.id!)));
       })
-      .catch((err) => setStoresError(err.message))
+      .catch(async (err) => {
+        const appError = await ErrorHandler.processError(err, { action: 'getStores' });
+        setStoresError(ErrorHandler.getUserFriendlyMessage(appError));
+      })
       .finally(() => setStoresLoading(false));
   }, [user]);
 
@@ -62,22 +69,17 @@ const UserProfilePage: React.FC<Props> = () => {
     setOrdersError(null);
     sdk.getUserOrders({ page: 0, size: PAGE_SIZE })
       .then(setOrders)
-      .catch((err) => {
-        // If backend returns 404 or error message contains 'Error fetching user orders', treat as empty
-        if (
-          (err.message && err.message.includes('404')) ||
-          (err.message && err.message.includes('Error fetching user orders'))
-        ) {
+      .catch(async (err) => {
+        const appError = await ErrorHandler.processError(err, { action: 'getUserOrders' });
+        
+        // If it's a "no orders found" error, treat it as a normal state
+        if (appError.type === ErrorType.NO_ORDERS_FOUND) {
           setOrders([]);
+          setOrdersError(null);
         } else {
-          setOrdersError(
-            typeof err === 'object' && err !== null && err.message
-              ? `Orders error: ${err.message}`
-              : `Orders error: ${JSON.stringify(err)}`
-          );
+          setOrdersError(ErrorHandler.getUserFriendlyMessage(appError));
+          console.error('Orders fetch error:', appError);
         }
-        // eslint-disable-next-line no-console
-        console.error('Orders fetch error:', err);
       })
       .finally(() => setOrdersLoading(false));
   }, [user]);

@@ -91,6 +91,7 @@ const MainPage: React.FC = () => {
       id: undefined,
       name: newName,
       description: newDesc,
+      rating: 0,
     };
     await sdk.createStore(newStore);
     closeDialog();
@@ -188,7 +189,7 @@ const MainPage: React.FC = () => {
           <Button
             variant="contained"
             onClick={handleSave}
-            disabled={!newName.trim() || !newDesc.trim()}
+            disabled={!newName.trim()}
           >
             Save
           </Button>

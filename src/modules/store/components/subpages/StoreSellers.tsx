@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, Typography, Stack, Button , Snackbar} from "@mui/material";
+import { Box, Typography, Stack, Button } from "@mui/material";
 import { useParams } from "react-router-dom";
 import SellerCard from "./SellerCard";
 import SellerPermissionsDialog from "./SellerPermissionsDialog";
@@ -10,6 +10,9 @@ import {
   PublicUserDto,
   SellerDto,
 } from "../../../../shared/types/dtos";
+import ErrorDisplay from "../../../../shared/components/ErrorDisplay";
+import { useErrorHandler } from "../../../../shared/hooks/useErrorHandler";
+import { ErrorContext } from "../../../../shared/types/errors";
 
 type PermissionObject = Record<string, boolean>;
 
@@ -32,11 +35,10 @@ const StoreSellers = () => {
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
   const [selectedSellerToRemove, setSelectedSellerToRemove] = useState<Seller | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState("");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null); 
-  const [errorOpen, setErrorOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [allPermissions, setAllPermissions] = useState<string[]>([]); 
+
+  const { error, setError, clearError, withErrorHandling } = useErrorHandler();
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -69,9 +71,15 @@ const StoreSellers = () => {
     }
 
     setLoading(true);
-    setFetchError("");
+    clearError();
 
-    try {
+    const context: ErrorContext = {
+      component: 'StoreModule',
+      action: 'fetchSellers',
+      additionalInfo: { storeId }
+    };
+
+    await withErrorHandling(async () => {
       const officials: PublicUserDto[] = await sdk.getStoreOfficials(storeId);
       const detailedSellers: Seller[] = (
         await Promise.all(
@@ -101,13 +109,8 @@ const StoreSellers = () => {
       ).filter((s) => s.userId !== "");
 
       setSellers(detailedSellers);
-    } catch (err: any) {
-      setSellers([]);
-      const msg = err.message || String(err);
-      setFetchError(msg.startsWith("Error fetching") ? msg : `Error fetching store officials: ${msg}`);
-    } finally {
       setLoading(false);
-    }
+    }, context);
   };
 
   useEffect(() => {
@@ -127,7 +130,17 @@ const StoreSellers = () => {
   const handleSavePerms = async (newPerms: PermissionObject) => {
     if (!selectedSeller || !storeId) return;
 
-    try {
+    const context: ErrorContext = {
+      component: 'StoreModule',
+      action: 'updatePermissions',
+      additionalInfo: { 
+        storeId, 
+        sellerId: selectedSeller.userId,
+        sellerName: selectedSeller.name
+      }
+    };
+
+    await withErrorHandling(async () => {
       const updatedPermissions: string[] = Object.entries(newPerms)
         .filter(([_, isEnabled]) => isEnabled)
         .map(([perm]) => perm);
@@ -146,13 +159,7 @@ const StoreSellers = () => {
             : s
         )
       );
-    } catch (err: any) {
-      console.error("Failed to update manager permissions ", err);
-      setErrorMsg("Failed to save permissions " + (err.message || "Unknown error."));
-      setErrorOpen(true); 
-    } finally {
-      handleClosePerms();
-    }
+    }, context);
   };
 
   const handleAddSuccess = (newSeller: Seller) => {
@@ -168,20 +175,24 @@ const StoreSellers = () => {
   const handleConfirmRemove = async () => {
     if (!selectedSellerToRemove || !storeId) return;
 
-    try {
+    const context: ErrorContext = {
+      component: 'StoreModule',
+      action: 'removeSeller',
+      additionalInfo: { 
+        storeId, 
+        sellerId: selectedSellerToRemove.userId,
+        sellerName: selectedSellerToRemove.name
+      }
+    };
+
+    await withErrorHandling(async () => {
       const sellerDto = await sdk.getSeller(storeId, selectedSellerToRemove.userId);
       const sellerId = sellerDto.id;
       if (!sellerId) throw new Error("Seller ID could not be determined for removal.");
 
       await sdk.removeSeller(storeId, sellerId);
       setSellers((prev) => prev.filter((s) => s.userId !== selectedSellerToRemove.userId));
-    } catch (err: any) {
-      setErrorMsg("Failed to remove seller " + (err.message || "Unknown error."));
-      setErrorOpen(true);
-    } finally {
-      setRemoveDialogOpen(false);
-      setSelectedSellerToRemove(null);
-    }
+    }, context);
   };
 
   return (
@@ -192,11 +203,18 @@ const StoreSellers = () => {
         Add Seller
       </Button>
 
+      {error && (
+        <ErrorDisplay
+          error={error}
+          variant="alert"
+          onClose={clearError}
+          showRetry={true}
+          onRetry={fetchSellers}
+        />
+      )}
+
       <Stack spacing={2} width="100%" maxWidth="500px">
-        {fetchError && (
-          <Typography color="error.main" align="center">{fetchError}</Typography>
-        )}
-        {!loading && !fetchError && sellers.map((seller) => (
+        {!loading && !error && sellers.map((seller) => (
           <SellerCard
             key={seller.userId}
             name={seller.name}
@@ -206,7 +224,7 @@ const StoreSellers = () => {
             onDeleteClick={() => handleDeleteSellerClick(seller)}
           />
         ))}
-        {!loading && !fetchError && sellers.length === 0 && (
+        {!loading && !error && sellers.length === 0 && (
           <Typography color="textSecondary" align="center">
             No sellers yet for this store.
           </Typography>
@@ -241,32 +259,6 @@ const StoreSellers = () => {
         onClose={() => setRemoveDialogOpen(false)}
         onConfirm={handleConfirmRemove}
       />
-
-      {/*Snackbar pop-up for error */}
-      <Snackbar
-      open={errorOpen}
-      autoHideDuration={6000}
-      onClose={() => setErrorOpen(false)}
-      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-    >
-      <Box
-        sx={{
-          backgroundColor: "#fdecea", // ⬅️ Lighter red background
-          color: "#611a15",           // ⬅️ Dark red text for readability
-          px: 2,
-          py: 1.5,
-          borderRadius: 1,
-          boxShadow: 3,
-          fontWeight: 500,
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-        }}
-      >
-        <span style={{ fontSize: "1.2rem" }}>❌</span> {errorMsg}
-      </Box>
-    </Snackbar>
-
     </Box>
   );
 };

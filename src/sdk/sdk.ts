@@ -20,6 +20,8 @@ import * as user from "./modules/user/user";
 import * as notifications from "./modules/notification/notification";
 
 import { TokenService } from "../shared/utils/token";
+import { ErrorHandler } from "../shared/utils/errorHandler";
+import { ErrorContext } from "../shared/types/errors";
 
 import * as dtos from "../shared/types/dtos";
 import * as requests from "../shared/types/requests";
@@ -47,8 +49,7 @@ export class SDK {
   public getPublicUserProfileDetails!: (
     id: string
   ) => Promise<dtos.PublicUserDto>;
-    public getPublicUserProfileDetailsByUsername!: (username: string) => Promise<dtos.PublicUserDto>;
-
+  public getPublicUserProfileDetailsByUsername!: (username: string, context?: ErrorContext) => Promise<dtos.PublicUserDto>;
 
   // Message SDK
   public createMessage!: (payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
@@ -162,45 +163,92 @@ export class SDK {
     return `${this.options.baseUrl.replace(/\/+$/, '')}/${endpoint.replace(/^\/+/, '')}`;
   }
 
-  public async post(endpoint: string, payload: any): Promise<Response> {
-    return await fetch(this.buildUrl(endpoint), {
-      method: "POST",
-      headers: this.getHeaders(),
-      body: JSON.stringify(payload),
-    });
+  private async handleResponse(response: Response, context?: ErrorContext): Promise<Response> {
+    if (!response.ok) {
+      const error = await ErrorHandler.handleResponseError(response, context);
+      throw error;
+    }
+    return response;
   }
 
-  public async patch(endpoint: string, payload: any): Promise<Response> {
-    return await fetch(this.buildUrl(endpoint), {
-      method: "PATCH",
-      headers: this.getHeaders(),
-      body: JSON.stringify(payload),
-    });
+  public async post(endpoint: string, payload: any, context?: ErrorContext): Promise<Response> {
+    try {
+      const response = await fetch(this.buildUrl(endpoint), {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify(payload),
+      });
+      return await this.handleResponse(response, context);
+    } catch (error) {
+      // If it's already an AppError, re-throw it
+      if (error instanceof Error && 'type' in error) {
+        throw error;
+      }
+      // Otherwise, process it as a network error
+      const appError = ErrorHandler.processError(error, context);
+      throw appError;
+    }
+  }
+
+  public async patch(endpoint: string, payload: any, context?: ErrorContext): Promise<Response> {
+    try {
+      const response = await fetch(this.buildUrl(endpoint), {
+        method: "PATCH",
+        headers: this.getHeaders(),
+        body: JSON.stringify(payload),
+      });
+      return await this.handleResponse(response, context);
+    } catch (error) {
+      if (error instanceof Error && 'type' in error) {
+        throw error;
+      }
+      const appError = ErrorHandler.processError(error, context);
+      throw appError;
+    }
   }
 
   public async get(
     endpoint: string,
-    params: Record<string, any>
+    params: Record<string, any>,
+    context?: ErrorContext
   ): Promise<Response> {
-    const queryString = new URLSearchParams(params).toString();
-    return await fetch(
-      `${this.buildUrl(endpoint)}?${queryString}`,
-      {
-        method: "GET",
-        headers: this.getHeaders(),
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await fetch(
+        `${this.buildUrl(endpoint)}?${queryString}`,
+        {
+          method: "GET",
+          headers: this.getHeaders(),
+        }
+      );
+      return await this.handleResponse(response, context);
+    } catch (error) {
+      if (error instanceof Error && 'type' in error) {
+        throw error;
       }
-    );
+      const appError = ErrorHandler.processError(error, context);
+      throw appError;
+    }
   }
 
-  public async delete(endpoint: string): Promise<Response> {
-    return await fetch(this.buildUrl(endpoint), {
-      method: "DELETE",
-      headers: this.getHeaders(),
-    });
+  public async delete(endpoint: string, context?: ErrorContext): Promise<Response> {
+    try {
+      const response = await fetch(this.buildUrl(endpoint), {
+        method: "DELETE",
+        headers: this.getHeaders(),
+      });
+      return await this.handleResponse(response, context);
+    } catch (error) {
+      if (error instanceof Error && 'type' in error) {
+        throw error;
+      }
+      const appError = ErrorHandler.processError(error, context);
+      throw appError;
+    }
   }
 }
 
-export const sdk: SDK = new SDK({
+export const sdk = new SDK({
   baseUrl: "http://localhost:8080",
 });
 

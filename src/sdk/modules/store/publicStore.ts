@@ -5,46 +5,41 @@ const publicStore: string = "public/stores";
 const seller: string = "sellers";
 
 export async function getStore(this: SDK, id: string): Promise<StoreDto> {
-    const response = await this.get(`${publicStore}/${id}`, {});
+    const response = await this.get(`${publicStore}/${id}`, {}, { 
+        action: 'getStore', 
+        resource: 'store', 
+        resourceId: id 
+    });
     
-    if(!response.ok) {
-        const error = await response.text();
-        throw new Error(`Error fetching store: ${error}`);
-    }
-
     const result = (await response.json()) as StoreDto;
     return result;
 }
 
 export async function getStores(this: SDK, pageable: Pageable): Promise<StoreDto[]> {
-    const response = await this.get(publicStore, pageable);
-    
-    if(!response.ok) {
-        const error = await response.text();
-        throw new Error(`Error fetching stores: ${error}`);
-    }
+    const response = await this.get(publicStore, pageable, { 
+        action: 'getStores', 
+        resource: 'stores' 
+    });
 
     const result = (await response.json()) as StoreDto[];
     return result;
 }
 
 export async function getStoreOfficials(this: SDK, storeId: string): Promise<PublicUserDto[]> {
-    const response = await this.get(`${publicStore}/${storeId}/${seller}`, {});
-    
-    if(!response.ok) {
-        const error = await response.text();
-        throw new Error(`Error fetching store officials: ${error}`);
-    }
+    const response = await this.get(`${publicStore}/${storeId}/${seller}`, {}, { 
+        action: 'getStoreOfficials', 
+        resource: 'store', 
+        resourceId: storeId 
+    });
 
     const result = (await response.json()) as PublicUserDto[];
     return result;
 }
 
 export async function getStorePermissions(this: SDK): Promise<string[]> {
-  const response = await this.get("stores/permissions", {});
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Error fetching store permissions: ${errorText}`);
-  }
+  const response = await this.get("stores/permissions", {}, { 
+    action: 'getStorePermissions', 
+    resource: 'storePermissions' 
+  });
   return (await response.json()) as string[];
 }

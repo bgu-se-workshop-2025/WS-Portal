@@ -79,7 +79,7 @@ const CartMenu: React.FC = () => {
           productTuples.map(async ({ productId }) => {
             if (!newProductNames[productId]) {
               try {
-                // Adjust this line if your SDK’s getProduct signature is different
+                // Adjust this line if your SDK's getProduct signature is different
                 const productDto = await sdk.getProduct(productId);
                 newProductNames[productId] = productDto.name;
               } catch {
@@ -152,7 +152,7 @@ const CartMenu: React.FC = () => {
             {!cartLoading && error && (
               <Box p={2}>
                 <Typography variant="body2" color="error">
-                  {error}
+                  {typeof error === 'string' ? error : error.message || 'An error occurred'}
                 </Typography>
               </Box>
             )}

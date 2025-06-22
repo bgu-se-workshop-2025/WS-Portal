@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 
 import Header from "./shared/components/layout/Header";
 import Footer from "./shared/components/layout/Footer";
+import ErrorBoundary from "./shared/components/ErrorBoundary";
 
 import StorePage from "./modules/store/StorePage";
 import LoginPage from "./modules/user/login/LoginPage";
@@ -28,40 +29,55 @@ const App: React.FC = () => {
   const showLayout = !noLayoutPaths.includes(pathname);
 
   return (
-    <>
-      {showLayout && <Header />}
-      <Box sx={{ overflowY: "auto" }}>
-        <Routes>
-          <Route path="/" element={<MainPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-             
-          <Route path="/cart" element={<CartMainPage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/store/:storeId/*" element={<StorePage />}>
-            <Route index element={<Navigate to="products" replace />} />
-            <Route path="products" element={<StoreProductsPage />} />
-            <Route path="sellers" element={<StoreSellersPage />} />
-            <Route path="settings" element={<StoreSettingsPage />} />
-            <Route path="discounts" element={<StoreDiscountsPage />} />
-          </Route>
+    <ErrorBoundary>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
+        {showLayout && <Header />}
+        <Box 
+          sx={{ 
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            overflowY: "auto"
+          }}
+        >
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+               
+            <Route path="/cart" element={<CartMainPage />} />
+            <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/store/:storeId/*" element={<StorePage />}>
+              <Route index element={<Navigate to="products" replace />} />
+              <Route path="products" element={<StoreProductsPage />} />
+              <Route path="sellers" element={<StoreSellersPage />} />
+              <Route path="settings" element={<StoreSettingsPage />} />
+              <Route path="discounts" element={<StoreDiscountsPage />} />
+            </Route>
 
-          <Route path="/payment" element={<PaymentPage />} />
+            <Route path="/payment" element={<PaymentPage />} />
 
-          <Route path="/notifications" element={<NotificationPage />} />
-          
-          <Route path="/admin" element={<RequireAdmin />}>
-            <Route index element={<AdminPage />} />
-          </Route>
-          <Route path="/profile" element={<UserProfilePage />}>
-            <Route element={<UserProfilePage />} />
-          </Route>
-          
-          <Route path="*" element={<MainPage />} />
-        </Routes>
+            <Route path="/notifications" element={<NotificationPage />} />
+            
+            <Route path="/admin" element={<RequireAdmin />}>
+              <Route index element={<AdminPage />} />
+            </Route>
+            <Route path="/profile" element={<UserProfilePage />}>
+              <Route element={<UserProfilePage />} />
+            </Route>
+            
+            <Route path="*" element={<MainPage />} />
+          </Routes>
+        </Box>
+        {showLayout && <Footer />}
       </Box>
-      {showLayout && <Footer />}
-    </>
+    </ErrorBoundary>
   );
 };
 

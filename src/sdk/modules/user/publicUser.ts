@@ -1,5 +1,6 @@
 import { SDK } from "../../sdk.ts";
 import { PublicUserDto } from "../../../shared/types/dtos.ts";
+import { ErrorContext } from "../../../shared/types/errors.ts";
 
 const controller = "public/users";
 
@@ -15,8 +16,8 @@ export async function getPublicUserProfileDetails(this: SDK, id: string): Promis
   return result;
 }
 
-export async function getPublicUserProfileDetailsByUsername(this: SDK, username: string): Promise<PublicUserDto> {
-  const response = await this.get(`${controller}/name/${username}`, {});
+export async function getPublicUserProfileDetailsByUsername(this: SDK, username: string, context?: ErrorContext): Promise<PublicUserDto> {
+  const response = await this.get(`${controller}/name/${username}`, {}, context);
 
   if (!response.ok) {
     const err = await response.text();
