@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState, useEffect, use } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -32,6 +32,8 @@ const UserProductCard: React.FC<{
 
   const { storeId } = useParams<{ storeId: string }>();
   const isUserAuthenticated = isAuthenticated();
+  // For auction products, we need to track the current top offer
+  const [currentTopOffer, setCurrentTopOffer] = useState<number | null>(null);
 
   // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
@@ -73,6 +75,14 @@ const UserProductCard: React.FC<{
       );
     }
   }, [currentQty, product.id, product.name, removeFromCart, updateQuantity]);
+
+  useEffect(() => {
+    if (product.auctionEndDate) {
+      sdk.getWinningBidPrice(product.id)
+        .then(setCurrentTopOffer)
+        .catch(() => setCurrentTopOffer(null));
+    }
+  }, [product.auctionEndDate, product.id]);
 
   return (
     <Card
