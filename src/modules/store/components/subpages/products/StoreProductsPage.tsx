@@ -10,6 +10,7 @@ import HeaderBar from "./components/HeaderBar";
 import ProductsGrid from "./components/ProductGrid";
 import PaginationBar from "./components/PaginationBar";
 import AddProductDialog from "./components/AddProductDialog";
+import { is } from "date-fns/locale";
 
 const StoreProducts: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();

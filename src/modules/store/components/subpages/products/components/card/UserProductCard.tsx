@@ -23,7 +23,7 @@ import {
   Snackbar
 } from "@mui/material";
 
-import { ProductDto, ShippingAddressDto, PaymentDetails, PaymentMethod } from "../../../../../../../shared/types/dtos";
+import { ProductDto, ShippingAddressDto, PaymentDetails, PaymentMethod, PublicUserDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
 import RatingComponent from "../../../../../../../shared/components/RatingComponent";
 import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
@@ -152,9 +152,12 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
               <Typography variant="body2">
                 <strong>Starting Price:</strong> ${product.price.toFixed(2)}
               </Typography>
-              <Typography variant="body2">
-                <strong>Auction Ends:</strong> {new Date(product.auctionEndDate).toLocaleString()}
-              </Typography>
+            <Typography variant="body2">
+              <strong>Current Top Offer:</strong>
+              {currentTopOffer !== null
+                ? ` $ ${currentTopOffer.toFixed(2)}`
+                : " No offers yet"}
+            </Typography>
             <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
               <TextField
                 size="small"
@@ -210,7 +213,7 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
           </Typography>
         )}
 
-        <Box
+        {!product.auctionEndDate && <Box
           sx={{
             mb: theme.spacing(1),
             mt: theme.spacing(2),
@@ -226,7 +229,7 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
             size="small"
             precision={0.1}
           />
-        </Box>
+        </Box>}
 
         {cartError && (
           <Typography
@@ -239,7 +242,7 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
         )}
       </CardContent>
 
-      <CardActions
+      {!product.auctionEndDate && <CardActions
         sx={{
           justifyContent: "center",
           alignItems: "center",
@@ -280,7 +283,7 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
         {cartLoading && (
           <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
         )}
-      </CardActions>
+      </CardActions>}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Enter Bid Details</DialogTitle>
         <DialogContent>
@@ -366,21 +369,9 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
               </Select>
             </FormControl>
             <TextField
-              label="External ID"
-              value={paymentDetails.externalId}
-              onChange={e => setPaymentDetails({ ...paymentDetails, externalId: e.target.value })}
-              fullWidth
-            />
-            <TextField
               label="Payer Email"
               value={paymentDetails.payerEmail}
               onChange={e => setPaymentDetails({ ...paymentDetails, payerEmail: e.target.value })}
-              fullWidth
-            />
-            <TextField
-              label="Payer ID"
-              value={paymentDetails.payerId}
-              onChange={e => setPaymentDetails({ ...paymentDetails, payerId: e.target.value })}
               fullWidth
             />
           </Box>
@@ -394,12 +385,6 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
               setBidLoading(true);
               setBidError(null);
               try {
-                await sdk.placeBid(product.id, {
-                  productId: product.id,
-                  bidPrice: Number(bidValue),
-                  shippingAddress,
-                  paymentDetails,
-                });
                 setDialogOpen(false);
                 setBidValue("");
                 setShippingAddress({
@@ -412,20 +397,36 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
                   apartmentNumber: "",
                   mailbox: "",
                 });
+                let profile: PublicUserDto | undefined = undefined;
+                try {
+                  profile = await sdk.getCurrentUserProfileDetails();
+                } catch (e) {
+                  console.error("Failed to fetch current user profile:", e);
+                }
+                if (!profile) {
+                  throw new Error("User profile not found. Please log in.");
+                }
                 setPaymentDetails({
                   paymentMethod: PaymentMethod.CREDIT_CARD,
-                  externalId: "",
+                  externalId: undefined,
                   payerEmail: "",
                   payerId: "",
+                });
+                await sdk.placeBid(product.id, {
+                  productId: product.id,
+                  bidderId: profile.id,
+                  bidPrice: Number(bidValue),
+                  shippingAddress,
+                  paymentDetails,
                 });
                 setSnackbarMessage("Bid placed successfully!");
                 setSnackbarSeverity("success");
                 setSnackbarOpen(true);
+
+                const newTopOffer = await sdk.getWinningBidPrice(product.id);
+                setCurrentTopOffer(newTopOffer);
               } catch (e: any) {
                 setBidError(e?.message || "Failed to place bid");
-                setSnackbarMessage(e?.message || "Failed to place bid");
-                setSnackbarSeverity("error");
-                setSnackbarOpen(true);
               } finally {
                 setBidLoading(false);
               }
@@ -444,7 +445,7 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
       </Dialog>
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={4000}
+        autoHideDuration={2000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >

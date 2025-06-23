@@ -137,7 +137,7 @@ export interface CartProductEntryDto {
 
 export interface PaymentDetails {
     paymentMethod: PaymentMethod;
-    externalId: string;
+    externalId?: string;
     payerEmail: string;
     payerId: string;
 }
@@ -174,7 +174,7 @@ export interface BidDto {
 export interface AuctionBidDto {
   id?: string;
   productId: string;
-  bidderId?: string;
+  bidderId: string;
   bidPrice: number;
   paymentDetails: PaymentDetails;
   shippingAddress: ShippingAddressDto;
