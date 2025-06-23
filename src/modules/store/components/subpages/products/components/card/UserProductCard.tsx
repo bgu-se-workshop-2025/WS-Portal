@@ -103,9 +103,20 @@ const UserProductCard: React.FC<{
         </Typography>
 
         <Box sx={{ mb: theme.spacing(1) }}>
-          <Typography variant="body2">
-            <strong>Price:</strong> ${product.price.toFixed(2)}
-          </Typography>
+          {product.auctionEndDate ? (
+            <>
+              <Typography variant="body2">
+                <strong>Starting Price:</strong> ${product.price.toFixed(2)}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Auction Ends:</strong> {new Date(product.auctionEndDate).toLocaleString()}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="body2">
+              <strong>Price:</strong> ${product.price.toFixed(2)}
+            </Typography>
+          )}
           <Typography variant="body2">
             <strong>Available:</strong> {product.quantity}
           </Typography>
