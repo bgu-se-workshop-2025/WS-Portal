@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, useEffect, use } from "react";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -9,9 +9,21 @@ import {
   useTheme,
   Box,
   CircularProgress,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Divider,
+  Alert,
+  Snackbar
 } from "@mui/material";
 
-import { ProductDto } from "../../../../../../../shared/types/dtos";
+import { ProductDto, ShippingAddressDto, PaymentDetails, PaymentMethod } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
 import RatingComponent from "../../../../../../../shared/components/RatingComponent";
 import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
@@ -32,8 +44,30 @@ const UserProductCard: React.FC<{
 
   const { storeId } = useParams<{ storeId: string }>();
   const isUserAuthenticated = isAuthenticated();
-  // For auction products, we need to track the current top offer
+  // For auction products:
   const [currentTopOffer, setCurrentTopOffer] = useState<number | null>(null);
+  const [bidValue, setBidValue] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddressDto>({
+    country: "",
+    city: "",
+    region: "",
+    street: "",
+    zipCode: "",
+    homeNumber: "",
+    apartmentNumber: "",
+    mailbox: "",});
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
+    paymentMethod: PaymentMethod.CREDIT_CARD,
+    externalId: "",
+    payerEmail: "",
+    payerId: "",
+  });
+  const [bidError, setBidError] = useState<string | null>(null);
+  const [bidLoading, setBidLoading] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
@@ -121,6 +155,38 @@ const UserProductCard: React.FC<{
               <Typography variant="body2">
                 <strong>Auction Ends:</strong> {new Date(product.auctionEndDate).toLocaleString()}
               </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+              <TextField
+                size="small"
+                label="Your Offer"
+                type="number"
+                value={bidValue}
+                onChange={e => setBidValue(e.target.value)}
+                sx={{ mr: 1, width: 120 }}
+              />
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => {
+                  setBidError(null);
+                  if (
+                    Number(bidValue) > (currentTopOffer ?? product.price)
+                  ) {
+                    setDialogOpen(true);
+                  } else {
+                    setBidError("Offer must be higher than current top offer");
+                  }
+                }}
+                disabled={bidLoading}
+              >
+                Add Offer
+              </Button>
+            </Box>
+            {bidError && (
+              <Typography variant="caption" color="error" sx={{ mt: 1 }}>
+                {bidError}
+              </Typography>
+            )}
             </>
           ) : (
             <Typography variant="body2">
@@ -215,6 +281,181 @@ const UserProductCard: React.FC<{
           <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
         )}
       </CardActions>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Enter Bid Details</DialogTitle>
+        <DialogContent>
+          {/* Shipping Address Section */}
+          <Typography variant="subtitle1" sx={{ mt: 1, mb: 1 }}>
+            Shipping Address
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            <TextField
+              label="Country"
+              value={shippingAddress.country}
+              onChange={e => setShippingAddress({ ...shippingAddress, country: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="City"
+              value={shippingAddress.city}
+              onChange={e => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Region"
+              value={shippingAddress.region}
+              onChange={e => setShippingAddress({ ...shippingAddress, region: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Street"
+              value={shippingAddress.street}
+              onChange={e => setShippingAddress({ ...shippingAddress, street: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Zip Code"
+              value={shippingAddress.zipCode}
+              onChange={e => setShippingAddress({ ...shippingAddress, zipCode: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Home Number"
+              value={shippingAddress.homeNumber}
+              onChange={e => setShippingAddress({ ...shippingAddress, homeNumber: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Apartment Number"
+              value={shippingAddress.apartmentNumber}
+              onChange={e => setShippingAddress({ ...shippingAddress, apartmentNumber: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Mailbox"
+              value={shippingAddress.mailbox}
+              onChange={e => setShippingAddress({ ...shippingAddress, mailbox: e.target.value })}
+              fullWidth
+            />
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Payment Details Section */}
+          <Typography variant="subtitle1" sx={{ mt: 1, mb: 1 }}>
+            Payment Details
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel id="payment-method-label">Payment Method</InputLabel>
+              <Select
+                labelId="payment-method-label"
+                value={paymentDetails.paymentMethod}
+                label="Payment Method"
+                onChange={e =>
+                  setPaymentDetails({
+                    ...paymentDetails,
+                    paymentMethod: Number(e.target.value) as PaymentMethod,
+                  })
+                }
+              >
+                <MenuItem value={PaymentMethod.CREDIT_CARD}>Credit Card</MenuItem>
+                <MenuItem value={PaymentMethod.PAYPAL}>PayPal</MenuItem>
+                <MenuItem value={PaymentMethod.APPLE_PAY}>Apple Pay</MenuItem>
+                <MenuItem value={PaymentMethod.GOOGLE_PAY}>Google Pay</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              label="External ID"
+              value={paymentDetails.externalId}
+              onChange={e => setPaymentDetails({ ...paymentDetails, externalId: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Payer Email"
+              value={paymentDetails.payerEmail}
+              onChange={e => setPaymentDetails({ ...paymentDetails, payerEmail: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              label="Payer ID"
+              value={paymentDetails.payerId}
+              onChange={e => setPaymentDetails({ ...paymentDetails, payerId: e.target.value })}
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)} disabled={bidLoading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={async () => {
+              setBidLoading(true);
+              setBidError(null);
+              try {
+                await sdk.placeBid(product.id, {
+                  productId: product.id,
+                  bidPrice: Number(bidValue),
+                  shippingAddress,
+                  paymentDetails,
+                });
+                setDialogOpen(false);
+                setBidValue("");
+                setShippingAddress({
+                  country: "",
+                  city: "",
+                  region: "",
+                  street: "",
+                  zipCode: "",
+                  homeNumber: "",
+                  apartmentNumber: "",
+                  mailbox: "",
+                });
+                setPaymentDetails({
+                  paymentMethod: PaymentMethod.CREDIT_CARD,
+                  externalId: "",
+                  payerEmail: "",
+                  payerId: "",
+                });
+                setSnackbarMessage("Bid placed successfully!");
+                setSnackbarSeverity("success");
+                setSnackbarOpen(true);
+              } catch (e: any) {
+                setBidError(e?.message || "Failed to place bid");
+                setSnackbarMessage(e?.message || "Failed to place bid");
+                setSnackbarSeverity("error");
+                setSnackbarOpen(true);
+              } finally {
+                setBidLoading(false);
+              }
+            }}
+            variant="contained"
+            disabled={bidLoading}
+          >
+            Submit Bid
+          </Button>
+        </DialogActions>
+        {bidError && (
+          <Typography variant="caption" color="error" sx={{ px: 2, pb: 2 }}>
+            {bidError}
+          </Typography>
+        )}
+      </Dialog>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Card>
   );
 };
