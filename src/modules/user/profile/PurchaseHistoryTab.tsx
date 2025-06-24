@@ -6,6 +6,52 @@ import { sdk } from '../../../sdk/sdk';
 
 const PAGE_SIZE = 25;
 
+// Helper functions for price calculations
+const calculateProductTotal = (product: any): number => {
+  return product.price * product.quantity;
+};
+
+const hasDiscount = (product: any): boolean => {
+  return product.discountPrice && product.discountPrice < product.price * product.quantity;
+};
+
+const getProductDisplayPrice = (product: any): React.ReactNode => {
+  const regularTotal = calculateProductTotal(product);
+  
+  if (hasDiscount(product)) {
+    return (
+      <>
+        <span style={{ textDecoration: "line-through", color: "#888" }}>
+          {regularTotal.toFixed(2)}₪
+        </span>
+        &nbsp;
+        <span style={{ color: "#388e3c", fontWeight: "bold" }}>
+          {product.discountPrice.toFixed(2)}₪
+        </span>
+      </>
+    );
+  }
+  
+  return <span>{regularTotal.toFixed(2)}₪</span>;
+};
+
+const calculateStoreTotal = (products: any[]): number => {
+  return products.reduce((sum: number, product: any) => {
+    if (hasDiscount(product)) {
+      return sum + product.discountPrice;
+    }
+    return sum + calculateProductTotal(product);
+  }, 0);
+};
+
+const calculateOrderTotal = (storeSnapshots: any[]): number => {
+  return storeSnapshots.reduce((orderSum: number, store: any) => {
+    const products = Array.isArray(store.products) ? store.products : [];
+    const storeTotal = calculateStoreTotal(products);
+    return orderSum + storeTotal;
+  }, 0);
+};
+
 const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoading, ordersError, cartSnapshots, liveStoreNames, setOrders, setLiveStoreNames }) => {
   return (
     <Box>
@@ -69,13 +115,8 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                       const products = Array.isArray(store.products) ? store.products : [];
                       const liveName = liveStoreNames[store.storeId];
                       const storeDisplayName = liveName || (store.storeName && store.storeName !== store.storeId ? store.storeName : null);
-                      // Calculate total order price for this store
-                      const totalOrderPrice = products.reduce((sum: number, product: any) => {
-                        if (product.discountPrice && product.discountPrice < product.price * product.quantity) {
-                          return sum + product.discountPrice;
-                        }
-                        return sum + (product.price * product.quantity);
-                      }, 0);
+                      const totalOrderPrice = calculateStoreTotal(products);
+                      
                       return (
                         <Box key={store.storeId} mb={2} pl={1}>
                           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#58a6ff', mb: 0.5, display: 'flex', alignItems: 'center' }}>
@@ -135,19 +176,7 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                                       × {product.quantity} @ {product.price ? product.price.toFixed(2) : '?'}₪ each
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                                      Total: {product.discountPrice && product.discountPrice < product.price * product.quantity ? (
-                                        <>
-                                          <span style={{ textDecoration: "line-through", color: "#888" }}>
-                                            {(product.price * product.quantity).toFixed(2)}₪
-                                          </span>
-                                          &nbsp;
-                                          <span style={{ color: "#388e3c", fontWeight: "bold" }}>
-                                            {product.discountPrice.toFixed(2)}₪
-                                          </span>
-                                        </>
-                                      ) : (
-                                        <span>{(product.price * product.quantity).toFixed(2)}₪</span>
-                                      )}
+                                      Total: {getProductDisplayPrice(product)}
                                     </Typography>
                                   </Box>
                                   <Box sx={{ ml: 2 }}>
@@ -196,18 +225,7 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                 <Divider sx={{ mt: 2, width: '100%', bgcolor: '#e0e7ef' }} />
                 {cartSnapshot && Array.isArray(cartSnapshot.storeSnapshots) && cartSnapshot.storeSnapshots.length > 0 && (
                   <Typography variant="body1" sx={{ fontWeight: 600, color: '#1976d2', mt: 2, mb: 1, textAlign: 'right' }}>
-                    Order total: {
-                      cartSnapshot.storeSnapshots.reduce((orderSum: number, store: any) => {
-                        const products = Array.isArray(store.products) ? store.products : [];
-                        const storeTotal = products.reduce((sum: number, product: any) => {
-                          if (product.discountPrice && product.discountPrice < product.price * product.quantity) {
-                            return sum + product.discountPrice;
-                          }
-                          return sum + (product.price * product.quantity);
-                        }, 0);
-                        return orderSum + storeTotal;
-                      }, 0).toFixed(2)
-                    }₪
+                    Order total: {calculateOrderTotal(cartSnapshot.storeSnapshots).toFixed(2)}₪
                   </Typography>
                 )}
               </ListItem>

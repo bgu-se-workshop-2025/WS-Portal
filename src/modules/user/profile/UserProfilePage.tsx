@@ -276,23 +276,6 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === 2 && <MyBidsTab {...tabProps} />}
         </Box>
       </Box>
-      <Box
-        component="footer"
-        position={{ xs: 'static', md: 'fixed' }}
-        left={0}
-        bottom={0}
-        width="100%"
-        py={2}
-        bgcolor="#fff"
-        textAlign="center"
-        zIndex={1300}
-        boxShadow={1}
-        sx={{ px: { xs: 1, md: 0 } }}
-      >
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: 11, sm: 13 } }}>
-          © 2025 Kaj-Kadir. All rights reserved.
-        </Typography>
-      </Box>
     </Box>
   );
 };
