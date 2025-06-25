@@ -33,7 +33,7 @@ const UserBidCard: React.FC<UserBidCardProps> = ({ bid, onAction }) => {
   }, [bid.productId, bid.storeId]);
 
   const handlePurchase = () => {
-    navigate(`/payment?mode=bid&bidId=${bid.id}`);
+    navigate(`/payment?bidId=${bid.id}`);
     onAction();
   };
 
