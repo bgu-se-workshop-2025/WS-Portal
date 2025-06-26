@@ -1,41 +1,48 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { OrderRequestDetails, UserOrderDto } from "../../../shared/types/dtos";
 import { sdk } from "../../../sdk/sdk";
+import { useAsyncOperation } from "../../../shared/hooks/useErrorHandler";
+import type { AppError } from "../../../shared/types/errors";
 
 interface UseOrderReturn {
     loading: boolean;
-    error: string | null;
-    createOrder: (
-        orderRequest: OrderRequestDetails
-    ) => Promise<UserOrderDto | undefined>;
+    error: AppError | null;
+    data: UserOrderDto | null;
+    createOrder: (orderRequest: OrderRequestDetails) => Promise<UserOrderDto | null>;
+    retry: () => Promise<void>;
+    clearError: () => void;
 }
 
 const useOrder = (): UseOrderReturn => {
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const {
+        data,
+        isLoading,
+        error,
+        execute,
+        retry,
+        clearError,
+        reset
+    } = useAsyncOperation<UserOrderDto>({
+        component: 'OrderPage',
+        operation: 'Create Order'
+    });
 
     const createOrder = useCallback(
-        async (orderRequest: OrderRequestDetails) => {
-            setLoading(true);
-            setError(null);
-            try {
-                const order = await sdk.createOrder(orderRequest);
-                return order;
-            } catch (err: any) {
-                console.error("Error creating order:", err);
-                setError(err.message || "Failed to create order");
-                return undefined;
-            } finally {
-                setLoading(false);
-            }
+        async (orderRequest: OrderRequestDetails): Promise<UserOrderDto | null> => {
+            return execute(async () => {
+                return await sdk.createOrder(orderRequest);
+            });
         },
-        []
+        [execute]
     );
 
     return {
-        loading,
+        loading: isLoading,
         error,
+        data,
         createOrder,
+        retry,
+        clearError
     };
 };
 

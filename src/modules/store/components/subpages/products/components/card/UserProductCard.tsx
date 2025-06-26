@@ -44,12 +44,6 @@ const UserProductCard: React.FC<{
 
   // When incrementing: if currentQty === 0, call addToCart; otherwise updateQuantity
   const handleIncrement = useCallback(async () => {
-    if (currentQty === product.quantity) {
-      console.log(
-        `Cannot add ${product.name} to cart: already at max quantity (${product.quantity})`
-      );
-      return;
-    }
     if (currentQty === 0) {
       await addToCart(storeId as string, product.id, 1);
       console.log(`Added ${product.name} to cart (quantity = 1)`);
