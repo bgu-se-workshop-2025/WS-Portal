@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -11,16 +10,9 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
-import { OrderRequestDetails, PaymentDetails, PaymentMethod, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
+import { OrderRequestDetails, PaymentDetails, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
 import useCart from '../../shared/hooks/useCart';
 import useOrder from './hooks/useOrder';
-
-const paymentMethods = [
-  { label: 'Credit Card', value: PaymentMethod.CREDIT_CARD },
-  { label: 'PayPal', value: PaymentMethod.PAYPAL },
-  { label: 'Apple Pay', value: PaymentMethod.APPLE_PAY },
-  { label: 'Google Pay', value: PaymentMethod.GOOGLE_PAY },
-];
 
 const PaymentPage: React.FC = () => {
   const cartHook = useCart();
@@ -30,10 +22,10 @@ const PaymentPage: React.FC = () => {
   const [success, setSuccess] = useState<UserOrderDto | undefined>(undefined);
 
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
-    paymentMethod: PaymentMethod.CREDIT_CARD,
     externalId: "",
     payerEmail: "",
     payerId: "",
+    paymentData: { "currency": "ILS" }
   });
 
   const [shippingAddress, setShippingAddress] = useState<ShippingAddressDto>({
@@ -51,14 +43,6 @@ const PaymentPage: React.FC = () => {
     setLoading(cartHook.loading)
     setError(cartHook.error ?? "")
   }, [cartHook.loading, cartHook.error]);
-
-  const handlePaymentDetailsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const choice = event.target.value;
-    const options = paymentMethods.filter((item) => item.label === choice);
-    if (options.length === 1) {
-      setPaymentDetails({ ...paymentDetails, paymentMethod: options[0].value })
-    }
-  };
 
   const handlePaymentEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -103,23 +87,69 @@ const PaymentPage: React.FC = () => {
         </Typography>
 
         <Stack spacing={2} mt={2}>
+          {/* I haven't made use of the update payment details since it uses a map and kinda complex */}
           <TextField
-            select
-            label="Payment Method"
-            name="paymentMethod"
-            value={paymentDetails.paymentMethod}
-            onChange={handlePaymentDetailsChange}
+            required
+            label="Card Owner Name"
+            name="cardOwnerName"
+            value={paymentDetails.paymentData["holder"]}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "holder": e.target.value } })}
             fullWidth
             disabled={loading}
-          >
-            {paymentMethods.map(method => (
-              <MenuItem key={method.value} value={method.value}>
-                {method.label}
-              </MenuItem>
-            ))}
-          </TextField>
+          />
 
           <TextField
+            required
+            label="Card Owner ID"
+            name="cardOwnerId"
+            value={paymentDetails.paymentData["id"]}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "id": e.target.value } })}
+            fullWidth
+            disabled={loading}
+          />
+
+          <TextField
+            required
+            label="Card Number"
+            name="cardNumber"
+            value={paymentDetails.paymentData["card_number"]}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "card_number": e.target.value } })}
+            fullWidth
+            disabled={loading}
+          />
+
+          <TextField
+            required
+            label="CVV"
+            name="cvv"
+            value={paymentDetails.paymentData["cvv"]}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "cvv": e.target.value } })}
+            fullWidth
+            disabled={loading}
+          />
+
+          <TextField
+            required
+            label="Expiration Month"
+            name="expirationMonth"
+            value={paymentDetails.paymentData["month"]}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "month": e.target.value } })}
+            fullWidth
+            disabled={loading}
+          />
+
+          <TextField
+            required
+            label="Expiration Year"
+            name="expirationYear"
+            value={paymentDetails.paymentData["year"]}
+            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "year": e.target.value } })}
+            fullWidth
+            disabled={loading}
+          />
+
+          <TextField
+            required
             label="Payer Email"
             name="payerEmail"
             value={paymentDetails.payerEmail}
