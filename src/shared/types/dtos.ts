@@ -185,6 +185,15 @@ export interface BidDto {
     price: number;
 }
 
+export interface AuctionBidDto {
+  id?: string;
+  productId: string;
+  bidderId?: string;
+  bidPrice: number;
+  paymentDetails: PaymentDetails;
+  shippingAddress: ShippingAddressDto;
+}
+
 export interface ProductSnapshotDto {
   id: string;
   productId: string;
