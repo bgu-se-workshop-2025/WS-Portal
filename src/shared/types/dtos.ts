@@ -184,3 +184,25 @@ export interface BidDto {
     productId: string;
     price: number;
 }
+
+export interface ProductSnapshotDto {
+  id: string;
+  productId: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  totalPrice: number;
+  discountPrice: number;
+  auctionEndDate?: string;
+}
+
+export interface StoreSnapshotDto {
+  id: string;
+  storeId: string;
+  name: string;
+  description: string;
+  products: ProductSnapshotDto[];
+  price: number;
+  discount: number;
+}
