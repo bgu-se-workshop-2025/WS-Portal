@@ -119,6 +119,12 @@ export interface OrderRequestDetails {
     shippingAddress: ShippingAddressDto;
 }
 
+export interface BidOrderRequestDetails {
+    bidId: string;
+    paymentDetails: PaymentDetails;
+    shippingAddress: ShippingAddressDto;
+}
+
 export interface CartDto {
     ownerId?: string;
     stores: CartStoreBasketDto[];

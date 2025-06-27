@@ -90,6 +90,7 @@ export class SDK {
 
   // Public Order SDK
   public createOrder!: (payload: dtos.OrderRequestDetails) => Promise<dtos.UserOrderDto>;
+  public createOrderForBid!: (payload: dtos.BidOrderRequestDetails) => Promise<dtos.UserOrderDto>;
 
   // Bidding SDK
   public createBidRequest!: (payload: dtos.BidRequestDto) => Promise<dtos.BidRequestDto>;
