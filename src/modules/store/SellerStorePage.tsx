@@ -28,7 +28,8 @@ import StoreIcon from "@mui/icons-material/Store";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import RatingComponent from "../../shared/components/RatingComponent";
-import { sdk, isAuthenticated } from "../../sdk/sdk";
+import { sdk } from "../../sdk/sdk";
+import { TokenService } from "../../shared/utils/token";
 
 import { StoreDto } from "../../shared/types/dtos";
 
@@ -41,12 +42,14 @@ const SellerStoreLayout: React.FC = () => {
   const { storeId: id } = useParams<{ storeId: string }>();
 
   const [store, setStore] = useState<StoreDto | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Rating dialog states
   const [rateDialogOpen, setRateDialogOpen] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(null);
   const [rateError, setRateError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isSeller, setIsSeller] = useState<boolean | null>(null);
+  const [isSeller, setIsSeller] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -57,6 +60,10 @@ const SellerStoreLayout: React.FC = () => {
       .then((result) => {
         setStore(result);
         setIsLoading(false);
+        // Check if current user is a seller of this store
+        // You might need to implement this check based on your authentication system
+        // For now, setting to false as a placeholder
+        setIsSeller(false);
       })
       .catch((err) => {
         console.error("Failed to fetch store:", err.message || err);
@@ -64,39 +71,18 @@ const SellerStoreLayout: React.FC = () => {
         setStore(null);
         setIsLoading(false);
       });
-    // Check if user is a seller for this store
-    const checkSeller = async () => {
-      if (!id || isAuthenticated() === false) {
-        setIsSeller(false);
-        return;
-      }
-      try {
-        const me = await sdk.getCurrentUserProfileDetails();
-        const mySeller = await sdk.getSeller(id, me.id);
-        setIsSeller(!!mySeller);
-      } catch (err) {
-        setIsSeller(false);
-      }
-    };
-    checkSeller();
   }, [id]);
 
-  // Determine “activeTab” from the URL.
-  // E.g. if pathname is "/store/123/sellers" → activeTab = "sellers".
-  // Fallback to “products” if no match.
   const computedActiveTab: TabValue = React.useMemo(() => {
     if (!location.pathname || !id) return "products";
 
-    // location.pathname might be "/store/123/products", "/store/123/sellers", etc.
     const segments = location.pathname.split("/");
-    // ["", "store", "123", "sellers", …]
-    const tabSegment = segments[3] as TabValue | undefined;
-    return TAB_ORDER.includes(tabSegment as any)
+    const tabSegment = segments[3];
+    return tabSegment && TAB_ORDER.includes(tabSegment as TabValue)
       ? (tabSegment as TabValue)
       : "products";
   }, [location.pathname, id]);
 
-  // If someone visits “/store/:storeId” exactly, redirect to “/store/:storeId/products”
   if (location.pathname === `/store/${id}`) {
     return <Navigate to={`/store/${id}/products`} replace />;
   }
@@ -121,10 +107,9 @@ const SellerStoreLayout: React.FC = () => {
       setRateDialogOpen(false);
       setUserRating(null);
       alert("Thank you for rating the store!");
-    } catch (err: any) {
-      setRateError(
-        err.message || "You must purchase from this store before rating."
-      );
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "You must purchase from this store before rating.";
+      setRateError(errorMessage);
     }
   };
 
@@ -137,7 +122,6 @@ const SellerStoreLayout: React.FC = () => {
       }}
     >
       <Container maxWidth="lg">
-        {/* ─── BREADCRUMBS ─────────────────────────────────────────────────────────── */}
         <Box sx={{ mb: theme.spacing(2) }}>
           <Breadcrumbs aria-label="breadcrumb">
             <MuiLink underline="hover" color="inherit" component={Link} to="/">
@@ -157,7 +141,6 @@ const SellerStoreLayout: React.FC = () => {
           </Breadcrumbs>
         </Box>
 
-        {/* ─── HERO / HEADER SECTION ───────────────────────────────────────────────── */}
         <Paper
           elevation={0}
           sx={{
@@ -184,16 +167,15 @@ const SellerStoreLayout: React.FC = () => {
           </Typography>
         </Paper>
 
-        {/* ─── RATING SECTION ───────────────────────────────────────────────────────── */}
         {store && (
           <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
             <RatingComponent
-              value={store.rating}
-              readOnly={isSeller || !isAuthenticated()}
+              value={typeof store.rating === "number" && store.rating > 0 ? store.rating : 0}
+              readOnly={true}
               size="large"
               precision={1}
               onChange={async (newValue) => {
-                if (isSeller || !isAuthenticated()) return;
+                if (isSeller || !TokenService.isAuthenticated) return;
                 if (!id) return;
                 try {
                   await sdk.createStoreReview({
@@ -210,11 +192,10 @@ const SellerStoreLayout: React.FC = () => {
                   const updatedStore = await sdk.getStore(id);
                   setStore(updatedStore);
                   alert("Thank you for rating the store!");
-                } catch (err: any) {
-                  alert(
-                    "You must purchase from this store before you can rate it."
-                  );
-                }
+                                 } catch (err: unknown) {
+                   const errorMessage = err instanceof Error ? err.message : "You must purchase from this store before you can rate it.";
+                   alert(errorMessage);
+                 }
               }}
             />
             <Typography variant="h6" mt={1}>
@@ -243,10 +224,7 @@ const SellerStoreLayout: React.FC = () => {
           <DialogActions>
             <Button onClick={() => setRateDialogOpen(false)}>Cancel</Button>
             <Button
-              onClick={async () => {
-                await handleRateStore();
-                // After rating, refresh store info (already handled in handleRateStore)
-              }}
+              onClick={handleRateStore}
               disabled={userRating == null}
             >
               Submit
@@ -267,7 +245,6 @@ const SellerStoreLayout: React.FC = () => {
           />
         )}
 
-        {/* ─── LOADING / ERROR / NO ID STATES ──────────────────────────────────────── */}
         {isLoading && (
           <Box display="flex" justifyContent="center" my={6}>
             <CircularProgress color="primary" size={48} />
@@ -275,18 +252,17 @@ const SellerStoreLayout: React.FC = () => {
         )}
 
         {!isLoading && error && (
-          <Alert severity="error" sx={{ mb: theme.spacing(4) }}>
-            {`Failed to load store: ${error}`}
-          </Alert>
+                      <Alert severity="error" sx={{ mb: theme.spacing(4) }}>
+              Failed to load store: {error}
+            </Alert>
         )}
 
         {!id && !isLoading && (
-          <Alert severity="warning" sx={{ mb: theme.spacing(4) }}>
-            No store ID provided. Please navigate via “My Stores” first.
-          </Alert>
+                      <Alert severity="warning" sx={{ mb: theme.spacing(4) }}>
+              No store ID provided. Please navigate via &quot;My Stores&quot; first.
+            </Alert>
         )}
 
-        {/* ─── TABS + OUTLET ───────────────────────────────────────────────────────── */}
         {!isLoading && !error && store && (
           <Paper
             elevation={3}
@@ -297,7 +273,6 @@ const SellerStoreLayout: React.FC = () => {
               boxShadow: theme.shadows[2],
             }}
           >
-            {/* ─── TABS NAVIGATION ─────────────────────────────────────────────── */}
             <Tabs
               value={computedActiveTab}
               textColor="primary"

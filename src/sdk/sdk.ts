@@ -123,6 +123,7 @@ export class SDK {
   public addProductToCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
   public removeProductFromCart!: (productId: string) => Promise<void>;
   public updateProductInCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
+  public getCartSnapshotById!: (snapshotId: string) => Promise<any>;
 
   // Notification SDK
   public getNotifications!: (payload: dtos.Pageable) => Promise<responses.NotificationPayload[]>;
