@@ -11,7 +11,7 @@ import {
   Alert,
 } from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
-import type { StoreDto } from "../../../../shared/types/dtos";
+import type { StoreDto, SellerDto } from "../../../../shared/types/dtos";
 
 const StoreSettings: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
@@ -23,6 +23,35 @@ const StoreSettings: React.FC = () => {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [isCreator, setIsCreator] = useState(false);
+
+  // Check if current user is the store creator
+  useEffect(() => {
+    const checkIfCreator = async () => {
+      if (!storeId) return;
+
+      try {
+        // Get current user information
+        const currentUser = await sdk.getCurrentUserProfileDetails();
+
+        // Get current user's seller information for this store
+        const sellerInfo: SellerDto = await sdk.getSeller(storeId, currentUser.id);
+        
+        // The creator is the seller who has no employer (employerSellerId is empty or equals their own id)
+        // or the seller who is their own employer (root of the seller hierarchy)
+        const isStoreCreator = !sellerInfo.employerSellerId || 
+                              sellerInfo.employerSellerId === sellerInfo.id ||
+                              sellerInfo.employerSellerId === currentUser.id;
+        
+        setIsCreator(isStoreCreator);
+      } catch {
+        console.log("User is not a seller of this store or error checking creator status");
+        setIsCreator(false);
+      }
+    };
+
+    checkIfCreator();
+  }, [storeId]);
 
   useEffect(() => {
     if (!storeId) return;
@@ -61,7 +90,7 @@ const StoreSettings: React.FC = () => {
       setTimeout(() => {
         navigate("/");
       }, 1500);
-    } catch (err) {
+    } catch {
       setMessage({ type: "error", text: "Failed to close store." });
     } finally {
       setLoading(false);
@@ -105,14 +134,16 @@ const StoreSettings: React.FC = () => {
           >
             {loading ? "Saving…" : "Save"}
           </Button>
-          <Button
-            variant="outlined"
-            color="error"
-            onClick={handleClose}
-            disabled={loading}
-          >
-            Close Store
-          </Button>
+          {isCreator && (
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleClose}
+              disabled={loading}
+            >
+              Close Store
+            </Button>
+          )}
         </CardActions>
       </Card>
     </Box>
