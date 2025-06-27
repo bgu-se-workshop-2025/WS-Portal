@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { Container, Typography, CircularProgress, Alert, Grid } from '@mui/material';
+import { Container, Typography, CircularProgress, Alert, Grid, Box } from '@mui/material';
 import useBid from '../hooks/useBid';
 import UserBidRequestCard from '../components/UserBidRequestCard';
 import { Pageable } from '../../../shared/types/dtos';
@@ -28,10 +28,23 @@ const UserBidRequestPage: React.FC = () => {
         My Bid Requests
       </Typography>
 
-      {loading.list && <CircularProgress />}
-      {error && <Alert severity="error">{error}</Alert>}
-      {!loading && !error && requests.length === 0 && (
-        <Typography>No bid requests found.</Typography>
+      {loading.list && (
+        <Box textAlign="center" my={2}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* Display only when fully loaded, no error, and no requests */}
+      {!loading.list && !error && requests.length === 0 && (
+        <Typography variant="body1" sx={{ mt: 2 }}>
+          No bid requests found.
+        </Typography>
       )}
 
       <Grid container spacing={2} mt={2}>
