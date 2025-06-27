@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -9,7 +9,11 @@ import {
   useTheme,
   Box,
   CircularProgress,
+  IconButton,
+  Tooltip,
+  Snackbar,
 } from "@mui/material";
+import { ContentCopy, Check } from "@mui/icons-material";
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
@@ -21,6 +25,9 @@ const UserProductCard: React.FC<{
   setUpdateProducts?: React.Dispatch<React.SetStateAction<boolean>>;
 }> = ({ product, setUpdateProducts }) => {
   const theme = useTheme();
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [copied, setCopied] = useState(false);
+  
   const {
     cart,
     addToCart,
@@ -74,127 +81,167 @@ const UserProductCard: React.FC<{
     }
   }, [currentQty, product.id, product.name, removeFromCart, updateQuantity]);
 
+  const handleCopyId = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(product.id);
+      setCopied(true);
+      setCopySuccess(true);
+      setTimeout(() => setCopied(false), 1000);
+      setTimeout(() => setCopySuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to copy product ID:', err);
+    }
+  }, [product.id]);
+
   return (
-    <Card
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        borderRadius: theme.shape.borderRadius * 2,
-        boxShadow: theme.shadows[1],
-        transition: "transform 0.2s, box-shadow 0.2s",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: theme.shadows[4],
-        },
-      }}
-    >
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
-          {product.name}
-        </Typography>
-        <Typography
-          variant="body2"
-          paragraph
-          noWrap
-          sx={{ color: theme.palette.text.secondary }}
-        >
-          {product.description}
-        </Typography>
-
-        <Box sx={{ mb: theme.spacing(1) }}>
-          <Typography variant="body2">
-            <strong>Price:</strong> ${product.price.toFixed(2)}
-          </Typography>
-          <Typography variant="body2">
-            <strong>Available:</strong> {product.quantity}
-          </Typography>
-        </Box>
-
-        {product.categories.length > 0 && (
-          <Typography variant="body2">
-            <strong>Categories:</strong> {product.categories.join(", ")}
-          </Typography>
-        )}
-        {product.auctionEndDate && (
-          <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
-            <strong>Auction Ends:</strong>{" "}
-            {new Date(product.auctionEndDate).toLocaleString()}
-          </Typography>
-        )}
-
-        <Box
-          sx={{
-            mb: theme.spacing(1),
-            mt: theme.spacing(2),
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {/* Always show partial stars for viewing */}
-          <RatingComponent
-            value={product.rating}
-            readOnly={true}
-            size="small"
-            precision={0.1}
-          />
-        </Box>
-
-        {cartError && (
-          <Typography
-            variant="caption"
-            color="error"
-            sx={{ mt: theme.spacing(1), display: "block" }}
-          >
-            {cartError}
-          </Typography>
-        )}
-      </CardContent>
-
-      <CardActions
+    <>
+      <Card
         sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          px: theme.spacing(2),
-          pb: theme.spacing(2),
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: theme.shape.borderRadius * 2,
+          boxShadow: theme.shadows[1],
+          transition: "transform 0.2s, box-shadow 0.2s",
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: theme.shadows[4],
+          },
         }}
       >
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={handleDecrement}
-          disabled={cartLoading || currentQty === 0}
-          sx={{ minWidth: 32, p: 0 }}
-        >
-          –
-        </Button>
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
+            {product.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            paragraph
+            noWrap
+            sx={{ color: theme.palette.text.secondary }}
+          >
+            {product.description}
+          </Typography>
 
-        <Box
+          <Box sx={{ mb: theme.spacing(1) }}>
+            <Typography variant="body2">
+              <strong>Price:</strong> ${product.price.toFixed(2)}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Available:</strong> {product.quantity}
+            </Typography>
+          </Box>
+
+          {product.categories.length > 0 && (
+            <Typography variant="body2">
+              <strong>Categories:</strong> {product.categories.join(", ")}
+            </Typography>
+          )}
+          {product.auctionEndDate && (
+            <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
+              <strong>Auction Ends:</strong>{" "}
+              {new Date(product.auctionEndDate).toLocaleString()}
+            </Typography>
+          )}
+
+          <Box
+            sx={{
+              mb: theme.spacing(1),
+              mt: theme.spacing(2),
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            {/* Always show partial stars for viewing */}
+            <RatingComponent
+              value={product.rating}
+              readOnly={true}
+              size="small"
+              precision={0.1}
+            />
+          </Box>
+
+          {cartError && (
+            <Typography
+              variant="caption"
+              color="error"
+              sx={{ mt: theme.spacing(1), display: "block" }}
+            >
+              {cartError}
+            </Typography>
+          )}
+        </CardContent>
+
+        <CardActions
           sx={{
-            width: 32,
-            textAlign: "center",
-            mx: theme.spacing(1),
+            justifyContent: "space-between",
+            alignItems: "center",
+            px: theme.spacing(2),
+            pb: theme.spacing(2),
           }}
         >
-          <Typography variant="body2">{currentQty}</Typography>
-        </Box>
+          <Tooltip title="Copy Product ID">
+            <IconButton
+              size="small"
+              onClick={handleCopyId}
+              sx={{
+                color: copied ? theme.palette.success.main : theme.palette.text.secondary,
+                '&:hover': {
+                  backgroundColor: theme.palette.action.hover,
+                },
+              }}
+            >
+              {copied ? <Check /> : <ContentCopy />}
+            </IconButton>
+          </Tooltip>
 
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={handleIncrement}
-          disabled={cartLoading}
-          sx={{ minWidth: 32, p: 0 }}
-        >
-          +
-        </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleDecrement}
+              disabled={cartLoading || currentQty === 0}
+              sx={{ minWidth: 32, p: 0 }}
+            >
+              –
+            </Button>
 
-        {cartLoading && (
-          <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
-        )}
-      </CardActions>
-    </Card>
+            <Box
+              sx={{
+                width: 32,
+                textAlign: "center",
+                mx: theme.spacing(1),
+              }}
+            >
+              <Typography variant="body2">{currentQty}</Typography>
+            </Box>
+
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleIncrement}
+              disabled={cartLoading}
+              sx={{ minWidth: 32, p: 0 }}
+            >
+              +
+            </Button>
+
+            {cartLoading && (
+              <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
+            )}
+          </Box>
+        </CardActions>
+      </Card>
+
+      {/* Copy Success Snackbar */}
+      <Snackbar
+        open={copySuccess}
+        autoHideDuration={3000}
+        onClose={() => setCopySuccess(false)}
+        message="Product ID copied to clipboard!"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+    </>
   );
 };
 
