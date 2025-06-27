@@ -20,7 +20,8 @@ import {
   MenuItem,
   Divider,
   Alert,
-  Snackbar
+  Snackbar,
+  Stack
 } from "@mui/material";
 
 import { ProductDto, ShippingAddressDto, PaymentDetails, PaymentMethod, PublicUserDto } from "../../../../../../../shared/types/dtos";
@@ -62,6 +63,7 @@ const UserProductCard: React.FC<{
     externalId: "",
     payerEmail: "",
     payerId: "",
+    paymentData: { "currency": "ILS" }
   });
   const [bidError, setBidError] = useState<string | null>(null);
   const [bidLoading, setBidLoading] = useState(false);
@@ -293,48 +295,56 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
             <TextField
+              required
               label="Country"
               value={shippingAddress.country}
               onChange={e => setShippingAddress({ ...shippingAddress, country: e.target.value })}
               fullWidth
             />
             <TextField
+              required
               label="City"
               value={shippingAddress.city}
               onChange={e => setShippingAddress({ ...shippingAddress, city: e.target.value })}
               fullWidth
             />
             <TextField
+              required
               label="Region"
               value={shippingAddress.region}
               onChange={e => setShippingAddress({ ...shippingAddress, region: e.target.value })}
               fullWidth
             />
             <TextField
+              required
               label="Street"
               value={shippingAddress.street}
               onChange={e => setShippingAddress({ ...shippingAddress, street: e.target.value })}
               fullWidth
             />
             <TextField
+              required
               label="Zip Code"
               value={shippingAddress.zipCode}
               onChange={e => setShippingAddress({ ...shippingAddress, zipCode: e.target.value })}
               fullWidth
             />
             <TextField
+              required
               label="Home Number"
               value={shippingAddress.homeNumber}
               onChange={e => setShippingAddress({ ...shippingAddress, homeNumber: e.target.value })}
               fullWidth
             />
             <TextField
+              required
               label="Apartment Number"
               value={shippingAddress.apartmentNumber}
               onChange={e => setShippingAddress({ ...shippingAddress, apartmentNumber: e.target.value })}
               fullWidth
             />
             <TextField
+              required
               label="Mailbox"
               value={shippingAddress.mailbox}
               onChange={e => setShippingAddress({ ...shippingAddress, mailbox: e.target.value })}
@@ -349,27 +359,64 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
             Payment Details
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel id="payment-method-label">Payment Method</InputLabel>
-              <Select
-                labelId="payment-method-label"
-                value={paymentDetails.paymentMethod}
-                label="Payment Method"
-                onChange={e =>
-                  setPaymentDetails({
-                    ...paymentDetails,
-                    paymentMethod: Number(e.target.value) as PaymentMethod,
-                  })
-                }
-              >
-                <MenuItem value={PaymentMethod.CREDIT_CARD}>Credit Card</MenuItem>
-                <MenuItem value={PaymentMethod.PAYPAL}>PayPal</MenuItem>
-                <MenuItem value={PaymentMethod.APPLE_PAY}>Apple Pay</MenuItem>
-                <MenuItem value={PaymentMethod.GOOGLE_PAY}>Google Pay</MenuItem>
-              </Select>
-            </FormControl>
             <TextField
+              required
+              label="Card Owner Name"
+              name="cardOwnerName"
+              value={paymentDetails.paymentData["holder"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "holder": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Card Owner ID"
+              name="cardOwnerId"
+              value={paymentDetails.paymentData["id"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "id": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Card Number"
+              name="cardNumber"
+              value={paymentDetails.paymentData["card_number"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "card_number": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="CVV"
+              name="cvv"
+              value={paymentDetails.paymentData["cvv"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "cvv": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Expiration Month"
+              name="expirationMonth"
+              value={paymentDetails.paymentData["month"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "month": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Expiration Year"
+              name="expirationYear"
+              value={paymentDetails.paymentData["year"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "year": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
               label="Payer Email"
+              name="payerEmail"
               value={paymentDetails.payerEmail}
               onChange={e => setPaymentDetails({ ...paymentDetails, payerEmail: e.target.value })}
               fullWidth
@@ -406,12 +453,6 @@ const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("s
                 if (!profile) {
                   throw new Error("User profile not found. Please log in.");
                 }
-                setPaymentDetails({
-                  paymentMethod: PaymentMethod.CREDIT_CARD,
-                  externalId: undefined,
-                  payerEmail: "",
-                  payerId: "",
-                });
                 await sdk.placeBid(product.id, {
                   productId: product.id,
                   bidderId: profile.id,
