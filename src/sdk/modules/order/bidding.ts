@@ -167,3 +167,15 @@ export async function deleteBid(this: SDK, bidRequestId: string): Promise<void> 
         throw new Error(`Failed to delete bid: ${error}`);
     }
 }
+
+export async function getSellersRemaining(this: SDK, bidRequestId: string): Promise<String[]> {
+    const response = await this.get(`${biddingController}/requests/${bidRequestId}/sellers`, {});
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to get sellers remaining: ${error}`);
+    }
+
+    const result = (await response.json()) as string[];
+    return result;
+}

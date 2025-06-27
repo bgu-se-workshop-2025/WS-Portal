@@ -107,6 +107,7 @@ export class SDK {
   public getBidRequestsOfStore!: (storeId: string, payload: dtos.Pageable) => Promise<dtos.BidRequestDto[]>;
   public deleteBidRequest!: (bidRequestId: string) => Promise<void>;
   public deleteBid!: (bidRequestId: string) => Promise<void>;
+  public getSellersRemaining!: (bidRequestId: string) => Promise<String[]>;
 
   // Public Review SDK
   public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;

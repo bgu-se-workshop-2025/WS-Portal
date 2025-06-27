@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card, CardContent, Typography, Box, Button,
   Dialog, DialogTitle, DialogContent, DialogActions,
   Chip, useTheme
 } from '@mui/material';
 import { BidRequestDto } from '../../../shared/types/dtos';
-import { sdk } from '../../../sdk/sdk';
+import useBid from '../hooks/useBid';
 
 const statusColor: Record<BidRequestDto['requestStatus'], any> = {
   PENDING: 'default',
@@ -23,31 +23,31 @@ interface Props {
 
 const UserBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
   const theme = useTheme();
+  const { cancelBidRequest, loading } = useBid();
   const [confirm, setConfirm] = useState(false);
 
-  const [productName, setProductName] = useState<string>(request.productId);
-  const [storeName, setStoreName] = useState<string>(request.storeId);
+  const [productName, setProductName] = useState(request.productId);
+  const [storeName, setStoreName] = useState(request.storeId);
 
-  // Fetch product and store names
   useEffect(() => {
-    sdk.getProduct(request.productId)
-      .then((p) => setProductName(p.name))
-      .catch(() => setProductName(request.productId));
-
-    sdk.getStore(request.storeId)
-      .then((s) => setStoreName(s.name))
-      .catch(() => setStoreName(request.storeId));
+    // Fetch product/store names
+    import('../../../sdk/sdk').then(({ sdk }) => {
+      sdk.getProduct(request.productId)
+        .then(p => setProductName(p.name))
+        .catch(() => {});
+      sdk.getStore(request.storeId)
+        .then(s => setStoreName(s.name))
+        .catch(() => {});
+    });
   }, [request.productId, request.storeId]);
 
-  const cancelRequest = async () => {
-    try {
-      await sdk.cancelBidRequest(request.bidRequestId);
-      onChanged();
-      setConfirm(false);
-    } catch (e: any) {
-      console.error(e);
-      alert(e.message || 'Failed to cancel request');
-    }
+  const isFinal = ['REJECTED', 'APPROVED', 'CANCELLED'].includes(request.requestStatus);
+  const isBusy = loading.action;
+
+  const handleCancel = async () => {
+    await cancelBidRequest(request.bidRequestId);
+    setConfirm(false);
+    onChanged();
   };
 
   return (
@@ -79,27 +79,28 @@ const UserBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
             />
           </Box>
         </CardContent>
+
         <Box sx={{ p: 2 }}>
           <Button
             variant="outlined"
             color="error"
             fullWidth
-            disabled={['REJECTED', 'APPROVED', 'CANCELLED'].includes(request.requestStatus)}
+            disabled={isFinal || isBusy}
             onClick={() => setConfirm(true)}
           >
-            Cancel Request
+            {isBusy ? 'Cancelling…' : 'Cancel Request'}
           </Button>
         </Box>
       </Card>
 
-      <Dialog open={confirm} onClose={() => setConfirm(false)}>
+      <Dialog open={confirm} onClose={() => setConfirm(false)} fullWidth maxWidth="xs">
         <DialogTitle>Cancel Bid Request?</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to cancel this bid request?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirm(false)}>No</Button>
-          <Button color="error" variant="contained" onClick={cancelRequest}>
+          <Button onClick={() => setConfirm(false)} disabled={isBusy}>No</Button>
+          <Button color="error" variant="contained" onClick={handleCancel} disabled={isBusy}>
             Yes, Cancel
           </Button>
         </DialogActions>
