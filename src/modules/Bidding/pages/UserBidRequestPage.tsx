@@ -36,7 +36,7 @@ const UserBidRequestPage: React.FC = () => {
 
       <Grid container spacing={2} mt={2}>
         {requests.map(req => (
-          <Grid container size={{xs: 12, sm: 6, md: 4, lg: 3, xl: 2}} key={req.bidRequestId}>
+          <Grid container size={{xs: 12, sm: 6, md: 4, lg: 3, xl: 2.4}} key={req.bidRequestId}>
             <UserBidRequestCard request={req} onChanged={fetchRequests} />
           </Grid>
         ))}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card, CardContent, Typography, Box, Stack,
   Button, Dialog, DialogTitle, DialogContent, DialogActions,
@@ -24,13 +24,7 @@ interface Props {
 
 const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
   const theme = useTheme();
-  const {
-    acceptBidRequest,
-    rejectBidRequest,
-    submitAlternativePrice,
-    getSellersRemaining,
-    remainingSellers,
-  } = useBid();
+  const { acceptBidRequest, rejectBidRequest, submitAlternativePrice } = useBid();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [priceStr, setPriceStr] = useState('');
@@ -40,22 +34,20 @@ const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
 
   const isFinal = ['REJECTED', 'APPROVED', 'CANCELLED'].includes(request.requestStatus);
 
-  // Fetch display names once
   useEffect(() => {
-    sdk.getProduct(request.productId).then(p => setProductName(p.name)).catch(() => {});
-    sdk.getPublicUserProfileDetails(request.userId).then(u => setUserName(u.username)).catch(() => {});
-    sdk.getStore(request.storeId).then(s => setStoreName(s.name)).catch(() => {});
-    getSellersRemaining(request.bidRequestId);
-  }, [request.bidRequestId, request.productId, request.userId, request.storeId, getSellersRemaining]);
-
-  const sellersLeft = remainingSellers[request.bidRequestId] || [];
-
-  // disable buttons if this seller already accepted
-  const disabledButtons = isFinal || sellersLeft.length === 0;
+    sdk.getProduct(request.productId)
+      .then(p => setProductName(p.name))
+      .catch(() => {});
+    sdk.getPublicUserProfileDetails(request.userId)
+      .then(u => setUserName(u.username))
+      .catch(() => {});
+    sdk.getStore(request.storeId)
+      .then(s => setStoreName(s.name))
+      .catch(() => {});
+  }, [request.productId, request.userId, request.storeId]);
 
   const handleAccept = async () => {
     await acceptBidRequest(request.bidRequestId);
-    await getSellersRemaining(request.bidRequestId);
     onChanged();
   };
 
@@ -81,11 +73,14 @@ const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          transition: theme.transitions.create(['transform','box-shadow'], {
+          transition: theme.transitions.create(['transform', 'box-shadow'], {
             duration: theme.transitions.duration.standard,
             easing: theme.transitions.easing.easeInOut,
           }),
-          '&:hover': { boxShadow: theme.shadows[6], transform: 'translateY(-4px)' },
+          '&:hover': {
+            boxShadow: theme.shadows[6],
+            transform: 'translateY(-4px)',
+          },
         }}
       >
         <CardContent sx={{ flexGrow: 1 }}>
@@ -94,30 +89,40 @@ const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
           <Typography variant="body2">Store: {storeName}</Typography>
           <Typography variant="body1" mt={1}><strong>Price:</strong> ${request.price.toFixed(2)}</Typography>
           <Box mt={1}>
-            <Chip label={request.requestStatus.replace(/_/g, ' ')} color={statusColor[request.requestStatus]} variant="outlined" />
+            <Chip
+              label={request.requestStatus.replace(/_/g, ' ')}
+              color={statusColor[request.requestStatus]}
+              variant="outlined"
+            />
           </Box>
         </CardContent>
 
         <Box sx={{ p: 2 }}>
           <Stack spacing={1}>
             <Stack direction="row" spacing={1}>
-              <Button variant="contained" color="success"
-                disabled={disabledButtons}
+              <Button
+                variant="contained"
+                color="success"
+                disabled={isFinal}
                 onClick={handleAccept}
                 fullWidth
               >
                 Accept
               </Button>
-              <Button variant="outlined" color="error"
-                disabled={disabledButtons}
+              <Button
+                variant="outlined"
+                color="error"
+                disabled={isFinal}
                 onClick={handleReject}
                 fullWidth
               >
                 Reject
               </Button>
             </Stack>
-            <Button variant="outlined"
-              disabled={disabledButtons}
+
+            <Button
+              variant="outlined"
+              disabled={isFinal}
               onClick={() => setDialogOpen(true)}
               fullWidth
             >
@@ -130,8 +135,14 @@ const StoreBidRequestCard: React.FC<Props> = ({ request, onChanged }) => {
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>Suggest Price</DialogTitle>
         <DialogContent>
-          <TextField label="New Price" type="number" fullWidth margin="normal"
-            value={priceStr} onChange={e => setPriceStr(e.target.value)} />
+          <TextField
+            label="New Price"
+            type="number"
+            fullWidth
+            margin="normal"
+            value={priceStr}
+            onChange={e => setPriceStr(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>Cancel</Button>

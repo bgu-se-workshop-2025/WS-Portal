@@ -5,6 +5,7 @@ import {
   CardActions,
   Typography,
   Button,
+  Alert,
   useTheme
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -25,16 +26,17 @@ const UserBidCard: React.FC<UserBidCardProps> = ({ bid, onAction }) => {
   useEffect(() => {
     sdk.getProduct(bid.productId)
       .then(p => setProductName(p.name))
-      .catch(() => {}); // fallback to ID
-
+      .catch(() => {});
     sdk.getStore(bid.storeId)
       .then(s => setStoreName(s.name))
-      .catch(() => {}); // fallback to ID
+      .catch(() => {});
   }, [bid.productId, bid.storeId]);
 
   const handlePurchase = () => {
-    navigate(`/payment?bidId=${bid.id}`);
-    onAction();
+    if (!bid.isPurchased) {
+      navigate(`/payment?bidId=${bid.id}`);
+      onAction();
+    }
   };
 
   return (
@@ -45,7 +47,7 @@ const UserBidCard: React.FC<UserBidCardProps> = ({ bid, onAction }) => {
         flexDirection: 'column',
         justifyContent: 'space-between',
         backgroundColor: '#fff',
-        transition: 'transform 0.2s, boxShadow 0.2s',
+        transition: 'transform 0.2s, box-shadow 0.2s',
         '&:hover': {
           boxShadow: theme.shadows[6],
           transform: 'translateY(-4px)',
@@ -62,15 +64,22 @@ const UserBidCard: React.FC<UserBidCardProps> = ({ bid, onAction }) => {
         <Typography variant="body1" mt={1}>
           Final Price: ${bid.price.toFixed(2)}
         </Typography>
+        {bid.isPurchased && (
+          <Alert sx={{ mt: 2 }} severity="success">
+            Purchased ✅
+          </Alert>
+        )}
       </CardContent>
+
       <CardActions sx={{ px: 2, pb: 2 }}>
         <Button
           variant="contained"
           color="primary"
           onClick={handlePurchase}
           fullWidth
+          disabled={bid.isPurchased}
         >
-          Purchase
+          {bid.isPurchased ? 'Purchased' : 'Purchase'}
         </Button>
       </CardActions>
     </Card>

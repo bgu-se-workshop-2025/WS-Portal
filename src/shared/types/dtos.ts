@@ -178,5 +178,5 @@ export interface BidDto {
     productId: string;
     price: number;
     storeId: string;
-    isPurcheased: boolean;
+    isPurchased: boolean;
 }

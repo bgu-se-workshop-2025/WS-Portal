@@ -1,38 +1,17 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import {
-  Container,
-  Typography,
-  CircularProgress,
-  Alert,
-  Grid,
-} from '@mui/material';
-import { sdk } from '../../../sdk/sdk';
-import { BidDto, Pageable } from '../../../shared/types/dtos';
+import React, { useEffect, useCallback } from 'react';
+import { Container, Typography, CircularProgress, Alert, Grid, Box } from '@mui/material';
 import UserBidCard from '../components/UserBidCard';
+import useBid from '../hooks/useBid';
+import { Pageable } from '../../../shared/types/dtos';
 
 const PAGE: Pageable = { page: 0, size: 20 };
 
 const UserBidsPage: React.FC = () => {
-  const [bids, setBids] = useState<BidDto[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { getBidsOfUser, bids, loading, error } = useBid();
 
-  const fetchBids = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { id: userId } = await sdk.getCurrentUserProfileDetails();
-      const data = await sdk.getBidsOfUser(userId, PAGE);
-      setBids(data);
-    } catch (err: any) {
-        console.log("Reached here");
-      console.error('Error fetching user bids:', err);
-      setError(err.message);
-      setBids([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchBids = useCallback(() => {
+    getBidsOfUser(PAGE);
+  }, [getBidsOfUser]);
 
   useEffect(() => {
     fetchBids();
@@ -40,15 +19,29 @@ const UserBidsPage: React.FC = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>My Bids</Typography>
-      {loading && <CircularProgress />}
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-      {!loading && !error && bids.length === 0 && (
-        <Typography variant="body1" mt={2}>No bids found.</Typography>
+      <Typography variant="h4" gutterBottom>
+        My Bids
+      </Typography>
+
+      {loading.list && (
+        <Box textAlign="center" my={2}>
+          <CircularProgress />
+        </Box>
       )}
-      <Grid container spacing={2} mt={2}>
-        {bids.map(bid => (
-          <Grid container size={{xs: 12, sm: 6, md: 4}} key={bid.id}>
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {!loading.list && !error && bids.length === 0 && (
+        <Typography variant="body1" sx={{ mt: 2 }}>
+          No bids found.
+        </Typography>
+      )}
+
+      <Grid container spacing={2} mt={2} alignItems="stretch">
+        {bids.map((bid) => (
+          <Grid container size={{xs: 12, sm: 6, md: 4, lg: 3, xl: 2.4}} key={bid.id}>
             <UserBidCard bid={bid} onAction={fetchBids} />
           </Grid>
         ))}

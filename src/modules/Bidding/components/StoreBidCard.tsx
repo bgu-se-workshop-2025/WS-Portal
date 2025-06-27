@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
   Typography,
   Box,
+  Alert,
   useTheme
 } from '@mui/material';
 import { BidDto } from '../../../shared/types/dtos';
@@ -20,17 +21,9 @@ const StoreBidCard: React.FC<StoreBidCardProps> = ({ bid }) => {
   const [storeName, setStoreName] = useState<string>(bid.storeId);
 
   useEffect(() => {
-    sdk.getProduct(bid.productId)
-      .then(p => setProductName(p.name))
-      .catch(() => {/* keep fallback */})
-
-    sdk.getPublicUserProfileDetails(bid.userId)
-      .then(u => setUserName(u.username))
-      .catch(() => {/* fallback userId */});
-
-    sdk.getStore(bid.storeId)
-      .then(s => setStoreName(s.name))
-      .catch(() => {/* fallback storeId */});
+    sdk.getProduct(bid.productId).then(p => setProductName(p.name)).catch(() => {});
+    sdk.getPublicUserProfileDetails(bid.userId).then(u => setUserName(u.username)).catch(() => {});
+    sdk.getStore(bid.storeId).then(s => setStoreName(s.name)).catch(() => {});
   }, [bid.productId, bid.userId, bid.storeId]);
 
   return (
@@ -61,11 +54,23 @@ const StoreBidCard: React.FC<StoreBidCardProps> = ({ bid }) => {
         <Typography variant="body1" mt={1}>
           Final Price: ${bid.price.toFixed(2)}
         </Typography>
+        {bid.isPurchased && (
+          <Alert severity="success" sx={{ mt: 2 }}>
+            Purchased ✅
+          </Alert>
+        )}
       </CardContent>
+
       <Box sx={{ px: 2, pb: 2 }}>
-        <Typography variant="body2" color="text.secondary" textAlign="center" width="100%">
-          Waiting for buyer to complete purchase.
-        </Typography>
+        {bid.isPurchased ? (
+          <Typography variant="body2" color="text.secondary" textAlign="center" width="100%">
+            ✅ Purchase completed
+          </Typography>
+        ) : (
+          <Typography variant="body2" color="text.secondary" textAlign="center" width="100%">
+            Waiting for buyer to complete purchase.
+          </Typography>
+        )}
       </Box>
     </Card>
   );
