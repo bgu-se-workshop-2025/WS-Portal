@@ -64,3 +64,13 @@ export async function getCartSnapshotById(this: SDK, snapshotId: string): Promis
   return await response.json();
 }
 
+
+export async function getStoreSnapshotById(this: SDK, snapshotId: string): Promise<StoreSnapshotDto> {
+  const response = await this.get(`orders/store-snapshots/${snapshotId}`, {});
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Error fetching cart snapshot: ${error}`);
+  }
+  return await response.json();
+}
+

@@ -5,13 +5,11 @@ import {
   Alert,
   IconButton,
   Tooltip,
-  useMediaQuery,
   Typography,
   List,
   TablePagination,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { useTheme } from "@mui/material/styles";
 import { useParams } from "react-router-dom";
 
 import { sdk } from "../../../../../sdk/sdk";
@@ -21,8 +19,6 @@ import TransactionCard from "./TransactionCard";
 const DEFAULT_SIZE = 10;
 
 const StoreTransactionsPage: React.FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { storeId } = useParams<{ storeId: string }>();
 
   const [orders, setOrders] = useState<StoreOrderDto[]>([]);
@@ -32,7 +28,6 @@ const StoreTransactionsPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_SIZE);
 
-  /* ───── Fetch orders ───── */
   const load = useCallback(async () => {
     if (!storeId) return;
     setLoading(true);
@@ -51,7 +46,6 @@ const StoreTransactionsPage: React.FC = () => {
     load();
   }, [load]);
 
-  /* ───── Pagination helpers ───── */
   const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);
   const handleChangeRowsPerPage = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(e.target.value, 10));
@@ -63,7 +57,6 @@ const StoreTransactionsPage: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  /* ───── States ───── */
   if (!storeId) return <Alert severity="warning">No store selected.</Alert>;
   if (loading)
     return (
@@ -84,38 +77,9 @@ const StoreTransactionsPage: React.FC = () => {
       </Alert>
     );
 
-  /* ───── Mobile view ───── */
-  if (isMobile) {
-    return (
-      <Box>
-        <Box textAlign="right" mb={1}>
-          <Tooltip title="Refresh">
-            <IconButton onClick={load}>
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-
-        {displayed.map((tx) => (
-          <TransactionCard key={tx.id} transaction={tx} />
-        ))}
-
-        <TablePagination
-          component="div"
-          count={orders.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Box>
-    );
-  }
-
-  /* ───── Desktop view ───── */
+ 
   return (
     <Box>
-      {/* Header + refresh */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -132,14 +96,12 @@ const StoreTransactionsPage: React.FC = () => {
         </Tooltip>
       </Box>
 
-      {/* Card list */}
       <List sx={{ width: "100%", p: 0, maxWidth: 900, mx: "auto" }}>
         {displayed.map((tx) => (
           <TransactionCard key={tx.id} transaction={tx} />
         ))}
       </List>
 
-      {/* Pagination */}
       <TablePagination
         component="div"
         count={orders.length}
