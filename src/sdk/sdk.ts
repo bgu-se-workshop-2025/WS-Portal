@@ -3,6 +3,7 @@ import * as auth from "./modules/auth/auth";
 import * as order from "./modules/order/order";
 import * as publicOrder from "./modules/order/publicOrder";
 import * as bidding from "./modules/order/bidding";
+import * as auction from "./modules/order/auction";
 
 import * as policy from "./modules/store/policy";
 import * as product from "./modules/store/product";
@@ -105,6 +106,12 @@ export class SDK {
   public deleteBidRequest!: (bidRequestId: string) => Promise<void>;
   public deleteBid!: (bidRequestId: string) => Promise<void>;
 
+  // Auction SDK
+  public placeBid!: (productId: string, payload: dtos.AuctionBidDto) => Promise<dtos.AuctionBidDto>;
+  public getBids!: (productId: string, pageable: dtos.Pageable) => Promise<dtos.AuctionBidDto[]>;
+  public getWinningBid!: (productId: string) => Promise<dtos.AuctionBidDto>;
+  public getWinningBidPrice!: (productId: string) => Promise<number>;
+
   // Public Review SDK
   public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
   public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
@@ -120,6 +127,7 @@ export class SDK {
   public addProductToCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
   public removeProductFromCart!: (productId: string) => Promise<void>;
   public updateProductInCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
+  public getCartSnapshotById!: (snapshotId: string) => Promise<any>;
 
   // Notification SDK
   public getNotifications!: (payload: dtos.Pageable) => Promise<responses.NotificationPayload[]>;
@@ -134,6 +142,7 @@ export class SDK {
       ...order,
       ...publicOrder,
       ...bidding,
+      ...auction,
       ...policy,
       ...product,
       ...publicReview,

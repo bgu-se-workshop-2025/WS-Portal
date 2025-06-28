@@ -1,29 +1,32 @@
-import React from "react";
-import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, Button, Stack } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, CircularProgress, Alert, Tabs, Tab } from "@mui/material";
 import { sdk } from "../../../sdk/sdk";
 import { StoreDto, UserOrderDto, PublicUserDto } from "../../../shared/types/dtos";
+import { MyStoresTab, PurchaseHistoryTab, MyBidsTab, UserProfileTabProps } from "./UserProfileTabs";
+import BombardilloCrocodilo from "./BombardilloCrocodilo";
 
 const PAGE_SIZE = 25;
 
-type Props = {};
+const bombardilloEnabled = false; //-----------
 
-const UserProfilePage: React.FC<Props> = () => {
+const UserProfilePage: React.FC = () => {
   const [user, setUser] = React.useState<PublicUserDto | null>(null);
   const [userLoading, setUserLoading] = React.useState(true);
   const [stores, setStores] = React.useState<StoreDto[]>([]);
   const [storesLoading, setStoresLoading] = React.useState(true);
   const [storesError, setStoresError] = React.useState<string | null>(null);
-
   const [orders, setOrders] = React.useState<UserOrderDto[]>([]);
   const [ordersLoading, setOrdersLoading] = React.useState(true);
   const [ordersError, setOrdersError] = React.useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = React.useState(0);
+  const [cartSnapshots, setCartSnapshots] = useState<Record<string, any>>({});
+  const [liveStoreNames, setLiveStoreNames] = useState<Record<string, string | null>>({});
 
   React.useEffect(() => {
     document.title = "My Profile ";
   }, []);
 
   React.useEffect(() => {
-    // Fetch user info
     setUserLoading(true);
     sdk.getCurrentUserProfileDetails()
       .then((u) => setUser(u))
@@ -33,12 +36,10 @@ const UserProfilePage: React.FC<Props> = () => {
 
   React.useEffect(() => {
     if (!user) return;
-    // Fetch all stores and filter by seller
     setStoresLoading(true);
     setStoresError(null);
     sdk.getStores({ page: 0, size: PAGE_SIZE })
       .then(async (allStores) => {
-        // For each store, check if user is a seller
         const sellerStoreIds: string[] = [];
         await Promise.all(
           allStores.map(async (store) => {
@@ -63,7 +64,6 @@ const UserProfilePage: React.FC<Props> = () => {
     sdk.getUserOrders({ page: 0, size: PAGE_SIZE })
       .then(setOrders)
       .catch((err) => {
-        // If backend returns 404 or error message contains 'Error fetching user orders', treat as empty
         if (
           (err.message && err.message.includes('404')) ||
           (err.message && err.message.includes('Error fetching user orders'))
@@ -76,13 +76,56 @@ const UserProfilePage: React.FC<Props> = () => {
               : `Orders error: ${JSON.stringify(err)}`
           );
         }
-        // eslint-disable-next-line no-console
         console.error('Orders fetch error:', err);
       })
       .finally(() => setOrdersLoading(false));
   }, [user]);
 
-  // Check for guest (not logged in)
+  useEffect(() => {
+    if (!orders || orders.length === 0) return;
+    const missing = orders.filter(o => !cartSnapshots[o.cartSnapshot]).map(o => o.cartSnapshot || `dummy-${o.id}`);
+    if (missing.length === 0) return;
+    Promise.all(
+      missing.map((id) =>
+        sdk.getCartSnapshotById(id)
+          .then(snap => ({ id, snap }))
+          .catch(() => null)
+      )
+    ).then(results => {
+      setCartSnapshots(prev => {
+        const next = { ...prev };
+        results.forEach(res => { if (res && res.snap) next[res.id] = res.snap; });
+        return next;
+      });
+    });
+  }, [orders]);
+
+  useEffect(() => {
+    const allStoreIds = new Set<string>();
+    Object.values(cartSnapshots).forEach((snap: any) => {
+      if (snap && Array.isArray(snap.storeSnapshots)) {
+        snap.storeSnapshots.forEach((store: any) => {
+          if (store && store.storeId) allStoreIds.add(store.storeId);
+        });
+      }
+    });
+    const missing = Array.from(allStoreIds).filter(id => !(id in liveStoreNames));
+    if (missing.length === 0) return;
+    Promise.all(
+      missing.map(id =>
+        sdk.getStore(id)
+          .then(store => ({ id, name: store.name }))
+          .catch(() => ({ id, name: null }))
+      )
+    ).then(results => {
+      setLiveStoreNames(prev => {
+        const next = { ...prev };
+        results.forEach(({ id, name }) => { next[id] = name; });
+        return next;
+      });
+    });
+  }, [cartSnapshots]);
+
   if (userLoading) {
     return (
       <Box mt={8} textAlign="center">
@@ -100,101 +143,138 @@ const UserProfilePage: React.FC<Props> = () => {
     );
   }
 
+  const tabProps: UserProfileTabProps = {
+    user,
+    stores,
+    storesLoading,
+    storesError,
+    orders,
+    ordersLoading,
+    ordersError,
+    cartSnapshots,
+    liveStoreNames,
+    setOrders,
+    setLiveStoreNames,
+  };
+
   return (
-    <Box maxWidth={800} mx="auto" mt={6}>
-      <Typography variant="h3" align="center" gutterBottom sx={{ fontWeight: 700, letterSpacing: 1 }}>
-        My Profile
-      </Typography>
-      <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={4}>
-        {/* My Stores */}
-        <Box flex={1} p={3} borderRadius={3} boxShadow={3} bgcolor="#f8fafc">
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            My Stores
-          </Typography>
-          {storesLoading ? (
-            <Box display="flex" justifyContent="center" py={2}><CircularProgress size={28} /></Box>
-          ) : storesError ? (
-            <Alert severity="error">{storesError}</Alert>
-          ) : stores.length === 0 ? (
-            <Typography color="text.secondary">You are not a seller in any stores yet.</Typography>
-          ) : (
-            <List>
-              {stores.map((store) => (
-                <ListItem
-                  key={store.id}
-                  sx={{
-                    borderRadius: 2,
-                    mb: 1,
-                    bgcolor: '#fff',
-                    boxShadow: 1,
-                    cursor: 'pointer',
-                    transition: 'background 0.2s',
-                    '&:hover': {
-                      bgcolor: '#e3e8ef',
-                      textDecoration: 'underline',
-                    },
-                  }}
-                  onClick={() => window.location.href = `/store/${store.id}`}
-                >
-                  <ListItemText
-                    primary={<Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{store.name}</Typography>}
-                    secondary={store.description}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Box>
-        {/* Purchase History */}
-        <Box flex={1} p={3} borderRadius={3} boxShadow={3} bgcolor="#f8fafc">
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-            Purchase History
-          </Typography>
-          {ordersLoading ? (
-            <Box display="flex" justifyContent="center" py={2}><CircularProgress size={28} /></Box>
-          ) : ordersError ? (
-            <Alert severity="error">{ordersError}</Alert>
-          ) : orders.length === 0 ? (
-            <Typography color="text.secondary">No purchases found.</Typography>
-          ) : (
-            <List>
-              {orders.map((order) => (
-                <ListItem key={order.id} sx={{ borderRadius: 2, mb: 1, bgcolor: '#fff', boxShadow: 1 }}>
-                  <ListItemText
-                    primary={<Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{`Order #${order.id}`}</Typography>}
-                    secondary={<>
-                      <Typography component="span" color="text.secondary">Date: {order.time}</Typography>
-                    </>}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Box>
-      </Box>
-      {/* Active Bids (replaced with buttons) */}
-      <Box mt={4} mb={4} p={3} borderRadius={3} boxShadow={3} bgcolor="#f8fafc">
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-          Bids
-        </Typography>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mt={2}>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ minWidth: 180 }}
-            href="#BID_REQUESTS_PAGE_URL" // TODO: Replace with actual Bid Requests page URL
+    <Box display="flex" flexDirection="column" minHeight="100vh" sx={{ bgcolor: '#fff' }}>
+      {bombardilloEnabled && <BombardilloCrocodilo />}
+      <Box
+        flex={1}
+        width="100%"
+        maxWidth={{ xs: '100%', xl: 1400 }}
+        mx="auto"
+        mt={0}
+        px={{ xs: 0.5, md: 4, xl: 8 }}
+        sx={{
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: { xs: 'stretch', md: 'flex-start' },
+          justifyContent: 'flex-start',
+          minHeight: '80vh',
+          bgcolor: 'transparent',
+          pt: { xs: 2, md: 6 },
+          gap: { xs: 2, md: 6, xl: 10 },
+        }}
+      >
+        {/* Sidebar */}
+        <Box
+          minWidth={{ xs: '100%', md: 240, xl: 280 }}
+          maxWidth={{ xs: '100%', md: 280, xl: 320 }}
+          flexBasis={{ xs: '100%', md: 260, xl: 300 }}
+          width={{ xs: '100%', md: 260, xl: 300 }}
+          mr={0}
+          mb={{ xs: 2, md: 0 }}
+          sx={{
+            bgcolor: '#fff',
+            borderRadius: 3,
+            boxShadow: 2,
+            border: '1px solid #e0e7ef',
+            p: 0,
+            height: 'fit-content',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            ml: 0,
+            width: { xs: '100%', md: 260, xl: 300 },
+            minWidth: { xs: '100%', md: 240, xl: 280 },
+            maxWidth: { xs: '100%', md: 280, xl: 320 },
+          }}
+        >
+          <Box px={3} py={3} borderBottom="1px solid #e0e7ef">
+            <Typography variant="h6" sx={{ color: '#22223b', fontWeight: 700, mb: 0.5, fontSize: { xs: 18, sm: 20 } }}>
+              {user?.username || 'User'}
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#64748b', fontSize: { xs: 13, sm: 15 } }}>
+              Your personal account
+            </Typography>
+          </Box>
+          <Tabs
+            orientation="vertical"
+            value={selectedTab}
+            onChange={(_, v) => setSelectedTab(v)}
+            variant="scrollable"
+            sx={{
+              borderRight: 0,
+              bgcolor: 'transparent',
+              borderRadius: 3,
+              minHeight: 120,
+              px: 0,
+              pt: 0,
+              '& .MuiTab-root': {
+                fontWeight: 600,
+                fontSize: { xs: 15, sm: 17 },
+                color: '#22223b',
+                borderRadius: 2,
+                mb: 0.5,
+                textAlign: 'left',
+                justifyContent: 'flex-start',
+                px: 2,
+                py: 1.2,
+                minHeight: 44,
+                transition: 'background 0.2s, color 0.2s',
+                '&.Mui-selected': {
+                  bgcolor: '#f6f8fa',
+                  color: '#3b82f6',
+                  boxShadow: 'none',
+                },
+                '&:hover': {
+                  bgcolor: '#f6f8fa',
+                  color: '#3b82f6',
+                },
+              },
+              boxShadow: 'none',
+            }}
           >
-            View Bid Requests
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            sx={{ minWidth: 180 }}
-            href="#APPROVED_BIDS_PAGE_URL" // TODO: Replace with actual Approved Bids page URL
-          >
-            View Approved Bids
-          </Button>
-        </Stack>
+            <Tab label="My Stores" sx={{ alignItems: 'flex-start' }} />
+            <Tab label="Purchase History" sx={{ alignItems: 'flex-start' }} />
+            <Tab label="My Bids" sx={{ alignItems: 'flex-start' }} />
+          </Tabs>
+        </Box>
+        {/* Main content */}
+        <Box
+          flex={1}
+          minWidth={0}
+          maxWidth={{ xs: '100%', md: 'calc(100vw - 320px - 64px)', xl: 1000 }}
+          width={{ xs: '100%', md: 'auto' }}
+          sx={{
+            ml: 0,
+            bgcolor: 'transparent',
+            borderRadius: 0,
+            boxShadow: 'none',
+            border: 'none',
+            p: { xs: 0, md: 0 },
+            color: '#22223b',
+            minHeight: 600,
+            width: { xs: '100%', md: 'auto' },
+            flex: 1,
+          }}
+        >
+          {selectedTab === 0 && <MyStoresTab {...tabProps} />}
+          {selectedTab === 1 && <PurchaseHistoryTab {...tabProps} />}
+          {selectedTab === 2 && <MyBidsTab {...tabProps} />}
+        </Box>
       </Box>
     </Box>
   );

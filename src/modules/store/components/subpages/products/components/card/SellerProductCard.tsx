@@ -172,11 +172,8 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
               value={product.rating}
               readOnly={true}
               size="medium"
-              precision={1}
+              precision={0.1}
             />
-            <Typography variant="body2">
-              {product.rating > 0 ? `(${product.rating.toFixed(1)})` : ""}
-            </Typography>
           </Box>
 
           <Box>
