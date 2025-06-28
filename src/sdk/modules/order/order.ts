@@ -1,5 +1,5 @@
 import { SDK } from "../../sdk";
-import { Pageable, UserOrderDto, StoreOrderDto } from "../../../shared/types/dtos.ts";
+import { Pageable, UserOrderDto, StoreOrderDto, StoreSnapshotDto } from "../../../shared/types/dtos.ts";
 
 const order = "orders";
 const store = "stores";
@@ -53,4 +53,12 @@ export async function getStoreOrders(this: SDK, storeId: string, pageable: Pagea
     const result = (await response.json()) as StoreOrderDto[];
     return result;
     
+}
+
+export async function getStoreSnapshotById(snapshotId: string): Promise<StoreSnapshotDto> {
+  const res = await fetch(`/orders/store-snapshots/${snapshotId}`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch store snapshot with id ${snapshotId}`);
+  }
+  return await res.json();
 }
