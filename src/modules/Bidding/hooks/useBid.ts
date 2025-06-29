@@ -13,12 +13,14 @@ export type useBidResponse = {
   rejectBidRequest: (id: string) => Promise<void>;
   submitAlternativePrice: (id: string, price: number) => Promise<void>;
   cancelBidRequest: (id: string) => Promise<void>;
-  getBidRequestsOfStore: (storeId: string, pageable: Pageable) => Promise<void>;
-  getBidRequestsOfUser: (pageable: Pageable) => Promise<void>;
-  getBidsOfUser: (pageable: Pageable) => Promise<void>;
-  getBidsOfStore: (storeId: string, pageable: Pageable) => Promise<void>;
+  getBidRequestsOfStore: (storeId: string, pageable: Pageable, append?: boolean) => Promise<void>;
+  getBidRequestsOfUser: (pageable: Pageable, append?: boolean) => Promise<void>;
+  getBidsOfUser: (pageable: Pageable, append?: boolean) => Promise<void>;
+  getBidsOfStore: (storeId: string, pageable: Pageable, append?: boolean) => Promise<void>;
   getSellersRemaining: (bidRequestId: string) => Promise<string[]>;
   resetError: () => void;
+  clearRequests: () => void;
+  clearBids: () => void;
 };
 
 const useBid = (): useBidResponse => {
@@ -29,6 +31,8 @@ const useBid = (): useBidResponse => {
   const [loading, setLoading] = useState({ create: false, action: false, list: false, remaining: false });
 
   const resetError = useCallback(() => setError(undefined), []);
+  const clearRequests = useCallback(() => setRequests([]), []);
+  const clearBids = useCallback(() => setBids([]), []);
 
   const createBidRequest = useCallback(async (r: BidRequestDto) => {
     try {
@@ -104,12 +108,12 @@ const useBid = (): useBidResponse => {
     }
   }, []);
 
-  const getBidRequestsOfStore = useCallback(async (storeId: string, pageable: Pageable) => {
+  const getBidRequestsOfStore = useCallback(async (storeId: string, pageable: Pageable, append: boolean = false) => {
     try {
       setError(undefined);
       setLoading(l => ({ ...l, list: true }));
       const resp = await sdk.getBidRequestsOfStore(storeId, pageable);
-      setRequests(resp);
+      setRequests(prev => append ? [...prev, ...resp] : resp);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -117,13 +121,13 @@ const useBid = (): useBidResponse => {
     }
   }, []);
 
-  const getBidRequestsOfUser = useCallback(async (pageable: Pageable) => {
+  const getBidRequestsOfUser = useCallback(async (pageable: Pageable, append: boolean = false) => {
     try {
       setError(undefined);
       setLoading(l => ({ ...l, list: true }));
       const userId = (await sdk.getCurrentUserProfileDetails()).id;
       const resp = await sdk.getBidRequestsOfUser(userId, pageable);
-      setRequests(resp);
+      setRequests(prev => append ? [...prev, ...resp] : resp);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -131,13 +135,13 @@ const useBid = (): useBidResponse => {
     }
   }, []);
 
-  const getBidsOfUser = useCallback(async (pageable: Pageable) => {
+  const getBidsOfUser = useCallback(async (pageable: Pageable, append: boolean = false) => {
     try {
       setError(undefined);
       setLoading(l => ({ ...l, list: true }));
       const userId = (await sdk.getCurrentUserProfileDetails()).id;
       const resp = await sdk.getBidsOfUser(userId, pageable);
-      setBids(resp);
+      setBids(prev => append ? [...prev, ...resp] : resp);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -145,12 +149,12 @@ const useBid = (): useBidResponse => {
     }
   }, []);
 
-  const getBidsOfStore = useCallback(async (storeId: string, pageable: Pageable) => {
+  const getBidsOfStore = useCallback(async (storeId: string, pageable: Pageable, append: boolean = false) => {
     try {
       setError(undefined);
       setLoading(l => ({ ...l, list: true }));
       const resp = await sdk.getBidsOfStore(storeId, pageable);
-      setBids(resp);
+      setBids(prev => append ? [...prev, ...resp] : resp);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -191,12 +195,15 @@ const useBid = (): useBidResponse => {
     getBidsOfStore,
     getSellersRemaining,
     resetError,
+    clearRequests,
+    clearBids,
   }), [
     loading, error, requests, bids, remainingSellers,
     createBidRequest, acceptBidRequest, rejectBidRequest,
     submitAlternativePrice, cancelBidRequest,
     getBidRequestsOfStore, getBidRequestsOfUser,
-    getBidsOfUser, getBidsOfStore, getSellersRemaining, resetError
+    getBidsOfUser, getBidsOfStore, getSellersRemaining, resetError,
+    clearRequests, clearBids
   ]);
 };
 
