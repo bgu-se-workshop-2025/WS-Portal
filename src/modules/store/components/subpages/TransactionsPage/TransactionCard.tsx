@@ -131,16 +131,34 @@ const TransactionCard: React.FC<Props> = ({ transaction }) => {
               );
             })}
 
-            {/* ➖ Divider */}
             <Divider sx={{ my: 2, borderColor: "#e0e7ef" }} />
 
-            {/* Summary */}
-            <Typography sx={{ fontWeight: 600, fontSize: "1rem", color: "#1d3557" }}>
-              Store total:{" "}
-              <span style={{ color: "#2196f3" }}>
-                {formatCurrency(snapshot.price - snapshot.discount)}
-              </span>
-            </Typography>
+            {/* Store Discount Summary */}
+            <Box mt={2}>
+              <Typography sx={{ fontWeight: 600, fontSize: "1rem", color: "#1d3557" }}>
+                Store total before discounts:{" "}
+                <span style={{ color: "#3b3b3b" }}>
+                  {formatCurrency(snapshot.price)}
+                </span>
+              </Typography>
+
+              {snapshot.discount > 0 && (
+                <>
+                  <Typography sx={{ fontWeight: 600, fontSize: "1rem", color: "#e53935", mt: 0.5 }}>
+                    Discounts applied: −{formatCurrency(snapshot.discount)}
+                  </Typography>
+                </>
+              )}
+
+              <Typography sx={{ fontWeight: 700, fontSize: "1.15rem", color: "#1d3557", mt: 1 }}>
+                Final total :{" "}
+                <span style={{ color: "#2196f3" }}>
+                  {formatCurrency(snapshot.price - snapshot.discount)}
+                </span>
+              </Typography>
+            </Box>
+
+
           </>
         ) : (
           <Typography color="error" variant="body2">
