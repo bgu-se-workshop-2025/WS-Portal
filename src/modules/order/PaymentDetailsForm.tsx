@@ -24,14 +24,14 @@ const PaymentDetailsForm: React.FC<Props> = ({ paymentDetails: paymentDetails, o
     <form>
       <Stack spacing={2}>
           <TextField
-              required
-              label="Card Owner Name"
-              name="holder"
-              value={paymentDetails.paymentData["holder"] || ""}
-              onChange={setPaymentDetails}
-              fullWidth
-              error={!!errors?.holder}
-              helperText={errors?.holder}
+            required
+            label="Card Owner Name"
+            name="holder"
+            value={paymentDetails.paymentData["holder"] || ""}
+            onChange={setPaymentDetails}
+            fullWidth
+            error={!!errors?.holder}
+            helperText={errors?.holder}
           />
           <TextField
             required
@@ -40,8 +40,8 @@ const PaymentDetailsForm: React.FC<Props> = ({ paymentDetails: paymentDetails, o
             value={paymentDetails.paymentData["id"] || ""}
             onChange={setPaymentDetails}
             fullWidth
-            error={!!errors?.holder}
-            helperText={errors?.holder}
+            error={!!errors?.id}
+            helperText={errors?.id}
           />
           <TextField
             required
@@ -50,8 +50,8 @@ const PaymentDetailsForm: React.FC<Props> = ({ paymentDetails: paymentDetails, o
             value={paymentDetails.paymentData["card_number"] || ""}
             onChange={setPaymentDetails}
             fullWidth
-            error={!!errors?.holder}
-            helperText={errors?.holder}
+            error={!!errors?.card_number}
+            helperText={errors?.card_number}
           />
           <TextField
             required
@@ -60,8 +60,8 @@ const PaymentDetailsForm: React.FC<Props> = ({ paymentDetails: paymentDetails, o
             value={paymentDetails.paymentData["cvv"] || ""}
             onChange={setPaymentDetails}
             fullWidth
-            error={!!errors?.holder}
-            helperText={errors?.holder}
+            error={!!errors?.cvv}
+            helperText={errors?.cvv}
           />
           <TextField
             required
@@ -70,8 +70,8 @@ const PaymentDetailsForm: React.FC<Props> = ({ paymentDetails: paymentDetails, o
             value={paymentDetails.paymentData["month"] || ""}
             onChange={setPaymentDetails}
             fullWidth
-            error={!!errors?.holder}
-            helperText={errors?.holder}
+            error={!!errors?.month}
+            helperText={errors?.month}
           />
           <TextField
             required
@@ -80,8 +80,8 @@ const PaymentDetailsForm: React.FC<Props> = ({ paymentDetails: paymentDetails, o
             value={paymentDetails.paymentData["year"] || ""}
             onChange={setPaymentDetails}
             fullWidth
-            error={!!errors?.holder}
-            helperText={errors?.holder}
+            error={!!errors?.year}
+            helperText={errors?.year}
           />
           <TextField
             required
@@ -90,8 +90,8 @@ const PaymentDetailsForm: React.FC<Props> = ({ paymentDetails: paymentDetails, o
             value={paymentDetails.payerEmail || ""}
             onChange={setPaymentDetails}
             fullWidth
-            error={!!errors?.holder}
-            helperText={errors?.holder}
+            error={!!errors?.payerEmail}
+            helperText={errors?.payerEmail}
           />
       </Stack>
     </form>
