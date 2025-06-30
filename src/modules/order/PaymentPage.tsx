@@ -13,6 +13,8 @@ import {
 import { OrderRequestDetails, PaymentDetails, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
 import useCart from '../../shared/hooks/useCart';
 import useOrder from './hooks/useOrder';
+import ShippingAddressForm from "./ShippingAddressForm";
+import PaymentDetailsForm from "./PaymentDetailsForm";
 
 const PaymentPage: React.FC = () => {
   const cartHook = useCart();
@@ -86,78 +88,11 @@ const PaymentPage: React.FC = () => {
           Payment Information
         </Typography>
 
-        <Stack spacing={2} mt={2}>
-          {/* I haven't made use of the update payment details since it uses a map and kinda complex */}
-          <TextField
-            required
-            label="Card Owner Name"
-            name="cardOwnerName"
-            value={paymentDetails.paymentData["holder"]}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "holder": e.target.value } })}
-            fullWidth
-            disabled={loading}
-          />
-
-          <TextField
-            required
-            label="Card Owner ID"
-            name="cardOwnerId"
-            value={paymentDetails.paymentData["id"]}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "id": e.target.value } })}
-            fullWidth
-            disabled={loading}
-          />
-
-          <TextField
-            required
-            label="Card Number"
-            name="cardNumber"
-            value={paymentDetails.paymentData["card_number"]}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "card_number": e.target.value } })}
-            fullWidth
-            disabled={loading}
-          />
-
-          <TextField
-            required
-            label="CVV"
-            name="cvv"
-            value={paymentDetails.paymentData["cvv"]}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "cvv": e.target.value } })}
-            fullWidth
-            disabled={loading}
-          />
-
-          <TextField
-            required
-            label="Expiration Month"
-            name="expirationMonth"
-            value={paymentDetails.paymentData["month"]}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "month": e.target.value } })}
-            fullWidth
-            disabled={loading}
-          />
-
-          <TextField
-            required
-            label="Expiration Year"
-            name="expirationYear"
-            value={paymentDetails.paymentData["year"]}
-            onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "year": e.target.value } })}
-            fullWidth
-            disabled={loading}
-          />
-
-          <TextField
-            required
-            label="Payer Email"
-            name="payerEmail"
-            value={paymentDetails.payerEmail}
-            onChange={handlePaymentEmailChange}
-            fullWidth
-            disabled={loading}
-          />
-        </Stack>
+        <PaymentDetailsForm
+          paymentDetails={paymentDetails}
+          onChange={setPaymentDetails}
+          disabled={loading}
+        />
 
         <Divider sx={{ my: 4 }} />
 
@@ -165,72 +100,11 @@ const PaymentPage: React.FC = () => {
           Shipping Address
         </Typography>
 
-        <Stack spacing={2} mt={2}>
-          <TextField
-            label="Country"
-            name="country"
-            value={shippingAddress.country}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="City"
-            name="city"
-            value={shippingAddress.city}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="Region"
-            name="region"
-            value={shippingAddress.region}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="Street"
-            name="street"
-            value={shippingAddress.street}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="Zip Code"
-            name="zipCode"
-            value={shippingAddress.zipCode}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="Home Number"
-            name="homeNumber"
-            value={shippingAddress.homeNumber}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="Apartment Number"
-            name="apartmentNumber"
-            value={shippingAddress.apartmentNumber}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-          <TextField
-            label="Mailbox"
-            name="mailbox"
-            value={shippingAddress.mailbox}
-            onChange={handleShippingChange}
-            fullWidth
-            disabled={loading}
-          />
-        </Stack>
+        <ShippingAddressForm
+          shippingAddress={shippingAddress}
+          onChange={setShippingAddress}
+          disabled={loading}
+        />
 
         <Stack spacing={2} mt={4}>
           <Button
