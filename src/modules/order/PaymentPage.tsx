@@ -15,19 +15,7 @@ import useOrder from './hooks/useOrder';
 import ShippingAddressForm from "./ShippingAddressForm";
 import PaymentDetailsForm from "./PaymentDetailsForm";
 import { PaymentDetailsErrors } from "../../shared/types/dtos";
-
-const [paymentErrors, setPaymentErrors] = useState<PaymentDetailsErrors>({});
-const validatePaymentDetails = (paymentDetails: PaymentDetails) => {
-  const errors: PaymentDetailsErrors = {};
-  if (!paymentDetails.paymentData.holder) errors.holder = "Required";
-  if (!paymentDetails.paymentData.id) errors.id = "Required";
-  if (!paymentDetails.paymentData.card_number) errors.card_number = "Required";
-  if (!paymentDetails.paymentData.cvv) errors.cvv = "Required";
-  if (!paymentDetails.paymentData.month) errors.month = "Required";
-  if (!paymentDetails.paymentData.year) errors.year = "Required";
-  if (!paymentDetails.payerEmail) errors.payerEmail = "Required";
-  return errors;
-};
+import { validatePaymentDetails } from "../../shared/utils/validatePaymentDetails";
 
 const PaymentPage: React.FC = () => {
   const cartHook = useCart();
@@ -42,6 +30,8 @@ const PaymentPage: React.FC = () => {
     payerId: "",
     paymentData: { "currency": "ILS" }
   });
+
+  const [paymentErrors, setPaymentErrors] = useState<PaymentDetailsErrors>({});
 
   const [shippingAddress, setShippingAddress] = useState<ShippingAddressDto>({
     apartmentNumber: "",
