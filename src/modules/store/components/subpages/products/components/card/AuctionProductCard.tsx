@@ -16,10 +16,24 @@ import {
   ProductDto,
   ShippingAddressDto,
   PaymentDetails,
+  PaymentDetailsErrors,
 } from "../../../../../../../shared/types/dtos";
 import { sdk } from "../../../../../../../sdk/sdk";
 import ShippingAddressForm from "../../../../../../order/ShippingAddressForm";
 import PaymentDetailsForm from "../../../../../../order/PaymentDetailsForm";
+
+const [paymentErrors, setPaymentErrors] = useState<PaymentDetailsErrors>({});
+const validatePaymentDetails = (paymentDetails: PaymentDetails) => {
+  const errors: PaymentDetailsErrors = {};
+  if (!paymentDetails.paymentData.holder) errors.holder = "Required";
+  if (!paymentDetails.paymentData.id) errors.id = "Required";
+  if (!paymentDetails.paymentData.card_number) errors.card_number = "Required";
+  if (!paymentDetails.paymentData.cvv) errors.cvv = "Required";
+  if (!paymentDetails.paymentData.month) errors.month = "Required";
+  if (!paymentDetails.paymentData.year) errors.year = "Required";
+  if (!paymentDetails.payerEmail) errors.payerEmail = "Required";
+  return errors;
+};
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -85,6 +99,13 @@ const AuctionProductCard: React.FC<{
   };
 
   const handleSubmitBid = async () => {
+    const errors = validatePaymentDetails(paymentDetails);
+    setPaymentErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setBidError("Please fix the payment details errors before proceeding.");
+      return;
+    }
+
     setBidLoading(true);
     setBidError(null);
     try {
@@ -195,6 +216,7 @@ const AuctionProductCard: React.FC<{
                     paymentDetails={paymentDetails}
                     onChange={setPaymentDetails}
                     disabled={bidLoading}
+                    errors={paymentErrors}
                 />
                     <Divider sx={{ my: 3 }} />
                 <ShippingAddressForm

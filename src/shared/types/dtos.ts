@@ -147,6 +147,16 @@ export interface PaymentDetails {
     paymentData: { [key: string]: string };
 }
 
+export type PaymentDetailsErrors = {
+  holder?: string;
+  id?: string;
+  card_number?: string;
+  cvv?: string;
+  month?: string;
+  year?: string;
+  payerEmail?: string;
+};
+
 export type paymentDataKeys =
     | "currency"
     | "card_number"

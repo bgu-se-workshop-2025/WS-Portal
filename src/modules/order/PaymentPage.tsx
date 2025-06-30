@@ -4,7 +4,6 @@ import {
   Button,
   Paper,
   Stack,
-  TextField,
   Typography,
   Alert,
   Divider,
@@ -15,6 +14,20 @@ import useCart from '../../shared/hooks/useCart';
 import useOrder from './hooks/useOrder';
 import ShippingAddressForm from "./ShippingAddressForm";
 import PaymentDetailsForm from "./PaymentDetailsForm";
+import { PaymentDetailsErrors } from "../../shared/types/dtos";
+
+const [paymentErrors, setPaymentErrors] = useState<PaymentDetailsErrors>({});
+const validatePaymentDetails = (paymentDetails: PaymentDetails) => {
+  const errors: PaymentDetailsErrors = {};
+  if (!paymentDetails.paymentData.holder) errors.holder = "Required";
+  if (!paymentDetails.paymentData.id) errors.id = "Required";
+  if (!paymentDetails.paymentData.card_number) errors.card_number = "Required";
+  if (!paymentDetails.paymentData.cvv) errors.cvv = "Required";
+  if (!paymentDetails.paymentData.month) errors.month = "Required";
+  if (!paymentDetails.paymentData.year) errors.year = "Required";
+  if (!paymentDetails.payerEmail) errors.payerEmail = "Required";
+  return errors;
+};
 
 const PaymentPage: React.FC = () => {
   const cartHook = useCart();
@@ -63,6 +76,13 @@ const PaymentPage: React.FC = () => {
     if (cartHook.loading || cartHook.error || !cartHook.cart || orderHook.loading) {
       return;
     }
+    
+    const errors = validatePaymentDetails(paymentDetails);
+    setPaymentErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setError("Please fix the payment details errors before proceeding.");
+      return;
+    }
 
     const createOrderRequest: OrderRequestDetails = {
       cart: cartHook.cart,
@@ -92,6 +112,7 @@ const PaymentPage: React.FC = () => {
           paymentDetails={paymentDetails}
           onChange={setPaymentDetails}
           disabled={loading}
+          errors={paymentErrors}
         />
 
         <Divider sx={{ my: 4 }} />
