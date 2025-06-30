@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, useEffect } from "react";
+import React, { useMemo, useCallback} from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -9,14 +9,6 @@ import {
   useTheme,
   Box,
   CircularProgress,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-  Alert,
-  Snackbar,
 } from "@mui/material";
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
