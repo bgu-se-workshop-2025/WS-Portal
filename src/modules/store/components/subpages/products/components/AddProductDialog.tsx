@@ -88,7 +88,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   
   const handleOnEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setNewAuctionEnd(value);
+    setNewAuctionEnd(new Date(value).toISOString());
   };
 
   const isAddDisabled =

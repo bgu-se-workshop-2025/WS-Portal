@@ -65,6 +65,9 @@ const UserProductCard: React.FC<{
   }, [currentQty, product.id, product.name, removeFromCart, updateQuantity]);
 
 
+  if (product.auctionEndDate && new Date(product.auctionEndDate).getTime() < Date.now()) {
+    return null;
+  } 
 
   return (
     <>

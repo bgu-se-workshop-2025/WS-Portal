@@ -34,16 +34,24 @@ const AuctionProductCard: React.FC<{
 
   const handleAddOfferClick = () => {
     setBidError(null);
-    if (Number(bidValue) > (currentTopOffer ?? product.price)) {
-      navigate(`/payment/${product.id}/${bidValue}`, { replace: true });
-    } else {
-      setBidError("Offer must be higher than current top offer");
+    if (currentTopOffer) {
+      if (Number(bidValue) > currentTopOffer) {
+        navigate(`/payment?productId=${product.id}&bidPrice=${bidValue}`, { replace: true });
+      } else {
+        setBidError("Offer must be higher than current top offer");
+      }
+    } else{
+      if (Number(bidValue) >= product.price) {
+        navigate(`/payment?productId=${product.id}&bidPrice=${bidValue}`, { replace: true });
+      } else {
+        setBidError("Offer must be at least the starting price");
+      }
     }
   };
 
-  return (
-    <Box>
-      <Box sx={{ mb: 1 }}>
+    return (
+      <Box>
+        <Box sx={{ mb: 1 }}>
         <Typography variant="body2">
           <strong>Current Top Offer:</strong>{" "}
           {currentTopOffer !== null
