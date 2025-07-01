@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, TextField, Button, Stack } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Stack,
+  Paper,
+} from "@mui/material";
 import { sdk } from "../../../../sdk/sdk";
 import { StoreDto } from "../../../../shared/types/dtos";
 
 const StoreSettings = () => {
   const { storeId } = useParams();
-	if (!storeId) return;
+  if (!storeId) return null;
 
   const [store, setStore] = useState<StoreDto | null>(null);
   const [loading, setLoading] = useState(false);
@@ -14,13 +21,9 @@ const StoreSettings = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (!storeId) return;
-
     sdk
       .getStore(storeId)
-      .then((data: StoreDto) => {
-        setStore(data);
-      })
+      .then((data: StoreDto) => setStore(data))
       .catch((err) => {
         console.error("Failed to load store:", err);
         setErrorMsg("Failed to load store from the backend.");
@@ -28,7 +31,7 @@ const StoreSettings = () => {
   }, [storeId]);
 
   const handleUpdate = async () => {
-    if (!storeId || !store) return;
+    if (!store) return;
 
     setLoading(true);
     setSuccessMsg("");
@@ -39,75 +42,81 @@ const StoreSettings = () => {
         id: storeId,
         name: store.name,
         description: store.description,
+        rating: store.rating,
       });
       setStore(updated);
-      setSuccessMsg("Store updated successfully.");
+      setSuccessMsg("✅ Store updated successfully.");
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to update store.");
+      setErrorMsg(err.message || "❌ Failed to update store.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Box mt={2} maxWidth={600} sx={{ width: "30rem" }} alignItems="center">
-      <Typography
-        variant="h5"
-        fontWeight="600"
-        color="primary"
-        mb={3}
-        display="flex"
-        alignItems="center"
-        gap={1}
-      >
-        ⚙️ Store Settings
-      </Typography>
+    <Box display="flex" justifyContent="center" mt={4}>
+      <Paper elevation={3} sx={{ p: 5, borderRadius: 3, width: "100%", maxWidth: 600 }}>
+        <Typography
+          variant="h5"
+          fontWeight="600"
+          color="primary"
+          mb={3}
+          display="flex"
+          alignItems="center"
+          gap={1}
+        >
+          ⚙️ Store Settings
+        </Typography>
 
-      {!store ? (
-        <Typography color="text.secondary">Loading store details...</Typography>
-      ) : (
-        <Stack spacing={3}>
-          <TextField
-            label="Store Name"
-            value={store.name}
-            onChange={(e) =>
-              setStore({ ...store, name: e.target.value })
-            }
-            fullWidth
-            required
-          />
+        {!store ? (
+          <Typography color="text.secondary">Loading store details...</Typography>
+        ) : (
+          <Stack spacing={3}>
+            <TextField
+              label="Store Name"
+              value={store.name}
+              onChange={(e) =>
+                setStore({ ...store, name: e.target.value })
+              }
+              fullWidth
+              required
+            />
 
-          <TextField
-            label="Description"
-            value={store.description}
-            onChange={(e) =>
-              setStore({ ...store, description: e.target.value })
-            }
-            fullWidth
-            multiline
-            rows={4}
-          />
+            <TextField
+              label="Description"
+              value={store.description}
+              onChange={(e) =>
+                setStore({ ...store, description: e.target.value })
+              }
+              fullWidth
+              multiline
+              rows={4}
+            />
 
-          {/* Show messages below the fields */}
-          <Box height={30} display="flex" alignItems="center">
             {errorMsg && (
-              <Typography color="error.main">{errorMsg}</Typography>
+              <Typography color="error" fontSize={14}>
+                {errorMsg}
+              </Typography>
             )}
             {successMsg && (
-              <Typography color="success.main">{successMsg}</Typography>
+              <Typography color="green" fontSize={14}>
+                {successMsg}
+              </Typography>
             )}
-          </Box>
 
-          <Button
-            variant="contained"
-            onClick={handleUpdate}
-            disabled={loading || !store.name.trim()}
-            sx={{ minWidth: 160, height: 40 }}
-          >
-            {loading ? "Updating..." : "Update Store"}
-          </Button>
-        </Stack>
-      )}
+            <Box display="flex" justifyContent="center">
+              <Button
+                variant="contained"
+                onClick={handleUpdate}
+                disabled={loading || !store.name.trim()}
+                sx={{ minWidth: 200, height: 45 }}
+              >
+                {loading ? "Updating..." : "Update Store"}
+              </Button>
+            </Box>
+          </Stack>
+        )}
+      </Paper>
     </Box>
   );
 };
