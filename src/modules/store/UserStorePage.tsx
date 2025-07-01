@@ -25,6 +25,13 @@ const UserStorePage: React.FC = () => {
   const theme   = useTheme();
   const { storeId } = useParams<{ storeId: string }>();
   const location    = useLocation();
+  const computedActiveTab = React.useMemo(() => {
+  if (!location.pathname || !storeId) return "products";
+
+    const segments = location.pathname.split("/");
+    const tabSegment = segments[3]; // products / sellersInfo / etc.
+    return tabSegment === "sellers-info" ? "sellers-info" : "products";
+  }, [location.pathname, storeId]);
 
   const [store, setStore]       = useState<StoreDto | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -179,7 +186,7 @@ const UserStorePage: React.FC = () => {
             }}
           >
             <Tabs
-              value="products"
+              value={computedActiveTab}
               textColor="primary"
               indicatorColor="primary"
               centered
@@ -191,7 +198,14 @@ const UserStorePage: React.FC = () => {
                 component={Link}
                 to={`/store/${storeId}/products`}
               />
+              <Tab
+                value="sellers-info"
+                label="Sellers Info"
+                component={Link}
+                to={`/store/${storeId}/sellers-info`}
+              />
             </Tabs>
+
 
             <Divider sx={{ mb: theme.spacing(3) }} />
             
