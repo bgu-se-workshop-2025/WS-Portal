@@ -1,7 +1,7 @@
 import { MessageDto } from "../../../shared/types/dtos.ts";
 import { SDK } from "../../sdk.ts";
 
-const controller = "message";
+const controller = "messages";
 
 export async function createMessage(this: SDK, payload: MessageDto): Promise<MessageDto> {
     const response = await this.post(`${controller}`, payload);
@@ -14,8 +14,7 @@ export async function createMessage(this: SDK, payload: MessageDto): Promise<Mes
 }
 
 export async function getMessages(this: SDK, page: number = 0, size: number = 25): Promise<MessageDto[]> {
-    const query = new URLSearchParams({ page: page.toString(), size: size.toString() });
-    const response = await this.get(`${controller}?${query.toString()}`, {});
+    const response = await this.get(`${controller}`, { page: page.toString(), size: size.toString() });
     if (!response.ok) {
         const err = await response.text();
         throw new Error(`Get messages failed: ${err}`);
@@ -24,8 +23,7 @@ export async function getMessages(this: SDK, page: number = 0, size: number = 25
 }
 
 export async function getSentMessages(this: SDK, page: number = 0, size: number = 25): Promise<MessageDto[]> {
-    const query = new URLSearchParams({ page: page.toString(), size: size.toString() });
-    const response = await this.get(`${controller}/sent?${query.toString()}`, {});
+    const response = await this.get(`${controller}/sent`, { page: page.toString(), size: size.toString() });
     if (!response.ok) {
         const err = await response.text();
         throw new Error(`Get sent messages failed: ${err}`);

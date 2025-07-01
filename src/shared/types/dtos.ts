@@ -53,9 +53,12 @@ export enum SellerType {
 }
 
 export interface MessageDto {
+    id?: string;
+    senderId?: string;
     recipientId: string;
     title: string;
     body: string;
+    date?: string;
 }
 
 export interface Pageable {

@@ -21,6 +21,7 @@ import StoreTransactionsPage from "./modules/store/components/subpages/Transacti
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
+import StoreMessages from "./modules/store/components/subpages/StoreMessages";
 import CartMainPage from "./modules/cart/CartMainPage";
 import StoreBidRequestPage from "./modules/Bidding/pages/StoreBidRequestPage";
 import UserBidPage from "./modules/Bidding/pages/UserBidPage";
@@ -58,6 +59,7 @@ const App: React.FC = () => {
             <Route path="bids/requests" element={<StoreBidRequestPage />} />
             <Route path="sellers-info" element={<SellerInfoPage />} />
 
+            <Route path="messages" element={<StoreMessages />} />
           </Route>
 
           <Route path="/notifications" element={<NotificationPage />} />
