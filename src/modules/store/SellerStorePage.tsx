@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Container, Tabs, Tab, Divider, Alert } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Container,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tabs,
+  Tab,
+  Divider,
+  Alert,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useParams, useLocation, Link, Navigate, Outlet } from "react-router-dom";
+import {
+  useParams,
+  useLocation,
+  Link,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MuiLink from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
@@ -10,11 +29,12 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import RatingComponent from "../../shared/components/RatingComponent";
 import { sdk } from "../../sdk/sdk";
+import { TokenService } from "../../shared/utils/token";
 
 import { StoreDto } from "../../shared/types/dtos";
 
-type TabValue = "products" | "sellers" | "settings" | "discounts" | "messages";
-const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "messages"];
+type TabValue = "products" | "sellers" | "settings" | "discounts" | "transactions" | "messages";
+const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "transactions", "messages"];
 
 const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
@@ -24,15 +44,26 @@ const SellerStoreLayout: React.FC = () => {
   const [store, setStore] = useState<StoreDto | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Rating dialog states
+  const [rateDialogOpen, setRateDialogOpen] = useState(false);
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [rateError, setRateError] = useState<string>("");
+  const [isSeller, setIsSeller] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     setIsLoading(true);
     setError(null);
-    sdk.getStore(id)
+    sdk
+      .getStore(id)
       .then((result) => {
         setStore(result);
         setIsLoading(false);
+        // Check if current user is a seller of this store
+        // You might need to implement this check based on your authentication system
+        // For now, setting to false as a placeholder
+        setIsSeller(false);
       })
       .catch((err) => {
         console.error("Failed to fetch store:", err.message || err);
@@ -46,8 +77,8 @@ const SellerStoreLayout: React.FC = () => {
     if (!location.pathname || !id) return "products";
 
     const segments = location.pathname.split("/");
-    const tabSegment = segments[3] as TabValue | undefined;
-    return TAB_ORDER.includes(tabSegment as any)
+    const tabSegment = segments[3];
+    return tabSegment && TAB_ORDER.includes(tabSegment as TabValue)
       ? (tabSegment as TabValue)
       : "products";
   }, [location.pathname, id]);
@@ -55,6 +86,32 @@ const SellerStoreLayout: React.FC = () => {
   if (location.pathname === `/store/${id}`) {
     return <Navigate to={`/store/${id}/products`} replace />;
   }
+
+  const handleRateStore = async () => {
+    if (!id || userRating == null) return;
+    setRateError("");
+    try {
+      await sdk.createStoreReview({
+        id: undefined, // let backend generate
+        productId: undefined, // not a product review
+        storeId: id ?? undefined,
+        writerId: undefined, // let backend use current user
+        title: undefined,
+        body: undefined,
+        rating: Math.round(userRating),
+        date: undefined,
+      });
+      // Refresh store info after rating
+      const updatedStore = await sdk.getStore(id);
+      setStore(updatedStore);
+      setRateDialogOpen(false);
+      setUserRating(null);
+      alert("Thank you for rating the store!");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "You must purchase from this store before rating.";
+      setRateError(errorMessage);
+    }
+  };
 
   return (
     <Box
@@ -116,11 +173,64 @@ const SellerStoreLayout: React.FC = () => {
               value={typeof store.rating === "number" && store.rating > 0 ? store.rating : 0}
               readOnly={true}
               size="large"
-              precision={0.1}
-              key={`readonly-store-rating-${store.rating}`}
+              precision={1}
+              onChange={async (newValue) => {
+                if (isSeller || !TokenService.isAuthenticated) return;
+                if (!id) return;
+                try {
+                  await sdk.createStoreReview({
+                    id: undefined, // let backend generate
+                    productId: undefined,
+                    storeId: id ?? undefined,
+                    writerId: undefined,
+                    title: undefined,
+                    body: undefined,
+                    rating: Math.round(newValue),
+                    date: undefined,
+                  });
+                  // Refresh store info after rating
+                  const updatedStore = await sdk.getStore(id);
+                  setStore(updatedStore);
+                  alert("Thank you for rating the store!");
+                                 } catch (err: unknown) {
+                   const errorMessage = err instanceof Error ? err.message : "You must purchase from this store before you can rate it.";
+                   alert(errorMessage);
+                 }
+              }}
             />
+            <Typography variant="h6" mt={1}>
+              {store.rating > 0 ? `(${store.rating.toFixed(1)})` : ""}
+            </Typography>
           </Box>
         )}
+
+        <Dialog open={rateDialogOpen} onClose={() => setRateDialogOpen(false)}>
+          <DialogTitle>Rate This Store</DialogTitle>
+          <DialogContent>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+              gap={2}
+            >
+              <RatingComponent
+                value={userRating ?? 0}
+                onChange={setUserRating}
+                size="large"
+              />
+              {rateError && <Typography color="error">{rateError}</Typography>}
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setRateDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleRateStore}
+              disabled={userRating == null}
+            >
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {error && (
           <Chip
@@ -142,15 +252,15 @@ const SellerStoreLayout: React.FC = () => {
         )}
 
         {!isLoading && error && (
-          <Alert severity="error" sx={{ mb: theme.spacing(4) }}>
-            {`Failed to load store: ${error}`}
-          </Alert>
+                      <Alert severity="error" sx={{ mb: theme.spacing(4) }}>
+              Failed to load store: {error}
+            </Alert>
         )}
 
         {!id && !isLoading && (
-          <Alert severity="warning" sx={{ mb: theme.spacing(4) }}>
-            No store ID provided. Please navigate via “My Stores” first.
-          </Alert>
+                      <Alert severity="warning" sx={{ mb: theme.spacing(4) }}>
+              No store ID provided. Please navigate via &quot;My Stores&quot; first.
+            </Alert>
         )}
 
         {!isLoading && !error && store && (
@@ -177,6 +287,12 @@ const SellerStoreLayout: React.FC = () => {
                 to={`/store/${id}/products`}
               />
               <Tab
+                value="discounts"
+                label="Discounts"
+                component={Link}
+                to={`/store/${id}/discounts`}
+              />
+              <Tab
                 value="sellers"
                 label="Sellers"
                 component={Link}
@@ -194,6 +310,13 @@ const SellerStoreLayout: React.FC = () => {
                 component={Link}
                 to={`/store/${id}/discounts`}
               />
+              <Tab
+                value="transactions"
+                label="Transactions"
+                component={Link}
+                to={`/store/${id}/transactions`}
+              />
+
               <Tab
                 value="messages"
                 label="Messages"

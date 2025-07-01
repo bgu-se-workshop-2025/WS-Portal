@@ -36,6 +36,7 @@ export class SDK {
   // Admin SDK
   public suspendUser!: (username: string, millis: number) => Promise<string>;
   public cancelSuspensionUser!: (username: string) => Promise<void>;
+  public getSuspensions!: (page: number, limit: number) => Promise<dtos.SuspensionTicketDto[]>;
   public elevateUser!: (username: string) => Promise<string>;
   public isAdmin!: () => Promise<dtos.AdminDetailsDto>;
 
@@ -78,6 +79,8 @@ export class SDK {
   // Store SDK
   public createStore!: (payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
   public updateStore!: (storeId: string, payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
+  public deleteStore!: (storeId: string) => Promise<void>;
+  public closeStore!: (storeId: string) => Promise<void>;
   public createProduct!: (storeId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public updateProduct!: (storeId: string, productId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public deleteProduct!: (storeId: string, productId: string) => Promise<void>;
@@ -91,6 +94,8 @@ export class SDK {
   public getStores!: (pageable: dtos.Pageable) => Promise<dtos.StoreDto[]>;
   public getStoreOfficials!: (storeId: string) => Promise<dtos.PublicUserDto[]>;
   public getStorePermissions!: () => Promise<string[]>;
+  public getStoreSnapshotById!: (snapshotId: string) => Promise<dtos.StoreSnapshotDto>;
+
   // Order SDK
   public getUserOrders!: (payload: dtos.Pageable) => Promise<dtos.UserOrderDto[]>;
   public getUserOrderById!: (id: string) => Promise<dtos.UserOrderDto>;

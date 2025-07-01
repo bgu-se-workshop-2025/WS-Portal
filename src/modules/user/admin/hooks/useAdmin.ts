@@ -3,6 +3,7 @@ import { sdk } from "../../../../sdk/sdk";
 import {
     AdminDetailsDto,
     SuspensionTicketDto,
+    StoreDto,
 } from "../../../../shared/types/dtos";
 
 export interface useAdminResponse {
@@ -10,6 +11,7 @@ export interface useAdminResponse {
     loading: boolean;
     error?: string;
     suspensions: SuspensionTicketDto[];
+    stores: StoreDto[];
     suspendUser: (userId: string, millis: number) => Promise<void>;
     elevateUser: (userId: string) => Promise<void>;
     isAdmin: () => Promise<AdminDetailsDto>;
@@ -18,6 +20,8 @@ export interface useAdminResponse {
         page: number,
         limit: number
     ) => Promise<SuspensionTicketDto[]>;
+    getStores: (page: number, limit: number) => Promise<StoreDto[]>;
+    deleteStore: (storeId: string) => Promise<void>;
 }
 
 const useAdmin = (): useAdminResponse => {
@@ -25,6 +29,7 @@ const useAdmin = (): useAdminResponse => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | undefined>(undefined);
     const [suspensions, setSuspensions] = useState<SuspensionTicketDto[]>([]);
+    const [stores, setStores] = useState<StoreDto[]>([]);
 
     const suspendUser = async (
         userId: string,
@@ -93,16 +98,50 @@ const useAdmin = (): useAdminResponse => {
         }
     };
 
+    const getStores = async (
+        page: number,
+        limit: number
+    ): Promise<StoreDto[]> => {
+        setLoading(true);
+        try {
+            const response = await sdk.getStores({ page, size: limit });
+            setStores(response);
+            return response;
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Unknown error");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteStore = async (storeId: string): Promise<void> => {
+        setLoading(true);
+        try {
+            await sdk.deleteStore(storeId);
+            // Remove the deleted store from the list
+            setStores(prev => prev.filter(store => store.id !== storeId));
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Unknown error");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         result,
         loading,
         error,
         suspensions,
+        stores,
         suspendUser,
         elevateUser,
         isAdmin,
         cancelSuspensionUser,
         getSuspensions,
+        getStores,
+        deleteStore,
     };
 };
 

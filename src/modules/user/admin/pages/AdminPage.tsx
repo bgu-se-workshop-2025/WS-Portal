@@ -2,6 +2,7 @@ import { Stack, Typography } from "@mui/material";
 import AdminCommandBar from "../components/AdminCommandBar";
 import Resources from "../AdminPageResources.json";
 import SuspendedUsersTable from "../components/SuspendedUsersTable";
+import StoresTable from "../components/StoresTable";
 import useAdmin from "../hooks/useAdmin";
 
 const AdminPage = () => {
@@ -13,6 +14,7 @@ const AdminPage = () => {
         <Typography variant="h3">System Management</Typography>
         <AdminCommandBar useAdminResponse={useAdminResponse} />
         <SuspendedUsersTable useAdminResponse={useAdminResponse} />
+        <StoresTable useAdminResponse={useAdminResponse} />
     </Stack>
 }
 

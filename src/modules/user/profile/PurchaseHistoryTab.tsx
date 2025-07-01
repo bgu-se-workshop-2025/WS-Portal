@@ -35,7 +35,20 @@ const getProductDisplayPrice = (product: any): React.ReactNode => {
   return <span>{regularTotal.toFixed(2)}₪</span>;
 };
 
-const calculateStoreTotal = (products: any[]): number => {
+const calculateStoreTotal = (store: any): number => {
+  if (!store) return 0;
+  
+  // If the store has price and discount fields, use them for the total calculation
+  if (typeof store.price === 'number') {
+    if (typeof store.discount === 'number' && store.discount > 0) {
+      // Apply discount if available
+      return store.price - store.discount;
+    }
+    return store.price;
+  }
+  
+  // Otherwise calculate from products
+  const products = Array.isArray(store.products) ? store.products : [];
   return products.reduce((sum: number, product: any) => {
     if (hasDiscount(product)) {
       return sum + product.discountPrice;
@@ -46,8 +59,7 @@ const calculateStoreTotal = (products: any[]): number => {
 
 const calculateOrderTotal = (storeSnapshots: any[]): number => {
   return storeSnapshots.reduce((orderSum: number, store: any) => {
-    const products = Array.isArray(store.products) ? store.products : [];
-    const storeTotal = calculateStoreTotal(products);
+    const storeTotal = calculateStoreTotal(store);
     return orderSum + storeTotal;
   }, 0);
 };
@@ -119,7 +131,7 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                       
                       return (
                         <Box key={store.storeId} mb={2} pl={1}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#58a6ff', mb: 0.5, display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#58a6ff', mb: 0.5, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                             🏬 Store:
                             {storeDisplayName ? (
                               <Button
@@ -143,14 +155,14 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                               onChange={async (newValue) => {
                                 try {
                                   await sdk.createStoreReview({
-                                    id: null,
-                                    productId: null,
+                                    id: undefined,
+                                    productId: undefined,
                                     storeId: store.storeId,
-                                    writerId: null,
+                                    writerId: undefined,
                                     title: '',
                                     body: '',
                                     rating: Math.round(newValue),
-                                    date: null,
+                                    date: undefined,
                                   });
                                   if (typeof setLiveStoreNames === 'function') {
                                     const updated = await sdk.getStore(store.storeId);
@@ -186,14 +198,14 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                                       onChange={async (newValue) => {
                                         try {
                                           await sdk.createProductReview({
-                                            id: null,
+                                            id: undefined,
                                             productId: product.productId || product.id,
                                             storeId: store.storeId,
-                                            writerId: null,
+                                            writerId: undefined,
                                             title: '',
                                             body: '',
                                             rating: Math.round(newValue),
-                                            date: null,
+                                            date: undefined,
                                           });
                                           if (typeof setOrders === 'function') {
                                             const updatedOrders = await sdk.getUserOrders({ page: 0, size: PAGE_SIZE });
@@ -212,7 +224,24 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                             <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>No products found.</Typography>
                           )}
                           <Typography variant="body2" sx={{ fontWeight: 500, color: 'gray', mt: 1 }}>
-                            Store total: {totalOrderPrice.toFixed(2)}₪
+                            Store total: {hasDiscount ? (
+                              <>
+                                <span style={{ textDecoration: "line-through", color: "#888", marginRight: "6px" }}>
+                                  {/* Sum of green (discounted) prices of products */}
+                                  {products.reduce((sum: number, product: any) => {
+                                    if (hasDiscount(product)) {
+                                      return sum + product.discountPrice;
+                                    }
+                                    return sum + calculateProductTotal(product);
+                                  }, 0).toFixed(2)}₪
+                                </span>
+                                <span style={{ color: "#388e3c", fontWeight: "bold" }}>
+                                  {(store.price - store.discount).toFixed(2)}₪
+                                </span>
+                              </>
+                            ) : (
+                              <span>{totalOrderPrice.toFixed(2)}₪</span>
+                            )}
                           </Typography>
                           <Divider sx={{ mt: 1, mb: 1, opacity: 0.2 }} />
                         </Box>
