@@ -16,8 +16,7 @@ import RequireAdmin from "./modules/user/admin/RequireAdmin";
 
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
 import PaymentPage from "./modules/order/PaymentPage";
-// import BidRequestPage from "./modules/Bidding/BidRequestPage";
-// import BidPage from "./modules/Bidding/BidPage";
+import StoreTransactionsPage from "./modules/store/components/subpages/TransactionsPage/StoreTransactionsPage";
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
@@ -44,12 +43,14 @@ const App: React.FC = () => {
              
           <Route path="/cart" element={<CartMainPage />} />
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment/:productId/:bidPrice" element={<PaymentPage />} />
           <Route path="/store/:storeId/*" element={<StorePage />}>
             <Route index element={<Navigate to="products" replace />} />
             <Route path="products" element={<StoreProductsPage />} />
             <Route path="sellers" element={<StoreSellersPage />} />
             <Route path="settings" element={<StoreSettingsPage />} />
             <Route path="discounts" element={<StoreDiscountsPage />} />
+            <Route path="transactions" element={<StoreTransactionsPage />} />
             <Route path="bids" element={<StoreBidPage />} />
             <Route path="bids/requests" element={<StoreBidRequestPage />} />
           </Route>

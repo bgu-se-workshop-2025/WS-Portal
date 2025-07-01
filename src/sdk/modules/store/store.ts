@@ -115,4 +115,22 @@ export async function updateManagerPermissions(
   }
 }
 
+export async function deleteStore(this: SDK, storeId: string): Promise<void> {
+    const response = await this.delete(`admin/stores/${storeId}`);
+
+    if(!response.ok) {
+        const err = await response.text();
+        throw new Error(`Failed to delete store ${storeId}: ${err}`);
+    }
+}
+
+export async function closeStore(this: SDK, storeId: string): Promise<void> {
+    const response = await this.delete(`${storeController}/${storeId}`);
+
+    if(!response.ok) {
+        const err = await response.text();
+        throw new Error(`Failed to close store ${storeId}: ${err}`);
+    }
+}
+
 

@@ -1,5 +1,5 @@
 import { SDK } from "../../sdk";
-import { Pageable, UserOrderDto, StoreOrderDto } from "../../../shared/types/dtos.ts";
+import { Pageable, UserOrderDto, StoreOrderDto, StoreSnapshotDto } from "../../../shared/types/dtos.ts";
 
 const order = "orders";
 const store = "stores";
@@ -54,3 +54,23 @@ export async function getStoreOrders(this: SDK, storeId: string, pageable: Pagea
     return result;
     
 }
+
+export async function getCartSnapshotById(this: SDK, snapshotId: string): Promise<any> {
+  const response = await this.get(`orders/cart-snapshots/${snapshotId}`, {});
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Error fetching cart snapshot: ${error}`);
+  }
+  return await response.json();
+}
+
+
+export async function getStoreSnapshotById(this: SDK, snapshotId: string): Promise<StoreSnapshotDto> {
+  const response = await this.get(`orders/store-snapshots/${snapshotId}`, {});
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Error fetching cart snapshot: ${error}`);
+  }
+  return await response.json();
+}
+

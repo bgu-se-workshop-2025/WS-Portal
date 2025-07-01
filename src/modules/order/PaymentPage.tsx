@@ -9,10 +9,13 @@ import {
   Alert,
   Divider,
   CircularProgress,
+  Snackbar,
 } from '@mui/material';
-import { OrderRequestDetails, BidOrderRequestDetails, PaymentDetails, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
+import { AuctionBidDto, OrderRequestDetails, BidOrderRequestDetails, PaymentDetails, PaymentDetailsErrors, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
 import useCart from '../../shared/hooks/useCart';
 import useOrder from './hooks/useOrder';
+import { useParams } from "react-router-dom";
+import { sdk } from '../../sdk/sdk';
 
 const PaymentPage: React.FC = () => {
   const cartHook = useCart();
@@ -20,6 +23,56 @@ const PaymentPage: React.FC = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<UserOrderDto | undefined>(undefined);
+  const [auctionSuccess, setAuctionSuccess] = useState<AuctionBidDto | undefined>(undefined);
+  const { productId, bidPrice } = useParams<{ productId: string; bidPrice: string }>();
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+
+  function validatePaymentDetails(paymentDetails: PaymentDetails): PaymentDetailsErrors {
+    const errors: PaymentDetailsErrors = {};
+    if (!paymentDetails.paymentData.holder) errors.holder = "Required";
+    if (!paymentDetails.paymentData.id) errors.id = "Required";
+    if (!paymentDetails.paymentData.card_number) errors.card_number = "Required";
+    if (!paymentDetails.paymentData.cvv) errors.cvv = "Required";
+    if (!paymentDetails.paymentData.month) errors.month = "Required";
+    if (!paymentDetails.paymentData.year) errors.year = "Required";
+    if (!paymentDetails.payerEmail) errors.payerEmail = "Required";
+    return errors;
+  }
+  
+  function setErrorMessage(message: string) {
+    setError(message);
+    setSuccess(undefined);
+    setAuctionSuccess(undefined);
+    setSnackbarMessage(message);
+    setSnackbarSeverity("error");
+    setSnackbarOpen(true);
+    console.error(message);
+  }
+
+  function setSuccessMessage(userOrderDto: UserOrderDto | undefined) {
+    setSuccess(userOrderDto);
+    setAuctionSuccess(undefined);
+    setError("");
+    let message = userOrderDto ? `Purchase successful! Transaction ID: ${userOrderDto.id}` : "Transaction ID unavailable";
+    setSnackbarMessage(message);
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
+    console.log("order created:" + userOrderDto);
+  }
+
+  function setAuctionSuccessMessage(auctionBidDto: AuctionBidDto | undefined) {
+    setAuctionSuccess(auctionBidDto);
+    setSuccess(undefined);
+    setError("");
+    let message = auctionBidDto ? `Successfully placed bid of: ${auctionBidDto.bidPrice}` : "bid price unavailable";
+    setSnackbarMessage(message);
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
+    console.log("Successfully placed bid: ", auctionBidDto);
+  }
 
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
     externalId: "",
@@ -27,6 +80,8 @@ const PaymentPage: React.FC = () => {
     payerId: "",
     paymentData: { "currency": "ILS" }
   });
+
+  const [errors, setPaymentErrors] = useState<PaymentDetailsErrors>({});
 
   const [shippingAddress, setShippingAddress] = useState<ShippingAddressDto>({
     apartmentNumber: "",
@@ -62,7 +117,48 @@ const PaymentPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (cartHook.loading || cartHook.error || !cartHook.cart || orderHook.loading) {
+    if (orderHook.loading) {
+      return;
+    }
+
+    const errors = validatePaymentDetails(paymentDetails);
+    setPaymentErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setErrorMessage("Missing or invalid payment details");
+      return;
+    }
+
+    if ((!!productId !== !!bidPrice)) {
+      setErrorMessage("Invalid URL - Both productId and bidPrice must be provided for auction bids");
+      return;
+    }
+
+    if (productId && bidPrice) {
+      try {
+        const auctionBid: AuctionBidDto = {
+          productId: productId,
+          bidderId: await sdk.getCurrentUserProfileDetails().then(user => user.id),
+          bidPrice: Number(bidPrice),
+          paymentDetails: paymentDetails,
+          shippingAddress: shippingAddress,
+        };
+        const bid = await orderHook.placeBid(productId, auctionBid);
+        let possibleError = orderHook.error;
+        if (possibleError) {
+          setErrorMessage(possibleError ?? "Unexpected error occurred");
+          return;
+        }
+        setAuctionSuccessMessage(bid);
+      } catch (error: any) {
+        setErrorMessage(error.msg ?? "Unexpected error occurred");
+      } finally {
+        setLoading(false);
+      }
+
+      return;
+    }
+    
+    if (cartHook.loading || cartHook.error || !cartHook.cart) {
       return;
     }
 
@@ -92,6 +188,18 @@ const PaymentPage: React.FC = () => {
       shippingAddress: shippingAddress
       };
 
+    try {
+      const order = await orderHook.createOrder(createOrderRequest);
+      let possibleError = await orderHook.error;
+      if (possibleError) {
+        setErrorMessage(possibleError ?? "Unexpected error occurred");
+        return;
+      }
+      setSuccessMessage(order);
+    } catch (error: any) {
+      setErrorMessage(error.msg ?? "Unexpected error occurred");
+    } finally {
+      setLoading(false);
       try {
         const order = await orderHook.createOrder(createOrderRequest);
         setSuccess(order);
@@ -121,6 +229,8 @@ const PaymentPage: React.FC = () => {
             onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "holder": e.target.value } })}
             fullWidth
             disabled={loading}
+            error={!!errors?.holder}
+            helperText={errors?.holder}
           />
 
           <TextField
@@ -131,6 +241,8 @@ const PaymentPage: React.FC = () => {
             onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "id": e.target.value } })}
             fullWidth
             disabled={loading}
+            error={!!errors?.id}
+            helperText={errors?.id}
           />
 
           <TextField
@@ -141,6 +253,8 @@ const PaymentPage: React.FC = () => {
             onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "card_number": e.target.value } })}
             fullWidth
             disabled={loading}
+            error={!!errors?.card_number}
+            helperText={errors?.card_number}
           />
 
           <TextField
@@ -151,6 +265,8 @@ const PaymentPage: React.FC = () => {
             onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "cvv": e.target.value } })}
             fullWidth
             disabled={loading}
+            error={!!errors?.cvv}
+            helperText={errors?.cvv}
           />
 
           <TextField
@@ -161,6 +277,8 @@ const PaymentPage: React.FC = () => {
             onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "month": e.target.value } })}
             fullWidth
             disabled={loading}
+            error={!!errors?.month}
+            helperText={errors?.month}
           />
 
           <TextField
@@ -171,6 +289,8 @@ const PaymentPage: React.FC = () => {
             onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "year": e.target.value } })}
             fullWidth
             disabled={loading}
+            error={!!errors?.year}
+            helperText={errors?.year}
           />
 
           <TextField
@@ -181,6 +301,8 @@ const PaymentPage: React.FC = () => {
             onChange={handlePaymentEmailChange}
             fullWidth
             disabled={loading}
+            error={!!errors?.payerEmail}
+            helperText={errors?.payerEmail}
           />
         </Stack>
 
@@ -262,7 +384,7 @@ const PaymentPage: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={!!success || !!auctionSuccess || loading}
             fullWidth
             sx={{ py: 1.5 }}
           >
@@ -275,15 +397,41 @@ const PaymentPage: React.FC = () => {
         </Stack>
 
         {success && (
+            <Alert severity="success" sx={{ mt: 3 }}>
+              Purchase successful! Transaction ID: {success.id}
+            </Alert>
           <Alert severity="success" sx={{ mt: 3 }}>
             Purchase {(bidId ? "from bid " : "")}successful! Transaction ID: {success.id}
           </Alert>
         )}
+
+        {auctionSuccess && (
+            <Alert severity="success" sx={{ mt: 3 }}>
+              Successfully placed bid of: {auctionSuccess.bidPrice}
+            </Alert>
+        )}
+        
         {error && (
           <Alert severity="error" sx={{ mt: 3 }}>
             {error}
           </Alert>
         )}
+
+        <Snackbar
+          open={snackbarOpen}
+          onClose={() => setSnackbarOpen(false)}
+          autoHideDuration={4000}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert 
+            severity={snackbarSeverity} 
+            sx={{ width: '100%' }}
+            onClose={() => setSnackbarOpen(false)}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+
       </Paper>
     </Box>
   );

@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from "react";
+import React, { useMemo, useCallback, useState} from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -15,8 +15,9 @@ import {
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
 import RatingComponent from "../../../../../../../shared/components/RatingComponent";
-import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
+import { isAuthenticated } from "../../../../../../../sdk/sdk";
 import CreateBidRequestDialog from "../../../../../../Bidding/CreateBidRequestDialog";
+import AuctionProductCard from "./AuctionProductCard";
 
 const UserProductCard: React.FC<{
   product: ProductDto;
@@ -36,7 +37,8 @@ const UserProductCard: React.FC<{
 
   const { storeId } = useParams<{ storeId: string }>();
   const isUserAuthenticated = isAuthenticated();
-
+ 
+  // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
     if (!cart) return 0;
     const basket = cart.stores.find((s) => s.storeId === storeId);
@@ -60,7 +62,9 @@ const UserProductCard: React.FC<{
     } else {
       await updateQuantity(storeId as string, product.id, currentQty - 1);
     }
-  }, [currentQty, product.id, removeFromCart, updateQuantity]);
+  }, [currentQty, product.id, product.name, removeFromCart, updateQuantity]);
+
+
 
   return (
     <>
@@ -91,74 +95,75 @@ const UserProductCard: React.FC<{
             {product.description}
           </Typography>
 
-          <Box sx={{ mb: theme.spacing(1) }}>
+        <Box sx={{ mb: theme.spacing(1) }}>
+          {product.auctionEndDate ? (
+            <AuctionProductCard 
+              product={product} 
+              setUpdateProducts={setUpdateProducts}
+              isUserAuthenticated={isUserAuthenticated}
+            />
+          ) : (
             <Typography variant="body2">
               <strong>Price:</strong> ${product.price.toFixed(2)}
             </Typography>
-            <Typography variant="body2">
-              <strong>Available:</strong> {product.quantity}
-            </Typography>
-          </Box>
-
-          {product.categories.length > 0 && (
-            <Typography variant="body2">
-              <strong>Categories:</strong> {product.categories.join(", ")}
-            </Typography>
           )}
-          {product.auctionEndDate && (
-            <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
-              <strong>Auction Ends:</strong>{" "}
-              {new Date(product.auctionEndDate).toLocaleString()}
-            </Typography>
-          )}
+          <Typography variant="body2">
+            <strong>Available:</strong> {product.quantity}
+          </Typography>
+        </Box>
 
-          <Box
-            sx={{
-              mb: theme.spacing(1),
-              mt: theme.spacing(2),
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <RatingComponent
-              value={product.rating}
-              readOnly={true}
-              size="small"
-              precision={0.1}
-            />
-          </Box>
+        {product.categories.length > 0 && (
+          <Typography variant="body2">
+            <strong>Categories:</strong> {product.categories.join(", ")}
+          </Typography>
+        )}
 
-          {cartError && (
-            <Typography
-              variant="caption"
-              color="error"
-              sx={{ mt: theme.spacing(1), display: "block" }}
-            >
-              {cartError}
-            </Typography>
-          )}
-        </CardContent>
-
-        <CardActions
+        {!product.auctionEndDate && <Box
           sx={{
-            justifyContent: "space-between",
+            mb: theme.spacing(1),
+            mt: theme.spacing(2),
+            display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            px: theme.spacing(2),
-            pb: theme.spacing(2),
-            flexWrap: "wrap",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleDecrement}
-              disabled={cartLoading || currentQty === 0}
-              sx={{ minWidth: 32, p: 0 }}
-            >
-              –
-            </Button>
+          {/* Always show partial stars for viewing */}
+          <RatingComponent
+            value={product.rating}
+            readOnly={true}
+            size="small"
+            precision={0.1}
+          />
+        </Box>}
+
+        {!product.auctionEndDate && cartError && (
+          <Typography
+            variant="caption"
+            color="error"
+            sx={{ mt: theme.spacing(1), display: "block" }}
+          >
+            {cartError}
+          </Typography>
+        )}
+      </CardContent>
+
+      {!product.auctionEndDate && <CardActions
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          px: theme.spacing(2),
+          pb: theme.spacing(2),
+        }}
+      >
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={handleDecrement}
+          disabled={cartLoading || currentQty === 0}
+          sx={{ minWidth: 32, p: 0 }}
+        >
+          –
+        </Button>
 
             <Box sx={{ width: 32, textAlign: "center", mx: theme.spacing(1) }}>
               <Typography variant="body2">{currentQty}</Typography>

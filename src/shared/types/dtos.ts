@@ -103,14 +103,14 @@ export interface ShippingAddressDto {
 }
 
 export interface ReviewDto {
-    id: string | null;
-    productId: string | null;
-    storeId: string;
-    writerId: string | null;
-    title: string;
-    body: string;
-    rating: number;
-    date: string | null;
+    id?: string;
+    productId?: string;  
+    storeId?: string;
+    writerId?: string;
+    title?: string;
+    body?: string;
+    rating?: number;
+    date?: string;
 }
 
 export interface OrderRequestDetails {
@@ -153,6 +153,16 @@ export interface PaymentDetails {
     paymentData: { [key: string]: string };
 }
 
+export type PaymentDetailsErrors = {
+  holder?: string;
+  id?: string;
+  card_number?: string;
+  cvv?: string;
+  month?: string;
+  year?: string;
+  payerEmail?: string;
+};
+
 export type paymentDataKeys =
     | "currency"
     | "card_number"
@@ -185,4 +195,35 @@ export interface BidDto {
     price: number;
     storeId: string;
     isPurchased: boolean;
+}
+
+export interface AuctionBidDto {
+  id?: string;
+  productId: string;
+  bidderId: string;
+  bidPrice: number;
+  paymentDetails: PaymentDetails;
+  shippingAddress: ShippingAddressDto;
+}
+
+export interface ProductSnapshotDto {
+  id: string;
+  productId: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  totalPrice: number;
+  discountPrice: number;
+  auctionEndDate?: string;
+}
+
+export interface StoreSnapshotDto {
+  id: string;
+  storeId: string;
+  name: string;
+  description: string;
+  products: ProductSnapshotDto[];
+  price: number;
+  discount: number;
 }

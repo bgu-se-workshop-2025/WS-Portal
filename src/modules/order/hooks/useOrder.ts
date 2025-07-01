@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { OrderRequestDetails, BidOrderRequestDetails, UserOrderDto } from "../../../shared/types/dtos";
+import { AuctionBidDto, OrderRequestDetails, BidOrderRequestDetails, UserOrderDto } from "../../../shared/types/dtos";
 import { sdk } from "../../../sdk/sdk";
 
 interface UseOrderReturn {
@@ -11,6 +11,10 @@ interface UseOrderReturn {
     createOrderForBid: (
         orderRequest: BidOrderRequestDetails
     ) => Promise<UserOrderDto | undefined>;
+    placeBid: (
+        productId: string,
+        auctionBid: AuctionBidDto
+    ) => Promise<AuctionBidDto | undefined>;
 }
 
 const useOrder = (): UseOrderReturn => {
@@ -53,11 +57,50 @@ const useOrder = (): UseOrderReturn => {
         []
     );
 
+
+    const placeBid = useCallback(
+        async (productId: string, auctionBid: AuctionBidDto) => {
+            setLoading(true);
+            setError(null);
+            try {
+                const bid = await sdk.placeBid(productId, auctionBid);
+                return bid;
+            } catch (err: any) {
+                console.error("Error placing bid:", err);
+                setError(err.message || "Failed to place bid");
+                return undefined;
+            } finally {
+                setLoading(false);
+            }
+        },
+        []
+    );
+
+
+    const placeBid = useCallback(
+        async (productId: string, auctionBid: AuctionBidDto) => {
+            setLoading(true);
+            setError(null);
+            try {
+                const bid = await sdk.placeBid(productId, auctionBid);
+                return bid;
+            } catch (err: any) {
+                console.error("Error placing bid:", err);
+                setError(err.message || "Failed to place bid");
+                return undefined;
+            } finally {
+                setLoading(false);
+            }
+        },
+        []
+    );
+
     return {
         loading,
         error,
         createOrder,
         createOrderForBid,
+        placeBid,
     };
 };
 

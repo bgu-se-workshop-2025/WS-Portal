@@ -3,6 +3,7 @@ import * as auth from "./modules/auth/auth";
 import * as order from "./modules/order/order";
 import * as publicOrder from "./modules/order/publicOrder";
 import * as bidding from "./modules/order/bidding";
+import * as auction from "./modules/order/auction";
 
 import * as policy from "./modules/store/policy";
 import * as product from "./modules/store/product";
@@ -34,6 +35,7 @@ export class SDK {
   // Admin SDK
   public suspendUser!: (username: string, millis: number) => Promise<string>;
   public cancelSuspensionUser!: (username: string) => Promise<void>;
+  public getSuspensions!: (page: number, limit: number) => Promise<dtos.SuspensionTicketDto[]>;
   public elevateUser!: (username: string) => Promise<string>;
   public isAdmin!: () => Promise<dtos.AdminDetailsDto>;
 
@@ -69,6 +71,8 @@ export class SDK {
   // Store SDK
   public createStore!: (payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
   public updateStore!: (storeId: string, payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
+  public deleteStore!: (storeId: string) => Promise<void>;
+  public closeStore!: (storeId: string) => Promise<void>;
   public createProduct!: (storeId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public updateProduct!: (storeId: string, productId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public deleteProduct!: (storeId: string, productId: string) => Promise<void>;
@@ -82,6 +86,8 @@ export class SDK {
   public getStores!: (pageable: dtos.Pageable) => Promise<dtos.StoreDto[]>;
   public getStoreOfficials!: (storeId: string) => Promise<dtos.PublicUserDto[]>;
   public getStorePermissions!: () => Promise<string[]>;
+  public getStoreSnapshotById!: (snapshotId: string) => Promise<dtos.StoreSnapshotDto>;
+
   // Order SDK
   public getUserOrders!: (payload: dtos.Pageable) => Promise<dtos.UserOrderDto[]>;
   public getUserOrderById!: (id: string) => Promise<dtos.UserOrderDto>;
@@ -110,6 +116,12 @@ export class SDK {
   public deleteBid!: (bidRequestId: string) => Promise<void>;
   public getSellersRemaining!: (bidRequestId: string) => Promise<String[]>;
 
+  // Auction SDK
+  public placeBid!: (productId: string, payload: dtos.AuctionBidDto) => Promise<dtos.AuctionBidDto>;
+  public getBids!: (productId: string, pageable: dtos.Pageable) => Promise<dtos.AuctionBidDto[]>;
+  public getWinningBid!: (productId: string) => Promise<dtos.AuctionBidDto>;
+  public getWinningBidPrice!: (productId: string) => Promise<number>;
+
   // Public Review SDK
   public getStoreReviews!: (storeId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
   public getProductReviews!: (storeId: string, productId: string, page?: number, size?: number) => Promise<dtos.ReviewDto[]>;
@@ -125,6 +137,7 @@ export class SDK {
   public addProductToCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
   public removeProductFromCart!: (productId: string) => Promise<void>;
   public updateProductInCart!: (productId: string, payload: { quantity: number }) => Promise<dtos.CartDto>;
+  public getCartSnapshotById!: (snapshotId: string) => Promise<any>;
 
   // Notification SDK
   public getNotifications!: (payload: dtos.Pageable) => Promise<responses.NotificationPayload[]>;
@@ -139,6 +152,7 @@ export class SDK {
       ...order,
       ...publicOrder,
       ...bidding,
+      ...auction,
       ...policy,
       ...product,
       ...publicReview,
