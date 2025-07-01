@@ -4,70 +4,24 @@ import {
   Typography,
   Button,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-  Alert,
-  Snackbar,
 } from "@mui/material";
 import {
   ProductDto,
-  ShippingAddressDto,
-  PaymentDetails,
-  PaymentDetailsErrors,
 } from "../../../../../../../shared/types/dtos";
 import { sdk } from "../../../../../../../sdk/sdk";
-import ShippingAddressForm from "../../../../../../order/ShippingAddressForm";
-import PaymentDetailsForm from "../../../../../../order/PaymentDetailsForm";
-import { validatePaymentDetails } from "../../../../../../../shared/utils/validatePaymentDetails";
+import { useNavigate } from "react-router-dom";
 
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-const initialShippingAddress: ShippingAddressDto = {
-  country: "",
-  city: "",
-  region: "",
-  street: "",
-  zipCode: "",
-  homeNumber: "",
-  apartmentNumber: "",
-  mailbox: "",
-};
-
-const initialPaymentDetails: PaymentDetails = {
-    externalId: "",
-    payerEmail: "",
-    payerId: "",
-    paymentData: {}
-};
 
 const AuctionProductCard: React.FC<{
   product: ProductDto;
   setUpdateProducts?: React.Dispatch<React.SetStateAction<boolean>>;
   isUserAuthenticated: boolean;
-}> = ({ product, setUpdateProducts, isUserAuthenticated }) => {
+}> = ({ product, isUserAuthenticated }) => {
   const [currentTopOffer, setCurrentTopOffer] = useState<number | null>(null);
   const [bidValue, setBidValue] = useState<string>("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState<ShippingAddressDto>(
-    initialShippingAddress
-  );
-  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>(
-    initialPaymentDetails
-  );
-  const [bidLoading, setBidLoading] = useState(false);
   const [bidError, setBidError] = useState<string | null>(null);
-  const [paymentErrors, setPaymentErrors] = useState<PaymentDetailsErrors>({});
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">(
-    "success"
-  );
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (product.auctionEndDate) {
@@ -81,67 +35,9 @@ const AuctionProductCard: React.FC<{
   const handleAddOfferClick = () => {
     setBidError(null);
     if (Number(bidValue) > (currentTopOffer ?? product.price)) {
-      setDialogOpen(true);
+      navigate(`/payment/${product.id}/${bidValue}`, { replace: true });
     } else {
       setBidError("Offer must be higher than current top offer");
-    }
-  };
-
-  const handleSubmitBid = async () => {
-    const errors = validatePaymentDetails(paymentDetails);
-    setPaymentErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      setBidError("Please fix the payment details errors before proceeding.");
-      return;
-    }
-
-    setBidLoading(true);
-    setBidError(null);
-    try {
-      let profile;
-      try {
-        profile = await sdk.getCurrentUserProfileDetails();
-      } catch (e) {
-        setBidError("Could not fetch user profile. Please log in again.");
-        setBidLoading(false);
-        return;
-      }
-      await sdk.placeBid(product.id, {
-        productId: product.id,
-        bidderId: profile.id,
-        bidPrice: Number(bidValue),
-        shippingAddress,
-        paymentDetails: {
-          ...paymentDetails,
-          payerId: profile.id,
-        },
-      });
-      
-      const newTopOffer = await sdk.getWinningBidPrice(product.id);
-      setCurrentTopOffer(newTopOffer);
-
-      setSnackbarMessage("Bid placed successfully!");
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-
-      await sleep(1000);
-
-      setDialogOpen(false);
-      setBidValue("");
-      setShippingAddress(initialShippingAddress);
-      setPaymentDetails({
-        ...initialPaymentDetails,
-        payerId: profile.id,
-      });
-      setUpdateProducts?.((u) => !u);
-      
-    } catch (e: any) {
-      setBidError(e?.message || "Failed to place bid");
-      setSnackbarMessage(e?.message || "Failed to place bid");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    } finally {
-      setBidLoading(false);
     }
   };
 
@@ -159,20 +55,21 @@ const AuctionProductCard: React.FC<{
         </Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-        <TextField
-          size="small"
-          label="Your Offer"
-          type="number"
-          value={bidValue}
-          onChange={(e) => setBidValue(e.target.value)}
-          sx={{ mr: 1, width: 120 }}
-        />
+        {isUserAuthenticated && (
+          <TextField
+            size="small"
+            label="Your Offer"
+            type="number"
+            value={bidValue}
+            onChange={(e) => setBidValue(e.target.value)}
+            sx={{ mr: 1, width: 120 }}
+          />
+        )}
         {isUserAuthenticated ? (
             <Button
                 size="small"
                 variant="contained"
                 onClick={handleAddOfferClick}
-                disabled={bidLoading}
             >
                 Add Offer
             </Button>)
@@ -193,61 +90,6 @@ const AuctionProductCard: React.FC<{
         </Typography>
       )}
 
-      <Dialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Enter Bid Details</DialogTitle>
-            <DialogContent>
-                <PaymentDetailsForm
-                    paymentDetails={paymentDetails}
-                    onChange={setPaymentDetails}
-                    disabled={bidLoading}
-                    errors={paymentErrors}
-                />
-                    <Divider sx={{ my: 3 }} />
-                <ShippingAddressForm
-                    shippingAddress={shippingAddress}
-                    onChange={setShippingAddress}
-                    disabled={bidLoading}
-                />
-            </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} disabled={bidLoading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmitBid}
-            variant="contained"
-            disabled={bidLoading}
-          >
-            Submit Bid
-          </Button>
-        </DialogActions>
-        {bidError && (
-          <Typography variant="caption" color="error" sx={{ px: 2, pb: 2 }}>
-            {bidError}
-          </Typography>
-        )}
-      </Dialog>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={(_, reason) => {
-            if (reason === "clickaway") return;
-            setSnackbarOpen(false);
-        }}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-        <Alert
-            severity={snackbarSeverity}
-            sx={{ width: "100%" }}
-        >
-            {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
