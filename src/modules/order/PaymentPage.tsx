@@ -11,7 +11,7 @@ import {
   CircularProgress,
   Snackbar,
 } from '@mui/material';
-import { AuctionBidDto, OrderRequestDetails, PaymentDetails, PaymentDetailsErrors, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
+import { AuctionBidDto, OrderRequestDetails, BidOrderRequestDetails, PaymentDetails, PaymentDetailsErrors, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
 import useCart from '../../shared/hooks/useCart';
 import useOrder from './hooks/useOrder';
 import { useParams } from "react-router-dom";
@@ -94,6 +94,10 @@ const PaymentPage: React.FC = () => {
     city: "",
   });
 
+  // read bidId param if present
+  const params = new URLSearchParams(location.search);
+  const bidId = params.get("bidId");
+
   useEffect(() => {
     setLoading(cartHook.loading)
     setError(cartHook.error ?? "")
@@ -158,24 +162,41 @@ const PaymentPage: React.FC = () => {
       return;
     }
 
-    const createOrderRequest: OrderRequestDetails = {
+    if(bidId) {
+        // Bid purchase flow
+        const bidOrder: BidOrderRequestDetails = {
+          bidId,
+          paymentDetails,
+          shippingAddress,
+        };
+
+        try {
+          const order = await orderHook.createOrderForBid(bidOrder);
+          setSuccess(order);
+          console.log("Order with bid created:", order);
+        } catch (error: any) {
+          setError(error.msg ?? "Unexpected error occurred");
+        } finally {
+          setLoading(false);
+        }
+    }
+
+    else {
+      const createOrderRequest: OrderRequestDetails = {
       cart: cartHook.cart,
       paymentDetails: paymentDetails,
       shippingAddress: shippingAddress
-    };
-
-    try {
-      const order = await orderHook.createOrder(createOrderRequest);
-      let possibleError = await orderHook.error;
-      if (possibleError) {
-        setErrorMessage(possibleError ?? "Unexpected error occurred");
-        return;
+      };
+      
+      try {
+        const order = await orderHook.createOrder(createOrderRequest);
+        setSuccess(order);
+        console.log("Order created:", order);
+      } catch (error: any) {
+        setError(error.msg ?? "Unexpected error occurred");
+      } finally {
+        setLoading(false);
       }
-      setSuccessMessage(order);
-    } catch (error: any) {
-      setErrorMessage(error.msg ?? "Unexpected error occurred");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -364,9 +385,9 @@ const PaymentPage: React.FC = () => {
         </Stack>
 
         {success && (
-            <Alert severity="success" sx={{ mt: 3 }}>
-              Purchase successful! Transaction ID: {success.id}
-            </Alert>
+          <Alert severity="success" sx={{ mt: 3 }}>
+            Purchase {(bidId ? "from bid " : "")}successful! Transaction ID: {success.id}
+          </Alert>
         )}
 
         {auctionSuccess && (

@@ -91,6 +91,7 @@ const MainPage: React.FC = () => {
       id: undefined,
       name: newName,
       description: newDesc,
+      rating: 0
     };
     await sdk.createStore(newStore);
     closeDialog();
