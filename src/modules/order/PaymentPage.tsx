@@ -64,8 +64,8 @@ const PaymentPage: React.FC = () => {
   }
 
   function setAuctionSuccessMessage(auctionBidDto: AuctionBidDto | undefined) {
-    setSuccess(undefined);
     setAuctionSuccess(auctionBidDto);
+    setSuccess(undefined);
     setError("");
     let message = auctionBidDto ? `Successfully placed bid of: ${auctionBidDto.bidPrice}` : "bid price unavailable";
     setSnackbarMessage(message);
@@ -139,7 +139,7 @@ const PaymentPage: React.FC = () => {
           shippingAddress: shippingAddress,
         };
         const bid = await orderHook.placeBid(productId, auctionBid);
-        let possibleError = await orderHook.error;
+        let possibleError = orderHook.error;
         if (possibleError) {
           setErrorMessage(possibleError ?? "Unexpected error occurred");
           return;
@@ -351,7 +351,7 @@ const PaymentPage: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={!!success || !!auctionSuccess || loading}
             fullWidth
             sx={{ py: 1.5 }}
           >
