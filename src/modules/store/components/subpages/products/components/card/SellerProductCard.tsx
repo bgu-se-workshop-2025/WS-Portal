@@ -21,6 +21,7 @@ import RatingComponent from "../../../../../../../shared/components/RatingCompon
 import useDiscounts from "../../../discounts/hooks/useDiscounts";
 import StoreDiscountEditor from "../../../discounts/StoreDiscountEditor/StoreDiscountEditor";
 import { getLabelForTag } from "../../../discounts/util/discountUtils";
+import SellerAuctionProductCard from "./SellerAuctionProductCard";
 
 interface SellerProductCardProps {
   product: ProductDto;
@@ -158,25 +159,32 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
           </Typography>
 
           <Box sx={{ mb: theme.spacing(1) }}>
-            <Typography variant="body2">
-              <strong>Price:</strong> ${product.price.toFixed(2)}
-            </Typography>
+            {product.auctionEndDate ? (
+              <SellerAuctionProductCard
+                product={product}
+              />
+            ) : (              
+              <Typography variant="body2">
+                <strong>Price:</strong> ${product.price.toFixed(2)}
+              </Typography>
+            )}
+
             <Typography variant="body2">
               <strong>Available:</strong> {product.quantity}
             </Typography>
           </Box>
 
           {/* Product rating: readonly for sellers and guests, rateable for non-sellers */}
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
+          {!product.auctionEndDate && <Box display="flex" alignItems="center" gap={1} mb={1}>
             <RatingComponent
               value={product.rating}
               readOnly={true}
               size="medium"
               precision={0.1}
             />
-          </Box>
+          </Box>}
 
-          <Box>
+          {!product.auctionEndDate && <Box>
             <Button onClick={handleOpenDiscount}>Open Discount Settings</Button>
             {discountOpen &&
               <ProductDisscountControllerDialog
@@ -186,17 +194,11 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
                 storeId={product.storeId}
               />
             }
-          </Box>
+          </Box>}
 
           {product.categories.length > 0 && (
             <Typography variant="body2">
               <strong>Categories:</strong> {product.categories.join(", ")}
-            </Typography>
-          )}
-          {product.auctionEndDate && (
-            <Typography variant="body2" sx={{ mt: theme.spacing(1) }}>
-              <strong>Auction Ends:</strong>{" "}
-              {new Date(product.auctionEndDate).toLocaleString()}
             </Typography>
           )}
 

@@ -41,9 +41,9 @@ const AuctionProductCard: React.FC<{
     }
   };
 
-  return (
-    <Box>
-      <Box sx={{ mb: 1 }}>
+    return (
+      <Box>
+        <Box sx={{ mb: 1 }}>
         <Typography variant="body2">
           <strong>Current Top Offer:</strong>{" "}
           {currentTopOffer !== null
