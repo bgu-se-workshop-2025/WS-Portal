@@ -129,6 +129,10 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
     setDiscountOpen(true);
   }
 
+ if (product.auctionEndDate && new Date(product.auctionEndDate).getTime() < Date.now()) {
+  return null;
+ } 
+
   return (
     <>
       <Card
