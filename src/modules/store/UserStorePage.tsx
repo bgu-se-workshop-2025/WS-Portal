@@ -30,7 +30,7 @@ const UserStorePage: React.FC = () => {
 
     const segments = location.pathname.split("/");
     const tabSegment = segments[3]; // products / sellersInfo / etc.
-    return tabSegment === "sellersInfo" ? "sellersInfo" : "products";
+    return tabSegment === "sellers-info" ? "sellers-info" : "products";
   }, [location.pathname, storeId]);
 
   const [store, setStore]       = useState<StoreDto | null>(null);
@@ -199,10 +199,10 @@ const UserStorePage: React.FC = () => {
                 to={`/store/${storeId}/products`}
               />
               <Tab
-                value="sellersInfo"
+                value="sellers-info"
                 label="Sellers Info"
                 component={Link}
-                to={`/store/${storeId}/sellersInfo`}
+                to={`/store/${storeId}/sellers-info`}
               />
             </Tabs>
 
