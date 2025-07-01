@@ -42,7 +42,7 @@ const getProductDisplayPrice = (product: any): React.ReactNode => {
 
 const calculateStoreTotal = (store: any): number => {
   if (!store) return 0;
-  
+
   // If the store has price and discount fields, use them for the total calculation
   if (typeof store.price === 'number') {
     if (typeof store.discount === 'number' && store.discount > 0) {
@@ -51,17 +51,18 @@ const calculateStoreTotal = (store: any): number => {
     }
     return store.price;
   }
-  
+
   // Otherwise calculate from products
   const products = Array.isArray(store.products) ? store.products : [];
-  return products.reduce((sum: number, product: any) => {
+  const discountedSum = products.reduce((sum: number, product: any) => {
     if (hasDiscount(product)) {
       return sum + product.discountPrice;
     }
     return sum + calculateProductTotal(product);
   }, 0);
+
   if (hasStoreDiscount(store)) {
-    const afterDiscount = store.price - store.discount;
+    const afterDiscount = discountedSum - store.discount;
     // Only apply store discount if afterDiscount < discountedSum
     if (afterDiscount < discountedSum) {
       return afterDiscount;
