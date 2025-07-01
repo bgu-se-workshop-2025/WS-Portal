@@ -35,6 +35,7 @@ export class SDK {
   // Admin SDK
   public suspendUser!: (username: string, millis: number) => Promise<string>;
   public cancelSuspensionUser!: (username: string) => Promise<void>;
+  public getSuspensions!: (page: number, limit: number) => Promise<dtos.SuspensionTicketDto[]>;
   public elevateUser!: (username: string) => Promise<string>;
   public isAdmin!: () => Promise<dtos.AdminDetailsDto>;
 
@@ -70,6 +71,8 @@ export class SDK {
   // Store SDK
   public createStore!: (payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
   public updateStore!: (storeId: string, payload: dtos.StoreDto) => Promise<dtos.StoreDto>;
+  public deleteStore!: (storeId: string) => Promise<void>;
+  public closeStore!: (storeId: string) => Promise<void>;
   public createProduct!: (storeId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public updateProduct!: (storeId: string, productId: string, payload: dtos.ProductDto) => Promise<dtos.ProductDto>;
   public deleteProduct!: (storeId: string, productId: string) => Promise<void>;
