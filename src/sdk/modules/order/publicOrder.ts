@@ -1,6 +1,5 @@
 import { SDK } from '../../sdk';
 import { UserOrderDto, OrderRequestDetails, BidOrderRequestDetails } from "../../../shared/types/dtos.ts";
-import { UserOrderDto, OrderRequestDetails } from "../../../shared/types/dtos.ts";
 import type { ErrorContext } from '../../../shared/types/errors';
 
 const publicOrder = "public/orders";
