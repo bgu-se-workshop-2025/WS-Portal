@@ -16,10 +16,15 @@ import RequireAdmin from "./modules/user/admin/RequireAdmin";
 
 import StoreDiscountsPage from "./modules/store/components/subpages/discounts/StoreDiscountsPage/StoreDiscountsPage";
 import PaymentPage from "./modules/order/PaymentPage";
+import StoreTransactionsPage from "./modules/store/components/subpages/TransactionsPage/StoreTransactionsPage";
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
 import CartMainPage from "./modules/cart/CartMainPage";
+import StoreBidRequestPage from "./modules/Bidding/pages/StoreBidRequestPage";
+import UserBidPage from "./modules/Bidding/pages/UserBidPage";
+import UserBidRequestPage from "./modules/Bidding/pages/UserBidRequestPage";
+import StoreBidPage from "./modules/Bidding/pages/StoreBidPage";
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -45,19 +50,23 @@ const App: React.FC = () => {
             <Route path="sellers" element={<StoreSellersPage />} />
             <Route path="settings" element={<StoreSettingsPage />} />
             <Route path="discounts" element={<StoreDiscountsPage />} />
+            <Route path="transactions" element={<StoreTransactionsPage />} />
+            <Route path="bids" element={<StoreBidPage />} />
+            <Route path="bids/requests" element={<StoreBidRequestPage />} />
           </Route>
 
           <Route path="/payment" element={<PaymentPage />} />
 
           <Route path="/notifications" element={<NotificationPage />} />
-          
+
           <Route path="/admin" element={<RequireAdmin />}>
             <Route index element={<AdminPage />} />
           </Route>
-          <Route path="/profile" element={<UserProfilePage />}>
-            <Route element={<UserProfilePage />} />
-          </Route>
-          
+          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/profile/bids" element={<UserBidPage />} />
+          <Route path="/profile/bids/requests" element={<UserBidRequestPage />} />
+
+
           <Route path="*" element={<MainPage />} />
         </Routes>
       </Box>

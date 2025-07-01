@@ -192,7 +192,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 type="datetime-local"
                 InputLabelProps={{ shrink: true }}
                 value={newAuctionEnd}
-                onChange={handleOnEndDateChange}
+                onChangeCapture={handleOnEndDateChange}
                 fullWidth
                 disabled={adding}
               />
