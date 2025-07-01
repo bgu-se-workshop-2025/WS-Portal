@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Stack, Box } from "@mui/material";
 
-type Tab = "products" | "sellers" | "settings" | "discounts";
+type Tab = "products" | "sellers" | "settings" | "discounts" | "transactions";
 
 interface StoreSellerToolbarProps {
   activeTab: Tab;
@@ -9,10 +9,11 @@ interface StoreSellerToolbarProps {
 }
 
 const tabs: { key: Tab; label: string; icon: string }[] = [
-  { key: "products", label: "Products", icon: "📦" },
-  { key: "sellers", label: "Sellers", icon: "🧑‍💼" },
-  { key: "settings", label: "Settings", icon: "⚙️" },
-  { key: "discounts", label: "Discounts", icon: "🏷️" },
+  { key: "products",     label: "Products",     icon: "📦" },
+  { key: "sellers",      label: "Sellers",      icon: "🧑‍💼" },
+  { key: "settings",     label: "Settings",     icon: "⚙️" },
+  { key: "discounts",    label: "Discounts",    icon: "🏷️" },
+  { key: "transactions", label: "Transactions", icon: "🧾" },  
 ];
 
 const StoreSellerToolbar: React.FC<StoreSellerToolbarProps> = ({

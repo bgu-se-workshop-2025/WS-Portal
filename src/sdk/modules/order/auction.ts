@@ -18,7 +18,7 @@ export async function placeBid(
     `${auctionController}/${productId}/bid`,
     bid
   );
-
+  
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`Failed to place auction bid: ${error}`);

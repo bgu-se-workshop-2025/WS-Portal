@@ -103,14 +103,14 @@ export interface ShippingAddressDto {
 }
 
 export interface ReviewDto {
-    id: string | null;
-    productId: string | null;
-    storeId: string;
-    writerId: string | null;
-    title: string;
-    body: string;
-    rating: number;
-    date: string | null;
+    id?: string;
+    productId?: string;  
+    storeId?: string;
+    writerId?: string;
+    title?: string;
+    body?: string;
+    rating?: number;
+    date?: string;
 }
 
 export interface OrderRequestDetails {
@@ -188,7 +188,7 @@ export interface BidDto {
 export interface AuctionBidDto {
   id?: string;
   productId: string;
-  bidderId?: string;
+  bidderId: string;
   bidPrice: number;
   paymentDetails: PaymentDetails;
   shippingAddress: ShippingAddressDto;

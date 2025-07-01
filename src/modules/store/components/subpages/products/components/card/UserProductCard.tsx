@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from "react";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -9,16 +9,23 @@ import {
   useTheme,
   Box,
   CircularProgress,
-  IconButton,
-  Tooltip,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  Alert,
   Snackbar,
+  IconButton,
+  Tooltip
 } from "@mui/material";
 import { ContentCopy, Check } from "@mui/icons-material";
 
-import { ProductDto } from "../../../../../../../shared/types/dtos";
+import { ProductDto, ShippingAddressDto, PaymentDetails, PaymentMethod, PublicUserDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
 import RatingComponent from "../../../../../../../shared/components/RatingComponent";
-import { sdk, isAuthenticated } from "../../../../../../../sdk/sdk";
+import { sdk } from "../../../../../../../sdk/sdk";
 
 const UserProductCard: React.FC<{
   product: ProductDto;
@@ -38,7 +45,30 @@ const UserProductCard: React.FC<{
   } = useCart();
 
   const { storeId } = useParams<{ storeId: string }>();
-  const isUserAuthenticated = isAuthenticated();
+  const [currentTopOffer, setCurrentTopOffer] = useState<number | null>(null);
+  const [bidValue, setBidValue] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddressDto>({
+    country: "",
+    city: "",
+    region: "",
+    street: "",
+    zipCode: "",
+    homeNumber: "",
+    apartmentNumber: "",
+    mailbox: "",});
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
+    paymentMethod: PaymentMethod.CREDIT_CARD,
+    externalId: "",
+    payerEmail: "",
+    payerId: "",
+    paymentData: { "currency": "ILS" }
+  });
+  const [bidError, setBidError] = useState<string | null>(null);
+  const [bidLoading, setBidLoading] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
@@ -81,17 +111,27 @@ const UserProductCard: React.FC<{
     }
   }, [currentQty, product.id, product.name, removeFromCart, updateQuantity]);
 
-  const handleCopyId = useCallback(async () => {
+  const handleCopyProductId = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(product.id);
-      setCopied(true);
       setCopySuccess(true);
-      setTimeout(() => setCopied(false), 1000);
-      setTimeout(() => setCopySuccess(false), 3000);
+      setCopied(true);
+      setTimeout(() => {
+        setCopySuccess(false);
+        setCopied(false);
+      }, 2000);
     } catch (err) {
       console.error('Failed to copy product ID:', err);
     }
   }, [product.id]);
+
+  useEffect(() => {
+    if (product.auctionEndDate) {
+      sdk.getWinningBidPrice(product.id)
+        .then(setCurrentTopOffer)
+        .catch(() => setCurrentTopOffer(null));
+    }
+  }, [product.auctionEndDate, product.id]);
 
   return (
     <>
@@ -110,9 +150,20 @@ const UserProductCard: React.FC<{
         }}
       >
         <CardContent sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
-            {product.name}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500, flex: 1 }}>
+              {product.name}
+            </Typography>
+            <Tooltip title={copied ? "Copied!" : "Copy Product ID"}>
+              <IconButton
+                size="small"
+                onClick={handleCopyProductId}
+                sx={{ ml: 1 }}
+              >
+                {copied ? <Check color="success" /> : <ContentCopy />}
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Typography
             variant="body2"
             paragraph
@@ -122,14 +173,60 @@ const UserProductCard: React.FC<{
             {product.description}
           </Typography>
 
-          <Box sx={{ mb: theme.spacing(1) }}>
+        <Box sx={{ mb: theme.spacing(1) }}>
+          {product.auctionEndDate ? (
+            <>
+              <Typography variant="body2">
+                <strong>Starting Price:</strong> ${product.price.toFixed(2)}
+              </Typography>
+            <Typography variant="body2">
+              <strong>Current Top Offer:</strong>
+              {currentTopOffer !== null
+                ? ` $ ${currentTopOffer.toFixed(2)}`
+                : " No offers yet"}
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
+              <TextField
+                size="small"
+                label="Your Offer"
+                type="number"
+                value={bidValue}
+                onChange={e => setBidValue(e.target.value)}
+                sx={{ mr: 1, width: 120 }}
+              />
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => {
+                  setBidError(null);
+                  if (
+                    Number(bidValue) > (currentTopOffer ?? product.price)
+                  ) {
+                    setDialogOpen(true);
+                  } else {
+                    setBidError("Offer must be higher than current top offer");
+                  }
+                }}
+                disabled={bidLoading}
+              >
+                Add Offer
+              </Button>
+            </Box>
+            {bidError && (
+              <Typography variant="caption" color="error" sx={{ mt: 1 }}>
+                {bidError}
+              </Typography>
+            )}
+            </>
+          ) : (
             <Typography variant="body2">
               <strong>Price:</strong> ${product.price.toFixed(2)}
             </Typography>
-            <Typography variant="body2">
-              <strong>Available:</strong> {product.quantity}
-            </Typography>
-          </Box>
+          )}
+          <Typography variant="body2">
+            <strong>Available:</strong> {product.quantity}
+          </Typography>
+        </Box>
 
           {product.categories.length > 0 && (
             <Typography variant="body2">
@@ -143,23 +240,23 @@ const UserProductCard: React.FC<{
             </Typography>
           )}
 
-          <Box
-            sx={{
-              mb: theme.spacing(1),
-              mt: theme.spacing(2),
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            {/* Always show partial stars for viewing */}
-            <RatingComponent
-              value={product.rating}
-              readOnly={true}
-              size="small"
-              precision={0.1}
-            />
-          </Box>
+        {!product.auctionEndDate && <Box
+          sx={{
+            mb: theme.spacing(1),
+            mt: theme.spacing(2),
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          {/* Always show partial stars for viewing */}
+          <RatingComponent
+            value={product.rating}
+            readOnly={true}
+            size="small"
+            precision={0.1}
+          />
+        </Box>}
 
           {cartError && (
             <Typography
@@ -172,39 +269,23 @@ const UserProductCard: React.FC<{
           )}
         </CardContent>
 
-        <CardActions
-          sx={{
-            justifyContent: "space-between",
-            alignItems: "center",
-            px: theme.spacing(2),
-            pb: theme.spacing(2),
-          }}
+      {!product.auctionEndDate && <CardActions
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          px: theme.spacing(2),
+          pb: theme.spacing(2),
+        }}
+      >
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={handleDecrement}
+          disabled={cartLoading || currentQty === 0}
+          sx={{ minWidth: 32, p: 0 }}
         >
-          <Tooltip title="Copy Product ID">
-            <IconButton
-              size="small"
-              onClick={handleCopyId}
-              sx={{
-                color: copied ? theme.palette.success.main : theme.palette.text.secondary,
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                },
-              }}
-            >
-              {copied ? <Check /> : <ContentCopy />}
-            </IconButton>
-          </Tooltip>
-
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleDecrement}
-              disabled={cartLoading || currentQty === 0}
-              sx={{ minWidth: 32, p: 0 }}
-            >
-              –
-            </Button>
+          –
+        </Button>
 
             <Box
               sx={{
@@ -226,21 +307,223 @@ const UserProductCard: React.FC<{
               +
             </Button>
 
-            {cartLoading && (
-              <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
-            )}
+        {cartLoading && (
+          <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
+        )}
+      </CardActions>}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Enter Bid Details</DialogTitle>
+        <DialogContent>
+          {/* Shipping Address Section */}
+          <Typography variant="subtitle1" sx={{ mt: 1, mb: 1 }}>
+            Shipping Address
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            <TextField
+              required
+              label="Country"
+              value={shippingAddress.country}
+              onChange={e => setShippingAddress({ ...shippingAddress, country: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              required
+              label="City"
+              value={shippingAddress.city}
+              onChange={e => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              required
+              label="Region"
+              value={shippingAddress.region}
+              onChange={e => setShippingAddress({ ...shippingAddress, region: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              required
+              label="Street"
+              value={shippingAddress.street}
+              onChange={e => setShippingAddress({ ...shippingAddress, street: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              required
+              label="Zip Code"
+              value={shippingAddress.zipCode}
+              onChange={e => setShippingAddress({ ...shippingAddress, zipCode: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              required
+              label="Home Number"
+              value={shippingAddress.homeNumber}
+              onChange={e => setShippingAddress({ ...shippingAddress, homeNumber: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              required
+              label="Apartment Number"
+              value={shippingAddress.apartmentNumber}
+              onChange={e => setShippingAddress({ ...shippingAddress, apartmentNumber: e.target.value })}
+              fullWidth
+            />
+            <TextField
+              required
+              label="Mailbox"
+              value={shippingAddress.mailbox}
+              onChange={e => setShippingAddress({ ...shippingAddress, mailbox: e.target.value })}
+              fullWidth
+            />
           </Box>
-        </CardActions>
-      </Card>
 
-      {/* Copy Success Snackbar */}
+          <Divider sx={{ my: 3 }} />
+
+          {/* Payment Details Section */}
+          <Typography variant="subtitle1" sx={{ mt: 1, mb: 1 }}>
+            Payment Details
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+            <TextField
+              required
+              label="Card Owner Name"
+              name="cardOwnerName"
+              value={paymentDetails.paymentData["holder"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "holder": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Card Owner ID"
+              name="cardOwnerId"
+              value={paymentDetails.paymentData["id"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "id": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Card Number"
+              name="cardNumber"
+              value={paymentDetails.paymentData["card_number"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "card_number": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="CVV"
+              name="cvv"
+              value={paymentDetails.paymentData["cvv"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "cvv": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Expiration Month"
+              name="expirationMonth"
+              value={paymentDetails.paymentData["month"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "month": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Expiration Year"
+              name="expirationYear"
+              value={paymentDetails.paymentData["year"]}
+              onChange={(e) => setPaymentDetails({ ...paymentDetails, paymentData: { ...paymentDetails.paymentData, "year": e.target.value } })}
+              fullWidth
+            />
+
+            <TextField
+              required
+              label="Payer Email"
+              name="payerEmail"
+              value={paymentDetails.payerEmail}
+              onChange={e => setPaymentDetails({ ...paymentDetails, payerEmail: e.target.value })}
+              fullWidth
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)} disabled={bidLoading}>
+            Cancel
+          </Button>
+          <Button
+            onClick={async () => {
+              setBidLoading(true);
+              setBidError(null);
+              try {
+                setDialogOpen(false);
+                setBidValue("");
+                setShippingAddress({
+                  country: "",
+                  city: "",
+                  region: "",
+                  street: "",
+                  zipCode: "",
+                  homeNumber: "",
+                  apartmentNumber: "",
+                  mailbox: "",
+                });
+                let profile: PublicUserDto | undefined = undefined;
+                try {
+                  profile = await sdk.getCurrentUserProfileDetails();
+                } catch (e) {
+                  console.error("Failed to fetch current user profile:", e);
+                }
+                if (!profile) {
+                  throw new Error("User profile not found. Please log in.");
+                }
+                await sdk.placeBid(product.id, {
+                  productId: product.id,
+                  bidderId: profile.id,
+                  bidPrice: Number(bidValue),
+                  shippingAddress,
+                  paymentDetails,
+                });
+                setSnackbarMessage("Bid placed successfully!");
+                setSnackbarSeverity("success");
+                setSnackbarOpen(true);
+
+                const newTopOffer = await sdk.getWinningBidPrice(product.id);
+                setCurrentTopOffer(newTopOffer);
+              } catch (e: any) {
+                setBidError(e?.message || "Failed to place bid");
+              } finally {
+                setBidLoading(false);
+              }
+            }}
+            variant="contained"
+            disabled={bidLoading}
+          >
+            Submit Bid
+          </Button>
+        </DialogActions>
+        {bidError && (
+          <Typography variant="caption" color="error" sx={{ px: 2, pb: 2 }}>
+            {bidError}
+          </Typography>
+        )}
+      </Dialog>
       <Snackbar
-        open={copySuccess}
-        autoHideDuration={3000}
-        onClose={() => setCopySuccess(false)}
-        message="Product ID copied to clipboard!"
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      />
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </Card>
     </>
   );
 };
