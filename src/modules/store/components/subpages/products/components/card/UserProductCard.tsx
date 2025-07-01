@@ -146,7 +146,7 @@ const UserProductCard: React.FC<{
           />
         </Box>}
 
-        {cartError && (
+        {!product.auctionEndDate && cartError && (
           <Typography
             variant="caption"
             color="error"
@@ -157,7 +157,7 @@ const UserProductCard: React.FC<{
         )}
       </CardContent>
 
-      <CardActions
+      {!product.auctionEndDate && <CardActions
         sx={{
           justifyContent: "center",
           alignItems: "center",
@@ -165,7 +165,7 @@ const UserProductCard: React.FC<{
           pb: theme.spacing(2),
         }}
       >
-        {!product.auctionEndDate && <Button
+        <Button
           size="small"
           variant="outlined"
           onClick={handleDecrement}
@@ -173,9 +173,9 @@ const UserProductCard: React.FC<{
           sx={{ minWidth: 32, p: 0 }}
         >
           –
-        </Button>}
+        </Button>
 
-        {!product.auctionEndDate && <Box
+        <Box
           sx={{
             width: 32,
             textAlign: "center",
@@ -183,9 +183,9 @@ const UserProductCard: React.FC<{
           }}
         >
           <Typography variant="body2">{currentQty}</Typography>
-        </Box>}
+        </Box>
 
-        {!product.auctionEndDate && <Button
+        <Button
           size="small"
           variant="outlined"
           onClick={handleIncrement}
@@ -193,12 +193,12 @@ const UserProductCard: React.FC<{
           sx={{ minWidth: 32, p: 0 }}
         >
           +
-        </Button>}
+        </Button>
 
         {cartLoading && (
           <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
         )}
-      </CardActions>
+      </CardActions>}
     </Card>
   );
 };
