@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState} from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -45,7 +45,7 @@ const UserProductCard: React.FC<{
   
   // Use product's storeId, fallback to URL parameter for backward compatibility
   const storeId = product.storeId || urlStoreId;
- 
+
   // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
     if (!cart) return 0;
@@ -207,37 +207,6 @@ const UserProductCard: React.FC<{
           <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
             {product.name}
           </Typography>
-          
-          {/* Store name subtitle for search results */}
-          {product.storeName && (
-            <Typography
-              variant="subtitle2"
-              sx={{ 
-                color: theme.palette.primary.main,
-                fontWeight: 500,
-                mb: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5
-              }}
-            >
-              {product.storeName}
-              {typeof product.storeRating === 'number' && product.storeRating > 0 && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                  <RatingComponent
-                    value={product.storeRating}
-                    readOnly={true}
-                    size="small"
-                    precision={0.1}
-                  />
-                  <Typography variant="caption" sx={{ ml: 0.5 }}>
-                    ({product.storeRating.toFixed(1)})
-                  </Typography>
-                </Box>
-              )}
-            </Typography>
-          )}
-          
           <Typography
             variant="body2"
             paragraph
@@ -288,67 +257,57 @@ const UserProductCard: React.FC<{
               />
             </Box>
           )}
-
-          {!product.auctionEndDate && cartError && (
-            <Typography
-              variant="caption"
-              color="error"
-              sx={{ mt: theme.spacing(1), display: "block" }}
-            >
-              {cartError}
-            </Typography>
-          )}
         </CardContent>
-
-        {!product.auctionEndDate && (
-          <CardActions
-            sx={{
-              justifyContent: "center",
-              alignItems: "center",
-              px: theme.spacing(2),
-              pb: theme.spacing(2),
-            }}
-          >
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleDecrement}
-              disabled={cartLoading || currentQty === 0}
-              sx={{ minWidth: 32, p: 0 }}
-            >
-              –
-            </Button>
-            <Box sx={{ width: 32, textAlign: "center", mx: theme.spacing(1) }}>
-              <Typography variant="body2">{currentQty}</Typography>
-            </Box>
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleIncrement}
-              disabled={cartLoading}
-              sx={{ minWidth: 32, p: 0 }}
-            >
-              +
-            </Button>
-            {cartLoading && (
-              <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
-            )}
-            {isUserAuthenticated && (
-              <>
-                <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
-                <Button
-                  size="small"
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setBidDialogOpen(true)}
-                >
-                  Bid
-                </Button>
-              </>
-            )}
-          </CardActions>
-        )}
       </Card>
+
+      {!product.auctionEndDate && (
+        <CardActions
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            px: theme.spacing(2),
+            pb: theme.spacing(2),
+          }}
+        >
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleDecrement}
+            disabled={cartLoading || currentQty === 0}
+            sx={{ minWidth: 32, p: 0 }}
+          >
+            –
+          </Button>
+          <Box sx={{ width: 32, textAlign: "center", mx: theme.spacing(1) }}>
+            <Typography variant="body2">{currentQty}</Typography>
+          </Box>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleIncrement}
+            disabled={cartLoading}
+            sx={{ minWidth: 32, p: 0 }}
+          >
+            +
+          </Button>
+          {cartLoading && (
+            <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
+          )}
+          {isUserAuthenticated && (
+            <>
+              <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={() => setBidDialogOpen(true)}
+              >
+                Bid
+              </Button>
+            </>
+          )}
+        </CardActions>
+      )}
 
       <CreateBidRequestDialog
         open={bidDialogOpen}
