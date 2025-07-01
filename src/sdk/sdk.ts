@@ -83,6 +83,8 @@ export class SDK {
   public getStores!: (pageable: dtos.Pageable) => Promise<dtos.StoreDto[]>;
   public getStoreOfficials!: (storeId: string) => Promise<dtos.PublicUserDto[]>;
   public getStorePermissions!: () => Promise<string[]>;
+  public getStoreSnapshotById!: (snapshotId: string) => Promise<dtos.StoreSnapshotDto>;
+
   // Order SDK
   public getUserOrders!: (payload: dtos.Pageable) => Promise<dtos.UserOrderDto[]>;
   public getUserOrderById!: (id: string) => Promise<dtos.UserOrderDto>;

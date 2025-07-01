@@ -13,8 +13,8 @@ import { sdk } from "../../sdk/sdk";
 
 import { StoreDto } from "../../shared/types/dtos";
 
-type TabValue = "products" | "sellers" | "settings" | "discounts";
-const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts"];
+type TabValue = "products" | "sellers" | "settings" | "discounts" | "transactions";
+const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "transactions"];
 
 const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
@@ -194,6 +194,13 @@ const SellerStoreLayout: React.FC = () => {
                 component={Link}
                 to={`/store/${id}/discounts`}
               />
+              <Tab
+                value="transactions"
+                label="Transactions"
+                component={Link}
+                to={`/store/${id}/transactions`}
+              />
+
             </Tabs>
             <Divider sx={{ mb: theme.spacing(3) }} />
             <Outlet />
