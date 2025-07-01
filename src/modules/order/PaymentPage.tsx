@@ -14,7 +14,7 @@ import {
 import { AuctionBidDto, OrderRequestDetails, BidOrderRequestDetails, PaymentDetails, PaymentDetailsErrors, ShippingAddressDto, UserOrderDto } from '../../shared/types/dtos';
 import useCart from '../../shared/hooks/useCart';
 import useOrder from './hooks/useOrder';
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { sdk } from '../../sdk/sdk';
 
 const PaymentPage: React.FC = () => {
@@ -24,7 +24,9 @@ const PaymentPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<UserOrderDto | undefined>(undefined);
   const [auctionSuccess, setAuctionSuccess] = useState<AuctionBidDto | undefined>(undefined);
-  const { productId, bidPrice } = useParams<{ productId: string; bidPrice: string }>();
+  const [searchParams] = useSearchParams();
+  const productId = searchParams.get("productId");
+  const bidPrice = searchParams.get("bidPrice");
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -172,10 +174,9 @@ const PaymentPage: React.FC = () => {
 
         try {
           const order = await orderHook.createOrderForBid(bidOrder);
-          setSuccess(order);
-          console.log("Order with bid created:", order);
+          setSuccessMessage(order);
         } catch (error: any) {
-          setError(error.msg ?? "Unexpected error occurred");
+          setErrorMessage(error.msg ?? "Unexpected error occurred");
         } finally {
           setLoading(false);
         }
@@ -190,10 +191,9 @@ const PaymentPage: React.FC = () => {
       
       try {
         const order = await orderHook.createOrder(createOrderRequest);
-        setSuccess(order);
-        console.log("Order created:", order);
+        setSuccessMessage(order);
       } catch (error: any) {
-        setError(error.msg ?? "Unexpected error occurred");
+        setErrorMessage(error.msg ?? "Unexpected error occurred");
       } finally {
         setLoading(false);
       }
