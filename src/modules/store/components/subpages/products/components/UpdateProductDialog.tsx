@@ -96,6 +96,11 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
       setSaving(false);
     }
   };
+  
+  const handleOnEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setAuctionEnd(new Date(value).toISOString());
+  };
 
   const isSaveDisabled =
     saving || name.trim().length === 0 || price === undefined;
@@ -196,7 +201,7 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
                 type="datetime-local"
                 InputLabelProps={{ shrink: true }}
                 value={auctionEnd}
-                onChange={(e) => setAuctionEnd(e.target.value)}
+                onChangeCapture={handleOnEndDateChange}
                 fullWidth
                 disabled={saving}
               />

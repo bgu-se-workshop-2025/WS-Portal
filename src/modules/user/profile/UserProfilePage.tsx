@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Alert, Tabs, Tab } from "@mui/material";
 import { sdk } from "../../../sdk/sdk";
-import { StoreDto, UserOrderDto, PublicUserDto } from "../../../shared/types/dtos";
+import {
+  StoreDto,
+  UserOrderDto,
+  PublicUserDto,
+} from "../../../shared/types/dtos";
 import { MyStoresTab, PurchaseHistoryTab, MyBidsTab, UserProfileTabProps } from "./UserProfileTabs";
 import BombardilloCrocodilo from "./BombardilloCrocodilo";
+import { useNavigate } from "react-router-dom";
 
 const PAGE_SIZE = 25;
 
@@ -18,6 +23,8 @@ const UserProfilePage: React.FC = () => {
   const [orders, setOrders] = React.useState<UserOrderDto[]>([]);
   const [ordersLoading, setOrdersLoading] = React.useState(true);
   const [ordersError, setOrdersError] = React.useState<string | null>(null);
+
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [cartSnapshots, setCartSnapshots] = useState<Record<string, any>>({});
   const [liveStoreNames, setLiveStoreNames] = useState<Record<string, string | null>>({});
@@ -28,7 +35,8 @@ const UserProfilePage: React.FC = () => {
 
   React.useEffect(() => {
     setUserLoading(true);
-    sdk.getCurrentUserProfileDetails()
+    sdk
+      .getCurrentUserProfileDetails()
       .then((u) => setUser(u))
       .catch(() => setUser(null))
       .finally(() => setUserLoading(false));
@@ -38,7 +46,8 @@ const UserProfilePage: React.FC = () => {
     if (!user) return;
     setStoresLoading(true);
     setStoresError(null);
-    sdk.getStores({ page: 0, size: PAGE_SIZE })
+    sdk
+      .getStores({ page: 0, size: PAGE_SIZE })
       .then(async (allStores) => {
         const sellerStoreIds: string[] = [];
         await Promise.all(
@@ -61,22 +70,24 @@ const UserProfilePage: React.FC = () => {
     if (!user) return;
     setOrdersLoading(true);
     setOrdersError(null);
-    sdk.getUserOrders({ page: 0, size: PAGE_SIZE })
+    sdk
+      .getUserOrders({ page: 0, size: PAGE_SIZE })
       .then(setOrders)
       .catch((err) => {
         if (
-          (err.message && err.message.includes('404')) ||
-          (err.message && err.message.includes('Error fetching user orders'))
+          (err.message && err.message.includes("404")) ||
+          (err.message &&
+            err.message.includes("Error fetching user orders"))
         ) {
           setOrders([]);
         } else {
           setOrdersError(
-            typeof err === 'object' && err !== null && err.message
+            typeof err === "object" && err !== null && err.message
               ? `Orders error: ${err.message}`
               : `Orders error: ${JSON.stringify(err)}`
           );
         }
-        console.error('Orders fetch error:', err);
+        console.error("Orders fetch error:", err);
       })
       .finally(() => setOrdersLoading(false));
   }, [user]);
@@ -136,8 +147,10 @@ const UserProfilePage: React.FC = () => {
   if (user === null) {
     return (
       <Box mt={8} textAlign="center">
-        <Alert severity="warning" sx={{ maxWidth: 500, margin: '0 auto' }}>
-          You must be logged in to view your profile. Please <a href="/login">log in</a> or <a href="/register">register</a> to access your dashboard.
+        <Alert severity="warning" sx={{ maxWidth: 500, margin: "0 auto" }}>
+          You must be logged in to view your profile. Please{" "}
+          <a href="/login">log in</a> or <a href="/register">register</a> to
+          access your dashboard.
         </Alert>
       </Box>
     );

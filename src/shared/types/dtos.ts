@@ -119,6 +119,12 @@ export interface OrderRequestDetails {
     shippingAddress: ShippingAddressDto;
 }
 
+export interface BidOrderRequestDetails {
+    bidId: string;
+    paymentDetails: PaymentDetails;
+    shippingAddress: ShippingAddressDto;
+}
+
 export interface CartDto {
     ownerId?: string;
     stores: CartStoreBasketDto[];
@@ -147,6 +153,16 @@ export interface PaymentDetails {
     paymentData: { [key: string]: string };
 }
 
+export type PaymentDetailsErrors = {
+  holder?: string;
+  id?: string;
+  card_number?: string;
+  cvv?: string;
+  month?: string;
+  year?: string;
+  payerEmail?: string;
+};
+
 export type paymentDataKeys =
     | "currency"
     | "card_number"
@@ -164,18 +180,12 @@ export enum PaymentMethod {
 }
 
 export interface BidRequestDto {
+    bidRequestId: string;
+    userId: string;
     storeId: string;
     productId: string;
     price: number;
-    bidRequestStatus: BidRequestStatus;
-}
-
-export enum BidRequestStatus {
-    PENDING = 0,
-    ACCEPTED = 1,
-    APPROVED = 2,
-    RECEIVED_ALTERNATIVE_PRICE = 3,
-    REJECTED = 4,
+    requestStatus:  'PENDING' | 'ACCEPTED' | 'APPROVED' | 'RECEIVED_ALTERNATIVE_PRICE' | 'REJECTED' | 'CANCELLED';
 }
 
 export interface BidDto {
@@ -183,6 +193,8 @@ export interface BidDto {
     userId: string;
     productId: string;
     price: number;
+    storeId: string;
+    isPurchased: boolean;
 }
 
 export interface AuctionBidDto {

@@ -40,11 +40,21 @@ const getProductDisplayPrice = (product: any): React.ReactNode => {
   return <span>{regularTotal.toFixed(2)}₪</span>;
 };
 
-
-// Calculates the store total after product discounts and store-level discount
 const calculateStoreTotal = (store: any): number => {
+  if (!store) return 0;
+  
+  // If the store has price and discount fields, use them for the total calculation
+  if (typeof store.price === 'number') {
+    if (typeof store.discount === 'number' && store.discount > 0) {
+      // Apply discount if available
+      return store.price - store.discount;
+    }
+    return store.price;
+  }
+  
+  // Otherwise calculate from products
   const products = Array.isArray(store.products) ? store.products : [];
-  const discountedSum = products.reduce((sum: number, product: any) => {
+  return products.reduce((sum: number, product: any) => {
     if (hasDiscount(product)) {
       return sum + product.discountPrice;
     }
@@ -134,7 +144,7 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                       
                       return (
                         <Box key={store.storeId} mb={2} pl={1}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#58a6ff', mb: 0.5, display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#58a6ff', mb: 0.5, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                             🏬 Store:
                             {storeDisplayName ? (
                               <Button

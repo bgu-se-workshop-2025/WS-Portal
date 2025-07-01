@@ -33,8 +33,8 @@ import { TokenService } from "../../shared/utils/token";
 
 import { StoreDto } from "../../shared/types/dtos";
 
-type TabValue = "products" | "sellers" | "settings" | "discounts" | "transactions";
-const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "transactions"];
+type TabValue = "products" | "sellers" | "settings" | "discounts" | "transactions" | "bids" | "bidRequests";
+const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "transactions", "bids", "bidRequests"];
 
 const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
@@ -76,8 +76,11 @@ const SellerStoreLayout: React.FC = () => {
   const computedActiveTab: TabValue = React.useMemo(() => {
     if (!location.pathname || !id) return "products";
 
-    const segments = location.pathname.split("/");
-    const tabSegment = segments[3];
+    const segments = location.pathname.split("/").filter(Boolean); // Remove empty segments
+    if (segments[2] === "bids" && segments[3] === "requests") {
+      return "bidRequests";
+    }
+    const tabSegment = segments[2];
     return tabSegment && TAB_ORDER.includes(tabSegment as TabValue)
       ? (tabSegment as TabValue)
       : "products";
@@ -287,12 +290,6 @@ const SellerStoreLayout: React.FC = () => {
                 to={`/store/${id}/products`}
               />
               <Tab
-                value="discounts"
-                label="Discounts"
-                component={Link}
-                to={`/store/${id}/discounts`}
-              />
-              <Tab
                 value="sellers"
                 label="Sellers"
                 component={Link}
@@ -317,6 +314,18 @@ const SellerStoreLayout: React.FC = () => {
                 to={`/store/${id}/transactions`}
               />
 
+              <Tab
+                value="bids"
+                label="Bids"
+                component={Link}
+                to={`/store/${id}/bids`}
+              />
+              <Tab
+                value="bidRequests"
+                label="Bid Requests"
+                component={Link}
+                to={`/store/${id}/bids/requests`}
+              />
             </Tabs>
             <Divider sx={{ mb: theme.spacing(3) }} />
             <Outlet />
