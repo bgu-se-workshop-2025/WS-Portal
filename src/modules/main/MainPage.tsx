@@ -8,6 +8,7 @@ import {
   DialogActions,
   TextField,
   Typography,
+  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -78,25 +79,46 @@ const MainPage: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string>();
 
   const openDialog = () => setDialogOpen(true);
   const closeDialog = () => {
     setDialogOpen(false);
     setNewName("");
     setNewDesc("");
+    setCreateError(undefined);
+    setCreating(false);
   };
 
   const handleSave = async () => {
-    const newStore: StoreDto = {
-      id: undefined,
-      name: newName,
-      description: newDesc,
-    };
-    await sdk.createStore(newStore);
-    closeDialog();
+    if (!newName.trim()) {
+      setCreateError("Store name is required");
+      return;
+    }
 
-    setAddedStores((prev) => prev + 1);
-    setPage(0);
+    setCreating(true);
+    setCreateError(undefined);
+
+    try {
+      const newStore: StoreDto = {
+        id: undefined,
+        name: newName.trim(),
+        description: newDesc.trim(),
+        purchasePolicies: [],
+        discountPolicies: [],
+      };
+      
+      await sdk.createStore(newStore);
+      closeDialog();
+      setAddedStores((prev) => prev + 1);
+      setPage(0);
+    } catch (err: any) {
+      console.error("Error creating store:", err);
+      setCreateError(err.userFriendlyMessage || err.message || "Failed to create store");
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
@@ -163,16 +185,26 @@ const MainPage: React.FC = () => {
         }
       </Box>
 
-      <Dialog open={dialogOpen} onClose={closeDialog}>
+      <Dialog open={dialogOpen} onClose={creating ? undefined : closeDialog}>
         <DialogTitle>Add New Store</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
         >
+          {createError && (
+            <Alert severity="error" variant="outlined">
+              {createError}
+            </Alert>
+          )}
+          
           <TextField
             label="Name"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             fullWidth
+            required
+            disabled={creating}
+            error={!newName.trim() && !!createError}
+            helperText={!newName.trim() && !!createError ? "Store name is required" : ""}
           />
           <TextField
             label="Description"
@@ -181,16 +213,19 @@ const MainPage: React.FC = () => {
             fullWidth
             multiline
             rows={3}
+            disabled={creating}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={closeDialog}>Cancel</Button>
+          <Button onClick={closeDialog} disabled={creating}>
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={handleSave}
-            disabled={!newName.trim() || !newDesc.trim()}
+            disabled={!newName.trim() || creating}
           >
-            Save
+            {creating ? "Creating..." : "Create Store"}
           </Button>
         </DialogActions>
       </Dialog>

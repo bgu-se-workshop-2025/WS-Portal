@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 
 import Header from "./shared/components/layout/Header";
 import Footer from "./shared/components/layout/Footer";
+import { ErrorProvider } from "./shared/providers/ErrorProvider";
 
 import StorePage from "./modules/store/StorePage";
 import LoginPage from "./modules/user/login/LoginPage";
@@ -22,6 +23,13 @@ import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
 import StoreMessages from "./modules/store/components/subpages/StoreMessages";
 import CartMainPage from "./modules/cart/CartMainPage";
+import StoreBidRequestPage from "./modules/Bidding/pages/StoreBidRequestPage";
+import UserBidPage from "./modules/Bidding/pages/UserBidPage";
+import UserBidRequestPage from "./modules/Bidding/pages/UserBidRequestPage";
+import StoreBidPage from "./modules/Bidding/pages/StoreBidPage";
+import SellerInfoPage from "./modules/store/components/subpages/SellerInfo/SellerInfoPage";
+
+
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -30,7 +38,7 @@ const App: React.FC = () => {
   const showLayout = !noLayoutPaths.includes(pathname);
 
   return (
-    <>
+    <ErrorProvider>
       {showLayout && <Header />}
       <Box sx={{ overflowY: "auto" }}>
         <Routes>
@@ -40,7 +48,6 @@ const App: React.FC = () => {
              
           <Route path="/cart" element={<CartMainPage />} />
           <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/payment/:productId/:bidPrice" element={<PaymentPage />} />
           <Route path="/store/:storeId/*" element={<StorePage />}>
             <Route index element={<Navigate to="products" replace />} />
             <Route path="products" element={<StoreProductsPage />} />
@@ -48,25 +55,28 @@ const App: React.FC = () => {
             <Route path="settings" element={<StoreSettingsPage />} />
             <Route path="discounts" element={<StoreDiscountsPage />} />
             <Route path="transactions" element={<StoreTransactionsPage />} />
+            <Route path="bids" element={<StoreBidPage />} />
+            <Route path="bids/requests" element={<StoreBidRequestPage />} />
+            <Route path="sellers-info" element={<SellerInfoPage />} />
+
             <Route path="messages" element={<StoreMessages />} />
           </Route>
 
-          <Route path="/payment" element={<PaymentPage />} />
-
           <Route path="/notifications" element={<NotificationPage />} />
-          
+
           <Route path="/admin" element={<RequireAdmin />}>
             <Route index element={<AdminPage />} />
           </Route>
-          <Route path="/profile" element={<UserProfilePage />}>
-            <Route element={<UserProfilePage />} />
-          </Route>
-          
+          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/profile/bids" element={<UserBidPage />} />
+          <Route path="/profile/bids/requests" element={<UserBidRequestPage />} />
+
+
           <Route path="*" element={<MainPage />} />
         </Routes>
       </Box>
       {showLayout && <Footer />}
-    </>
+    </ErrorProvider>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback} from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -9,19 +9,28 @@ import {
   useTheme,
   Box,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
 import useCart from "../../../../../../../shared/hooks/useCart";
 import RatingComponent from "../../../../../../../shared/components/RatingComponent";
 import { isAuthenticated } from "../../../../../../../sdk/sdk";
+import CreateBidRequestDialog from "../../../../../../Bidding/CreateBidRequestDialog";
 import AuctionProductCard from "./AuctionProductCard";
 
+interface ExtendedProductDto extends ProductDto {
+  storeName?: string;
+  storeRating?: number;
+}
+
 const UserProductCard: React.FC<{
-  product: ProductDto;
+  product: ExtendedProductDto;
   setUpdateProducts?: React.Dispatch<React.SetStateAction<boolean>>;
 }> = ({ product, setUpdateProducts }) => {
   const theme = useTheme();
+  const [bidDialogOpen, setBidDialogOpen] = useState(false);
+
   const {
     cart,
     addToCart,
@@ -31,9 +40,12 @@ const UserProductCard: React.FC<{
     error: cartError,
   } = useCart();
 
-  const { storeId } = useParams<{ storeId: string }>();
+  const { storeId: urlStoreId } = useParams<{ storeId: string }>();
   const isUserAuthenticated = isAuthenticated();
- 
+  
+  // Use product's storeId, fallback to URL parameter for backward compatibility
+  const storeId = product.storeId || urlStoreId;
+
   // Find current quantity of this product in the cart (for this store)
   const currentQty = useMemo(() => {
     if (!cart) return 0;
@@ -43,163 +55,267 @@ const UserProductCard: React.FC<{
     return entry?.quantity ?? 0;
   }, [cart, storeId, product.id]);
 
-  // When incrementing: if currentQty === 0, call addToCart; otherwise updateQuantity
   const handleIncrement = useCallback(async () => {
-    if (currentQty === product.quantity) {
-      console.log(
-        `Cannot add ${product.name} to cart: already at max quantity (${product.quantity})`
-      );
-      return;
-    }
+    if (!storeId) return;
+    if (currentQty === product.quantity) return;
+    
     if (currentQty === 0) {
-      await addToCart(storeId as string, product.id, 1);
-      console.log(`Added ${product.name} to cart (quantity = 1)`);
+      await addToCart(storeId, product.id!, 1);
     } else {
-      await updateQuantity(storeId as string, product.id, currentQty + 1);
-      console.log(
-        `Increased ${product.name} quantity to ${currentQty + 1} in cart`
-      );
+      await updateQuantity(storeId, product.id!, currentQty + 1);
     }
-  }, [addToCart, currentQty, product.id, product.name, updateQuantity]);
+  }, [addToCart, currentQty, product.id, product.quantity, storeId, updateQuantity]);
 
-  // When decrementing: if currentQty <= 1, remove entirely; otherwise updateQuantity
   const handleDecrement = useCallback(async () => {
+    if (!storeId) return;
+    
     if (currentQty <= 1) {
-      await removeFromCart(storeId as string, product.id);
-      console.log(`Removed ${product.name} from cart`);
+      await removeFromCart(storeId, product.id!);
     } else {
-      await updateQuantity(storeId as string, product.id, currentQty - 1);
-      console.log(
-        `Decreased ${product.name} quantity to ${currentQty - 1} in cart`
-      );
+      await updateQuantity(storeId, product.id!, currentQty - 1);
     }
-  }, [currentQty, product.id, product.name, removeFromCart, updateQuantity]);
+  }, [currentQty, product.id, removeFromCart, storeId, updateQuantity]);
 
+  if (product.auctionEndDate && new Date(product.auctionEndDate).getTime() < Date.now()) {
+    return null;
+  }
 
-
-  return (
-    <Card
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        borderRadius: theme.shape.borderRadius * 2,
-        boxShadow: theme.shadows[1],
-        transition: "transform 0.2s, box-shadow 0.2s",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: theme.shadows[4],
-        },
-      }}
-    >
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
-          {product.name}
-        </Typography>
-        <Typography
-          variant="body2"
-          paragraph
-          noWrap
-          sx={{ color: theme.palette.text.secondary }}
-        >
-          {product.description}
-        </Typography>
-
-        <Box sx={{ mb: theme.spacing(1) }}>
-          {product.auctionEndDate ? (
-            <AuctionProductCard 
-              product={product} 
-              setUpdateProducts={setUpdateProducts}
-              isUserAuthenticated={isUserAuthenticated}
-            />
-          ) : (
-            <Typography variant="body2">
-              <strong>Price:</strong> ${product.price.toFixed(2)}
-            </Typography>
-          )}
-          <Typography variant="body2">
-            <strong>Available:</strong> {product.quantity}
-          </Typography>
-        </Box>
-
-        {product.categories.length > 0 && (
-          <Typography variant="body2">
-            <strong>Categories:</strong> {product.categories.join(", ")}
-          </Typography>
-        )}
-
-        {!product.auctionEndDate && <Box
-          sx={{
-            mb: theme.spacing(1),
-            mt: theme.spacing(2),
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {/* Always show partial stars for viewing */}
-          <RatingComponent
-            value={product.rating}
-            readOnly={true}
-            size="small"
-            precision={0.1}
-          />
-        </Box>}
-
-        {!product.auctionEndDate && cartError && (
-          <Typography
-            variant="caption"
-            color="error"
-            sx={{ mt: theme.spacing(1), display: "block" }}
-          >
-            {cartError}
-          </Typography>
-        )}
-      </CardContent>
-
-      {!product.auctionEndDate && <CardActions
+  // Early return if no storeId for cart operations
+  if (!storeId) {
+    return (
+      <Card
         sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          px: theme.spacing(2),
-          pb: theme.spacing(2),
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: theme.shape.borderRadius * 2,
+          boxShadow: theme.shadows[1],
+          transition: "transform 0.2s, box-shadow 0.2s",
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: theme.shadows[4],
+          },
         }}
       >
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={handleDecrement}
-          disabled={cartLoading || currentQty === 0}
-          sx={{ minWidth: 32, p: 0 }}
-        >
-          –
-        </Button>
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
+            {product.name}
+          </Typography>
+          
+          {/* Store name subtitle for search results */}
+          {product.storeName && (
+            <Typography
+              variant="subtitle2"
+              sx={{ 
+                color: theme.palette.primary.main,
+                fontWeight: 500,
+                mb: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5
+              }}
+            >
+              {product.storeName}
+              {typeof product.storeRating === 'number' && product.storeRating > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                  <RatingComponent
+                    value={product.storeRating}
+                    readOnly={true}
+                    size="small"
+                    precision={0.1}
+                  />
+                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                    ({product.storeRating.toFixed(1)})
+                  </Typography>
+                </Box>
+              )}
+            </Typography>
+          )}
+          
+          <Typography
+            variant="body2"
+            paragraph
+            noWrap
+            sx={{ color: theme.palette.text.secondary }}
+          >
+            {product.description}
+          </Typography>
 
-        <Box
+          <Box sx={{ mb: theme.spacing(1) }}>
+            {product.auctionEndDate ? (
+              <AuctionProductCard 
+                product={product} 
+                setUpdateProducts={setUpdateProducts}
+                isUserAuthenticated={isUserAuthenticated}
+              />
+            ) : (
+              <Typography variant="body2">
+                <strong>Price:</strong> ${product.price.toFixed(2)}
+              </Typography>
+            )}
+            <Typography variant="body2">
+              <strong>Available:</strong> {product.quantity}
+            </Typography>
+          </Box>
+
+          {product.categories.length > 0 && (
+            <Typography variant="body2">
+              <strong>Categories:</strong> {product.categories.join(", ")}
+            </Typography>
+          )}
+
+          {!product.auctionEndDate && (
+            <Box
+              sx={{
+                mb: theme.spacing(1),
+                mt: theme.spacing(2),
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <RatingComponent
+                value={product.rating ?? 0}
+                readOnly={true}
+                size="small"
+                precision={0.1}
+              />
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <Card
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: theme.shape.borderRadius * 2,
+          boxShadow: theme.shadows[1],
+          transition: "transform 0.2s, box-shadow 0.2s",
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: theme.shadows[4],
+          },
+        }}
+      >
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
+            {product.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            paragraph
+            noWrap
+            sx={{ color: theme.palette.text.secondary }}
+          >
+            {product.description}
+          </Typography>
+
+          <Box sx={{ mb: theme.spacing(1) }}>
+            {product.auctionEndDate ? (
+              <AuctionProductCard 
+                product={product} 
+                setUpdateProducts={setUpdateProducts}
+                isUserAuthenticated={isUserAuthenticated}
+              />
+            ) : (
+              <Typography variant="body2">
+                <strong>Price:</strong> ${product.price.toFixed(2)}
+              </Typography>
+            )}
+            <Typography variant="body2">
+              <strong>Available:</strong> {product.quantity}
+            </Typography>
+          </Box>
+
+          {product.categories.length > 0 && (
+            <Typography variant="body2">
+              <strong>Categories:</strong> {product.categories.join(", ")}
+            </Typography>
+          )}
+
+          {!product.auctionEndDate && (
+            <Box
+              sx={{
+                mb: theme.spacing(1),
+                mt: theme.spacing(2),
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <RatingComponent
+                value={product.rating ?? 0}
+                readOnly={true}
+                size="small"
+                precision={0.1}
+              />
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+
+      {!product.auctionEndDate && (
+        <CardActions
           sx={{
-            width: 32,
-            textAlign: "center",
-            mx: theme.spacing(1),
+            justifyContent: "center",
+            alignItems: "center",
+            px: theme.spacing(2),
+            pb: theme.spacing(2),
           }}
         >
-          <Typography variant="body2">{currentQty}</Typography>
-        </Box>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleDecrement}
+            disabled={cartLoading || currentQty === 0}
+            sx={{ minWidth: 32, p: 0 }}
+          >
+            –
+          </Button>
+          <Box sx={{ width: 32, textAlign: "center", mx: theme.spacing(1) }}>
+            <Typography variant="body2">{currentQty}</Typography>
+          </Box>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleIncrement}
+            disabled={cartLoading}
+            sx={{ minWidth: 32, p: 0 }}
+          >
+            +
+          </Button>
+          {cartLoading && (
+            <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
+          )}
+          {isUserAuthenticated && (
+            <>
+              <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={() => setBidDialogOpen(true)}
+              >
+                Bid
+              </Button>
+            </>
+          )}
+        </CardActions>
+      )}
 
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={handleIncrement}
-          disabled={cartLoading}
-          sx={{ minWidth: 32, p: 0 }}
-        >
-          +
-        </Button>
-
-        {cartLoading && (
-          <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
-        )}
-      </CardActions>}
-    </Card>
+      <CreateBidRequestDialog
+        open={bidDialogOpen}
+        onClose={() => setBidDialogOpen(false)}
+        productId={product.id!}
+        storeId={storeId!}
+      />
+    </>
   );
 };
 

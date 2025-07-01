@@ -48,3 +48,16 @@ export async function getStorePermissions(this: SDK): Promise<string[]> {
   }
   return (await response.json()) as string[];
 }
+
+
+export async function getPublicSellersInfo(this: SDK, storeId: string): Promise<Record<string, string>> {
+  const response = await this.get(`public/stores/${storeId}/public-sellers`, {});
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Error fetching public sellers info: ${error}`);
+  }
+
+  return await response.json();
+}
+

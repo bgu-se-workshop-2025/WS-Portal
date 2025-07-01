@@ -34,8 +34,28 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
 }) => {
   const theme = useTheme();
 
-  // Derive an initial auctionEnd value safely (slice only if defined)
-  const initialAuctionEnd = existingProduct.auctionEndDate?.slice(0, 16) ?? "";
+  // Convert backend auction date format to datetime-local format
+  const getInitialAuctionEnd = () => {
+    if (!existingProduct.auctionEndDate) return "";
+    
+    try {
+      // Backend format: "HH:mm:ss dd/MM/yyyy"
+      const parts = existingProduct.auctionEndDate.split(' ');
+      if (parts.length !== 2) return "";
+      
+      const [timePart, datePart] = parts;
+      const [hours, minutes] = timePart.split(':');
+      const [day, month, year] = datePart.split('/');
+      
+      // Convert to ISO format for datetime-local input
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
+      return date.toISOString().slice(0, 16);
+    } catch {
+      return "";
+    }
+  };
+  
+  const initialAuctionEnd = getInitialAuctionEnd();
 
   // Initialize form fields from `existingProduct`
   const [name, setName] = useState(existingProduct.name);
@@ -59,7 +79,7 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
       setPrice(existingProduct.price);
       setQuantity(existingProduct.quantity);
       setCategories([...existingProduct.categories]);
-      setAuctionEnd(existingProduct.auctionEndDate?.slice(0, 16) ?? "");
+      setAuctionEnd(getInitialAuctionEnd());
       setSaveError(undefined);
       setSaving(false);
     }
@@ -69,10 +89,37 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
     // Basic validation: name & price required
     if (name.trim().length === 0 || price === undefined) return;
 
+    // Validate auction date if provided
+    if (auctionEnd) {
+      const auctionDate = new Date(auctionEnd);
+      const now = new Date();
+      if (auctionDate <= now) {
+        setSaveError("The product's auction date needs to be set in the future");
+        return;
+      }
+    }
+
     setSaving(true);
     setSaveError(undefined);
 
     try {
+      // Convert auction date to backend format if provided
+      let formattedAuctionDate: string | undefined = undefined;
+      if (auctionEnd) {
+        const date = new Date(auctionEnd);
+        // Format as "HH:mm:ss dd/MM/yyyy" to match backend expectation
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = '00';
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        formattedAuctionDate = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+      } else if (existingProduct.auctionEndDate) {
+        // Keep existing auction date if user didn't change it
+        formattedAuctionDate = existingProduct.auctionEndDate;
+      }
+
       const toUpdate: ProductDto = {
         ...existingProduct,
         name: name.trim(),
@@ -80,7 +127,7 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
         price: price,
         quantity: quantity ?? 0,
         categories,
-        auctionEndDate: auctionEnd || existingProduct.auctionEndDate,
+        auctionEndDate: formattedAuctionDate,
       };
 
       const updated: ProductDto = await sdk.updateProduct(
@@ -99,7 +146,7 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
   
   const handleOnEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setAuctionEnd(value);
+    setAuctionEnd(new Date(value).toISOString());
   };
 
   const isSaveDisabled =
@@ -204,6 +251,8 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
                 onChangeCapture={handleOnEndDateChange}
                 fullWidth
                 disabled={saving}
+                error={auctionEnd && new Date(auctionEnd) <= new Date() && !!saveError}
+                helperText={auctionEnd && new Date(auctionEnd) <= new Date() && !!saveError ? "The product's auction date needs to be set in the future" : "Leave empty for regular product"}
               />
             </Grid>
 

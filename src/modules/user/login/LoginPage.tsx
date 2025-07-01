@@ -1,15 +1,43 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaneLayout from "../register/components/PaneLayout/PaneLayout";
-import { Button, Typography } from "@mui/material";
+import { Button, Typography, CircularProgress } from "@mui/material";
 
 import LoginPageResources from "./LoginPageResources.json";
 import FormTextField from "../register/components/FormTextField/FormTextField";
 import { sdk } from "../../../sdk/sdk";
+import { useFormErrorHandler } from "../../../shared/hooks/useErrorHandler";
+import { InlineError } from "../../../shared/components/error/ErrorDisplay";
+import type { AppError } from "../../../shared/types/errors";
+import { ErrorType, ErrorSeverity } from "../../../shared/types/errors";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const {
+    error,
+    handleFormSubmit,
+    clearError
+  } = useFormErrorHandler({
+    component: 'LoginPage',
+    operation: 'User Login'
+  });
+
+  // Create a custom error message for login failures
+  const displayError: AppError | null = error && error.type === ErrorType.UNKNOWN_ERROR 
+    ? {
+        ...error,
+        type: ErrorType.INVALID_CREDENTIALS,
+        severity: ErrorSeverity.WARNING,
+        title: 'Invalid Credentials',
+        message: 'The username or password you entered is incorrect',
+        userFriendlyMessage: 'The username or password you entered is incorrect. Please check your credentials and try again.',
+        actionable: true,
+        retryable: true,
+        suggestedActions: ['Double-check your username and password', 'Reset your password if you forgot it', 'Register a new account if you don\'t have one']
+      }
+    : error;
 
   const handleRegisterNav = () => {
     navigate("/register");
@@ -22,13 +50,18 @@ const LoginPage: React.FC = () => {
     const username = formData.get(LoginPageResources.Main.Form.Username.Id) as string;
     const password = formData.get(LoginPageResources.Main.Form.Password.Id) as string;
 
-    try {
-      await sdk.login({ username, password });
+    setIsLoading(true);
+
+    const { data, error: loginError } = await handleFormSubmit(async () => {
+      return await sdk.login({ username, password });
+    });
+
+    setIsLoading(false);
+
+    if (data) {
       navigate("/");
-    } catch (ex) {
-      console.error("login: ", ex)
-      setError((ex as Error).message);
     }
+    // Error is already handled by the form error handler
   };
 
   return (
@@ -88,13 +121,26 @@ const LoginPage: React.FC = () => {
             type="password"
             required
           />
-          {error && error.trim().length > 0 && <Typography color="error">{error}</Typography>}
+          
+          <InlineError 
+            error={displayError} 
+            onDismiss={clearError}
+            onRetry={displayError?.retryable ? () => {
+              const form = document.querySelector('form') as HTMLFormElement;
+              if (form) {
+                handleLogin({ preventDefault: () => {}, currentTarget: form } as any);
+              }
+            } : undefined}
+          />
+          
           <Button
             variant="contained"
             type="submit"
+            disabled={isLoading}
             sx={LoginPageResources.Main.Styles.Button}
+            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : undefined}
           >
-            {LoginPageResources.Main.Form.Button.Content}
+            {isLoading ? 'Signing In...' : LoginPageResources.Main.Form.Button.Content}
           </Button>
         </form>
       </PaneLayout.Pane>
