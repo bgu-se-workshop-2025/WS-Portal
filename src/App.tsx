@@ -25,6 +25,9 @@ import StoreBidRequestPage from "./modules/Bidding/pages/StoreBidRequestPage";
 import UserBidPage from "./modules/Bidding/pages/UserBidPage";
 import UserBidRequestPage from "./modules/Bidding/pages/UserBidRequestPage";
 import StoreBidPage from "./modules/Bidding/pages/StoreBidPage";
+import SellerInfoPage from "./modules/store/components/subpages/SellerInfo/SellerInfoPage";
+
+
 
 const App: React.FC = () => {
   const { pathname } = useLocation();
@@ -52,6 +55,8 @@ const App: React.FC = () => {
             <Route path="transactions" element={<StoreTransactionsPage />} />
             <Route path="bids" element={<StoreBidPage />} />
             <Route path="bids/requests" element={<StoreBidRequestPage />} />
+            <Route path="sellers-info" element={<SellerInfoPage />} />
+
           </Route>
 
           <Route path="/notifications" element={<NotificationPage />} />
