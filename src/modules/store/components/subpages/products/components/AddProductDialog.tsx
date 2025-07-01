@@ -57,40 +57,82 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
   }, [open]);
 
   const handleAdd = async () => {
-    if (newName.trim().length === 0 || newPrice === undefined) {
+    // Client-side validation
+    if (!newName.trim()) {
+      setAddError("Product name is required");
       return;
+    }
+    
+    if (newPrice === undefined || newPrice <= 0) {
+      setAddError("Product price must be greater than zero");
+      return;
+    }
+
+    if (newQuantity !== undefined && newQuantity < 0) {
+      setAddError("Product quantity cannot be negative");
+      return;
+    }
+
+    // Validate auction date if provided
+    if (newAuctionEnd) {
+      const auctionDate = new Date(newAuctionEnd);
+      const now = new Date();
+      if (auctionDate <= now) {
+        setAddError("The product's auction date needs to be set in the future");
+        return;
+      }
     }
 
     setAdding(true);
     setAddError(undefined);
 
     try {
+      // Convert auction date to backend format if provided
+      let formattedAuctionDate: string | undefined = undefined;
+      if (newAuctionEnd) {
+        const date = new Date(newAuctionEnd);
+        // Format as "HH:mm:ss dd/MM/yyyy" to match backend expectation
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = '00';
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        formattedAuctionDate = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+      }
+
       const toCreate: Partial<ProductDto> = {
         name: newName.trim(),
         description: newDesc.trim(),
         price: newPrice,
         quantity: newQuantity ?? 0,
-        categories: newCategories,
-        auctionEndDate: newAuctionEnd,
+        categories: newCategories.length > 0 ? newCategories : [],
+        auctionEndDate: formattedAuctionDate,
       };
 
       await sdk.createProduct(storeId, toCreate as ProductDto);
 
-      // notify parent to refresh page 0 & refetch
+      // Close dialog and refresh parent
+      onClose();
       onProductAdded();
     } catch (err: any) {
       console.error("Error adding product:", err);
-      setAddError(err.message || "Failed to add product");
+      setAddError(err.userFriendlyMessage || err.message || "Failed to add product");
     } finally {
       setAdding(false);
     }
+  };
+  
+  const handleOnEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setNewAuctionEnd(new Date(value).toISOString());
   };
 
   const isAddDisabled =
     adding || newName.trim().length === 0 || newPrice === undefined;
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={adding ? undefined : onClose} fullWidth maxWidth="sm">
       <DialogTitle>
         Add New Product
         <IconButton
@@ -118,6 +160,8 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 fullWidth
                 required
                 disabled={adding}
+                error={!newName.trim() && !!addError}
+                helperText={!newName.trim() && !!addError ? "Product name is required" : ""}
               />
             </Grid>
 
@@ -146,7 +190,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 fullWidth
                 required
                 disabled={adding}
-                InputProps={{ inputProps: { min: 0, step: 0.01 } }}
+                error={(newPrice !== undefined && newPrice <= 0) && !!addError}
+                helperText={(newPrice !== undefined && newPrice <= 0) && !!addError ? "Price must be greater than 0" : ""}
+                InputProps={{ inputProps: { min: 0.01, step: 0.01 } }}
               />
             </Grid>
 
@@ -162,6 +208,8 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 }
                 fullWidth
                 disabled={adding}
+                error={(newQuantity !== undefined && newQuantity < 0) && !!addError}
+                helperText={(newQuantity !== undefined && newQuantity < 0) && !!addError ? "Quantity cannot be negative" : ""}
                 InputProps={{ inputProps: { min: 0, step: 1 } }}
               />
             </Grid>
@@ -187,9 +235,11 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 type="datetime-local"
                 InputLabelProps={{ shrink: true }}
                 value={newAuctionEnd}
-                onChange={(e) => setNewAuctionEnd(e.target.value)}
+                onChangeCapture={handleOnEndDateChange}
                 fullWidth
                 disabled={adding}
+                error={newAuctionEnd && new Date(newAuctionEnd) <= new Date() && !!addError}
+                helperText={newAuctionEnd && new Date(newAuctionEnd) <= new Date() && !!addError ? "The product's auction date needs to be set in the future" : "Leave empty for regular product"}
               />
             </Grid>
 
@@ -211,7 +261,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
         <Button
           variant="contained"
           onClick={handleAdd}
-          disabled={isAddDisabled}
+          disabled={adding || !newName.trim() || newPrice === undefined || newPrice <= 0}
         >
           {adding ? "Adding…" : "Add Product"}
         </Button>
