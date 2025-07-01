@@ -20,19 +20,21 @@ export interface StoreDto {
     id?: string;
     name: string;
     description: string;
-    rating: number;
+    rating?: number;
+    purchasePolicies?: any[];
+    discountPolicies?: any[];
 }
 
 export interface ProductDto {
-    id: string;
+    id?: string;
     name: string;
     description: string;
     price: number;
     quantity: number;
-    storeId: string;
-    rating: number;
+    storeId?: string;
+    rating?: number;
     categories: string[];
-    auctionEndDate: string;
+    auctionEndDate?: string;
 }
 
 export interface SellerDto {
@@ -51,9 +53,12 @@ export enum SellerType {
 }
 
 export interface MessageDto {
+    id?: string;
+    senderId?: string;
     recipientId: string;
     title: string;
     body: string;
+    date?: string;
 }
 
 export interface Pageable {

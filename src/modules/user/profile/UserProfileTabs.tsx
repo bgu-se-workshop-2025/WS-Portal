@@ -17,3 +17,4 @@ export interface UserProfileTabProps {
 export { default as MyStoresTab } from './MyStoresTab';
 export { default as PurchaseHistoryTab } from './PurchaseHistoryTab';
 export { default as MyBidsTab } from './MyBidsTab';
+export { default as MyMessagesTab } from './MyMessagesTab';

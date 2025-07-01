@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 
 import Header from "./shared/components/layout/Header";
 import Footer from "./shared/components/layout/Footer";
+import { ErrorProvider } from "./shared/providers/ErrorProvider";
 
 import StorePage from "./modules/store/StorePage";
 import LoginPage from "./modules/user/login/LoginPage";
@@ -20,6 +21,7 @@ import StoreTransactionsPage from "./modules/store/components/subpages/Transacti
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
+import StoreMessages from "./modules/store/components/subpages/StoreMessages";
 import CartMainPage from "./modules/cart/CartMainPage";
 import SearchResultsPage from "./modules/search/SearchResultsPage";
 import StoreBidRequestPage from "./modules/Bidding/pages/StoreBidRequestPage";
@@ -37,7 +39,7 @@ const App: React.FC = () => {
   const showLayout = !noLayoutPaths.includes(pathname);
 
   return (
-    <>
+    <ErrorProvider>
       {showLayout && <Header />}
       <Box sx={{ overflowY: "auto" }}>
         <Routes>
@@ -59,6 +61,7 @@ const App: React.FC = () => {
             <Route path="bids/requests" element={<StoreBidRequestPage />} />
             <Route path="sellers-info" element={<SellerInfoPage />} />
 
+            <Route path="messages" element={<StoreMessages />} />
           </Route>
 
           <Route path="/notifications" element={<NotificationPage />} />
@@ -75,7 +78,7 @@ const App: React.FC = () => {
         </Routes>
       </Box>
       {showLayout && <Footer />}
-    </>
+    </ErrorProvider>
   );
 };
 

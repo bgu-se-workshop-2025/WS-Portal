@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Alert, Tabs, Tab } from "@mui/material";
 import { sdk } from "../../../sdk/sdk";
-import {
-  StoreDto,
-  UserOrderDto,
-  PublicUserDto,
-} from "../../../shared/types/dtos";
-import { MyStoresTab, PurchaseHistoryTab, MyBidsTab, UserProfileTabProps } from "./UserProfileTabs";
+import { StoreDto, UserOrderDto, PublicUserDto } from "../../../shared/types/dtos";
+import { MyStoresTab, PurchaseHistoryTab, MyBidsTab, MyMessagesTab, UserProfileTabProps } from "./UserProfileTabs";
 import BombardilloCrocodilo from "./BombardilloCrocodilo";
 import { useNavigate } from "react-router-dom";
 
@@ -263,6 +259,7 @@ const UserProfilePage: React.FC = () => {
             <Tab label="My Stores" sx={{ alignItems: 'flex-start' }} />
             <Tab label="Purchase History" sx={{ alignItems: 'flex-start' }} />
             <Tab label="My Bids" sx={{ alignItems: 'flex-start' }} />
+            <Tab label="My Messages" sx={{ alignItems: 'flex-start' }} />
           </Tabs>
         </Box>
         {/* Main content */}
@@ -287,8 +284,11 @@ const UserProfilePage: React.FC = () => {
           {selectedTab === 0 && <MyStoresTab {...tabProps} />}
           {selectedTab === 1 && <PurchaseHistoryTab {...tabProps} />}
           {selectedTab === 2 && <MyBidsTab {...tabProps} />}
+          {selectedTab === 3 && <MyMessagesTab {...tabProps} />}
         </Box>
       </Box>
+      
+
     </Box>
   );
 };

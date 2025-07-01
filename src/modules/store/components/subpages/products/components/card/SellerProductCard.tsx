@@ -10,8 +10,11 @@ import {
   Dialog,
   Stack,
   CircularProgress,
+  IconButton,
+  Tooltip,
+  Snackbar,
 } from "@mui/material";
-import { Add, Close, Delete } from "@mui/icons-material";
+import { Add, Close, Delete, ContentCopy, Check } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
 
 import { ProductDto } from "../../../../../../../shared/types/dtos";
@@ -97,6 +100,8 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
   const [deleting, setDeleting] = useState(false);
   const [discountOpen, setDiscountOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string>();
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!storeId) {
     return null; // or show an error
@@ -107,7 +112,7 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
     setDeleteError(undefined);
 
     try {
-      await sdk.deleteProduct(storeId, product.id);
+      await sdk.deleteProduct(storeId, product.id!);
       setUpdateProducts((value) => !value);
     } catch (err: any) {
       console.error("Error deleting product:", err);
@@ -134,9 +139,21 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
     setDiscountOpen(true);
   }
 
- if (product.auctionEndDate && new Date(product.auctionEndDate).getTime() < Date.now()) {
-  return null;
- } 
+  if (product.auctionEndDate && new Date(product.auctionEndDate).getTime() < Date.now()) {
+    return null;
+  }
+
+  const handleCopyId = async () => {
+    try {
+      await navigator.clipboard.writeText(product.id!);
+      setCopied(true);
+      setCopySuccess(true);
+      setTimeout(() => setCopied(false), 1000);
+      setTimeout(() => setCopySuccess(false), 3000);
+    } catch (err) {
+      console.error('Failed to copy product ID:', err);
+    }
+  };
 
   return (
     <>
@@ -186,7 +203,7 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
           {/* Product rating: readonly for sellers and guests, rateable for non-sellers */}
           {!product.auctionEndDate && <Box display="flex" alignItems="center" gap={1} mb={1}>
             <RatingComponent
-              value={product.rating}
+              value={product.rating ?? 0}
               readOnly={true}
               size="medium"
               precision={0.1}
@@ -199,8 +216,8 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
               <ProductDisscountControllerDialog
                 open={discountOpen}
                 setOpen={setDiscountOpen}
-                productId={product.id}
-                storeId={product.storeId}
+                productId={product.id!}
+                storeId={product.storeId!}
               />
             }
           </Box>}
@@ -224,29 +241,46 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
 
         <CardActions
           sx={{
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             alignItems: "center",
             px: theme.spacing(2),
             pb: theme.spacing(2),
           }}
         >
-          <Button
-            size="small"
-            startIcon={<Add />}
-            onClick={handleOpenEdit}
-            disabled={deleting}
-          >
-            Edit
-          </Button>
-          <Button
-            size="small"
-            color="error"
-            startIcon={<Delete />}
-            onClick={handleDelete}
-            disabled={deleting}
-          >
-            {deleting ? "Deleting…" : "Delete"}
-          </Button>
+          <Tooltip title="Copy Product ID">
+            <IconButton
+              size="small"
+              onClick={handleCopyId}
+              sx={{
+                color: copied ? theme.palette.success.main : theme.palette.text.secondary,
+                '&:hover': {
+                  backgroundColor: theme.palette.action.hover,
+                },
+              }}
+            >
+              {copied ? <Check /> : <ContentCopy />}
+            </IconButton>
+          </Tooltip>
+          
+          <Box>
+            <Button
+              size="small"
+              startIcon={<Add />}
+              onClick={handleOpenEdit}
+              disabled={deleting}
+            >
+              Edit
+            </Button>
+            <Button
+              size="small"
+              color="error"
+              startIcon={<Delete />}
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting…" : "Delete"}
+            </Button>
+          </Box>
         </CardActions>
       </Card>
 
@@ -257,6 +291,15 @@ const SellerProductCard: React.FC<SellerProductCardProps> = ({ product, setUpdat
         existingProduct={product}
         onClose={handleCloseEdit}
         onProductUpdated={handleProductUpdated}
+      />
+
+      {/* Copy Success Snackbar */}
+      <Snackbar
+        open={copySuccess}
+        autoHideDuration={3000}
+        onClose={() => setCopySuccess(false)}
+        message="Product ID copied to clipboard!"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       />
     </>
   );

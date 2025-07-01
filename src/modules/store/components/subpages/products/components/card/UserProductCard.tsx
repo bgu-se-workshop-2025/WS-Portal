@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState} from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -56,28 +56,33 @@ const UserProductCard: React.FC<{
   }, [cart, storeId, product.id]);
 
   const handleIncrement = useCallback(async () => {
+    if (!storeId) return;
     if (currentQty === product.quantity) return;
+    
     if (currentQty === 0) {
-      await addToCart(storeId as string, product.id, 1);
+      await addToCart(storeId, product.id!, 1);
     } else {
-      await updateQuantity(storeId as string, product.id, currentQty + 1);
+      await updateQuantity(storeId, product.id!, currentQty + 1);
     }
   }, [addToCart, currentQty, product.id, product.quantity, storeId, updateQuantity]);
 
   const handleDecrement = useCallback(async () => {
+    if (!storeId) return;
+    
     if (currentQty <= 1) {
-      await removeFromCart(storeId as string, product.id);
+      await removeFromCart(storeId, product.id!);
     } else {
-      await updateQuantity(storeId as string, product.id, currentQty - 1);
+      await updateQuantity(storeId, product.id!, currentQty - 1);
     }
   }, [currentQty, product.id, removeFromCart, storeId, updateQuantity]);
 
   if (product.auctionEndDate && new Date(product.auctionEndDate).getTime() < Date.now()) {
     return null;
-  } 
+  }
 
-  return (
-    <>
+  // Early return if no storeId for cart operations
+  if (!storeId) {
+    return (
       <Card
         sx={{
           height: "100%",
@@ -111,7 +116,7 @@ const UserProductCard: React.FC<{
               }}
             >
               {product.storeName}
-              {product.storeRating !== undefined && product.storeRating > 0 && (
+              {typeof product.storeRating === 'number' && product.storeRating > 0 && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
                   <RatingComponent
                     value={product.storeRating}
@@ -169,9 +174,114 @@ const UserProductCard: React.FC<{
                 alignItems: "center",
               }}
             >
-              {/* Always show partial stars for viewing */}
               <RatingComponent
-                value={product.rating}
+                value={product.rating ?? 0}
+                readOnly={true}
+                size="small"
+                precision={0.1}
+              />
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <Card
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          borderRadius: theme.shape.borderRadius * 2,
+          boxShadow: theme.shadows[1],
+          transition: "transform 0.2s, box-shadow 0.2s",
+          "&:hover": {
+            transform: "translateY(-4px)",
+            boxShadow: theme.shadows[4],
+          },
+        }}
+      >
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" gutterBottom noWrap sx={{ fontWeight: 500 }}>
+            {product.name}
+          </Typography>
+          
+          {/* Store name subtitle for search results */}
+          {product.storeName && (
+            <Typography
+              variant="subtitle2"
+              sx={{ 
+                color: theme.palette.primary.main,
+                fontWeight: 500,
+                mb: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5
+              }}
+            >
+              {product.storeName}
+              {typeof product.storeRating === 'number' && product.storeRating > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                  <RatingComponent
+                    value={product.storeRating}
+                    readOnly={true}
+                    size="small"
+                    precision={0.1}
+                  />
+                  <Typography variant="caption" sx={{ ml: 0.5 }}>
+                    ({product.storeRating.toFixed(1)})
+                  </Typography>
+                </Box>
+              )}
+            </Typography>
+          )}
+          
+          <Typography
+            variant="body2"
+            paragraph
+            noWrap
+            sx={{ color: theme.palette.text.secondary }}
+          >
+            {product.description}
+          </Typography>
+
+          <Box sx={{ mb: theme.spacing(1) }}>
+            {product.auctionEndDate ? (
+              <AuctionProductCard 
+                product={product} 
+                setUpdateProducts={setUpdateProducts}
+                isUserAuthenticated={isUserAuthenticated}
+              />
+            ) : (
+              <Typography variant="body2">
+                <strong>Price:</strong> ${product.price.toFixed(2)}
+              </Typography>
+            )}
+            <Typography variant="body2">
+              <strong>Available:</strong> {product.quantity}
+            </Typography>
+          </Box>
+
+          {product.categories.length > 0 && (
+            <Typography variant="body2">
+              <strong>Categories:</strong> {product.categories.join(", ")}
+            </Typography>
+          )}
+
+          {!product.auctionEndDate && (
+            <Box
+              sx={{
+                mb: theme.spacing(1),
+                mt: theme.spacing(2),
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+              }}
+            >
+              <RatingComponent
+                value={product.rating ?? 0}
                 readOnly={true}
                 size="small"
                 precision={0.1}
@@ -240,14 +350,12 @@ const UserProductCard: React.FC<{
         )}
       </Card>
 
-      {storeId && (
-        <CreateBidRequestDialog
-          open={bidDialogOpen}
-          onClose={() => setBidDialogOpen(false)}
-          productId={product.id}
-          storeId={storeId}
-        />
-      )}
+      <CreateBidRequestDialog
+        open={bidDialogOpen}
+        onClose={() => setBidDialogOpen(false)}
+        productId={product.id!}
+        storeId={storeId!}
+      />
     </>
   );
 };

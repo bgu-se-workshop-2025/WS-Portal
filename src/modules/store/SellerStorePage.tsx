@@ -33,8 +33,8 @@ import { TokenService } from "../../shared/utils/token";
 
 import { StoreDto } from "../../shared/types/dtos";
 
-type TabValue = "products" | "sellers" | "settings" | "discounts" | "transactions" | "bids" | "bidRequests";
-const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "transactions", "bids", "bidRequests"];
+type TabValue = "products" | "sellers" | "settings" | "discounts" | "transactions" | "bids" | "bidRequests" | "messages";
+const TAB_ORDER: TabValue[] = ["products", "sellers", "settings", "discounts", "transactions", "bids", "bidRequests", "messages"];
 
 const SellerStoreLayout: React.FC = () => {
   const theme = useTheme();
@@ -134,7 +134,7 @@ const SellerStoreLayout: React.FC = () => {
               underline="hover"
               color="inherit"
               component={Link}
-              to="/seller/dashboard"
+              to="/profile"
             >
               My Stores
             </MuiLink>
@@ -202,7 +202,7 @@ const SellerStoreLayout: React.FC = () => {
               }}
             />
             <Typography variant="h6" mt={1}>
-              {store.rating > 0 ? `(${store.rating.toFixed(1)})` : ""}
+              {(store.rating ?? 0) > 0 ? `(${store.rating!.toFixed(1)})` : ""}
             </Typography>
           </Box>
         )}
@@ -325,6 +325,12 @@ const SellerStoreLayout: React.FC = () => {
                 label="Bid Requests"
                 component={Link}
                 to={`/store/${id}/bids/requests`}
+              />
+              <Tab
+                value="messages"
+                label="Messages"
+                component={Link}
+                to={`/store/${id}/messages`}
               />
             </Tabs>
             <Divider sx={{ mb: theme.spacing(3) }} />
