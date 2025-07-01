@@ -23,8 +23,13 @@ import StoreDiscountEditor from "../../../discounts/StoreDiscountEditor/StoreDis
 import { getLabelForTag } from "../../../discounts/util/discountUtils";
 import SellerAuctionProductCard from "./SellerAuctionProductCard";
 
+interface ExtendedProductDto extends ProductDto {
+  storeName?: string;
+  storeRating?: number;
+}
+
 interface SellerProductCardProps {
-  product: ProductDto;
+  product: ExtendedProductDto;
   setUpdateProducts: React.Dispatch<React.SetStateAction<boolean>>;
 }
 

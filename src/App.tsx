@@ -21,6 +21,7 @@ import StoreProductsPage from "./modules/store/components/subpages/products/Stor
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
 import CartMainPage from "./modules/cart/CartMainPage";
+import SearchResultsPage from "./modules/search/SearchResultsPage";
 import StoreBidRequestPage from "./modules/Bidding/pages/StoreBidRequestPage";
 import UserBidPage from "./modules/Bidding/pages/UserBidPage";
 import UserBidRequestPage from "./modules/Bidding/pages/UserBidRequestPage";
@@ -41,6 +42,7 @@ const App: React.FC = () => {
       <Box sx={{ overflowY: "auto" }}>
         <Routes>
           <Route path="/" element={<MainPage />} />
+          <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
              
