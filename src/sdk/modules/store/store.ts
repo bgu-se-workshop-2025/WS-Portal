@@ -7,52 +7,65 @@ const sellerController = "sellers";
 
 
 export async function createStore(this: SDK, store: StoreDto): Promise<StoreDto> {
-    const response = await this.post(`${storeController}`, store);
-    
-    if(!response.ok) {
-        const err = await response.text();
-        throw new Error(`Failed to create store ${err}`);
-    }
-
-    const result = (await response.json()) as StoreDto;
-    return result;
+    return await this.postWithErrorHandling<StoreDto>(
+        `${storeController}`,
+        store,
+        { 
+            operation: 'Create Store',
+            component: 'StoreService',
+            additionalData: { storeName: store.name }
+        }
+    );
 }
 
 export async function updateStore(this: SDK, storeId: string, store: StoreDto): Promise<StoreDto> {
-    const response = await this.patch(`${storeController}/${storeId}`, store);
-    
-    if(!response.ok) {
-
-        throw new Error(`Failed to update store : ${response.status}`);
-    }
-
-    const result = (await response.json()) as StoreDto;
-    return result;
+    return await this.patchWithErrorHandling<StoreDto>(
+        `${storeController}/${storeId}`,
+        store,
+        { 
+            operation: 'Update Store',
+            component: 'StoreService',
+            resourceId: storeId,
+            additionalData: { storeName: store.name }
+        }
+    );
 }
 
 export async function createProduct(this: SDK, storeId: string, product: ProductDto): Promise<ProductDto> {
-    const response = await this.post(`${storeController}/${storeId}/${productController}`, product);
-
-    if(!response.ok) {
-        const err = await response.text();
-        throw new Error(`Failed to create product ${err}`);
-    }
-
-    const result = (await response.json()) as ProductDto;
-    return result;
+    return await this.postWithErrorHandling<ProductDto>(
+        `${storeController}/${storeId}/${productController}`,
+        product,
+        { 
+            operation: 'Create Product',
+            component: 'StoreService',
+            resourceId: storeId,
+            additionalData: { 
+                productName: product.name,
+                price: product.price,
+                quantity: product.quantity
+            }
+        }
+    );
 }
 
 export async function updateProduct(this: SDK, storeId: string, productId: string, product: ProductDto): Promise<ProductDto> {
     console.log(`Updating product ${productId} in store ${storeId}`, product);
-    const response = await this.patch(`${storeController}/${storeId}/${productController}/${productId}`, product);
-
-    if(!response.ok) {
-        const err = await response.text();
-        throw new Error(`Failed to update product ${productId}: ${err}`);
-    }
-
-    const result = (await response.json()) as ProductDto;
-    return result;
+    
+    return await this.patchWithErrorHandling<ProductDto>(
+        `${storeController}/${storeId}/${productController}/${productId}`,
+        product,
+        { 
+            operation: 'Update Product',
+            component: 'StoreService',
+            resourceId: productId,
+            additionalData: { 
+                storeId: storeId,
+                productName: product.name,
+                price: product.price,
+                quantity: product.quantity
+            }
+        }
+    );
 }
 
 export async function deleteProduct(this: SDK, storeId: string, productId: string): Promise<void> {

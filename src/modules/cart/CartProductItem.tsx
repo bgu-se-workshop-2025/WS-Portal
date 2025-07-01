@@ -39,9 +39,6 @@ const CartProductItem: React.FC<CartProductItemProps> = ({
   }, [cart, product.id]);
 
   const handleIncrement = useCallback(async () => {
-    if(currentQty >= product.quantity){
-      return;
-    }
     if (currentQty === 0) {
       await addToCart(product.storeId,product.id, 1);
     } else {

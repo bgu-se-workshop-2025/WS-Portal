@@ -21,6 +21,8 @@ import * as user from "./modules/user/user";
 import * as notifications from "./modules/notification/notification";
 
 import { TokenService } from "../shared/utils/token";
+import type { ErrorContext } from "../shared/types/errors";
+import { AppErrorFactory } from "../shared/types/errors";
 
 import * as dtos from "../shared/types/dtos";
 import * as requests from "../shared/types/requests";
@@ -183,6 +185,53 @@ export class SDK {
     return `${this.options.baseUrl.replace(/\/+$/, '')}/${endpoint.replace(/^\/+/, '')}`;
   }
 
+  // Enhanced error handling for HTTP responses
+  private async handleResponse<T>(
+    responsePromise: Promise<Response>,
+    context?: ErrorContext,
+    parser?: (response: Response) => Promise<T>
+  ): Promise<T> {
+    let response: Response;
+    
+    try {
+      response = await responsePromise;
+    } catch (error) {
+      // Network error - fetch failed completely
+      if (error instanceof Error) {
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          throw AppErrorFactory.fromNetworkError(error, context);
+        }
+      }
+      throw AppErrorFactory.fromGenericError(error instanceof Error ? error : new Error('Unknown error occurred'), context);
+    }
+
+    // Handle HTTP errors
+    if (!response.ok) {
+      const responseBody = await response.text();
+      throw AppErrorFactory.fromHttpError(response, responseBody, context);
+    }
+
+    // Handle successful responses
+    try {
+      // Use custom parser if provided
+      if (parser) {
+        return await parser(response);
+      }
+
+      // Handle successful responses
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return await response.json() as T;
+      }
+
+      // Return empty object for successful responses without content
+      return {} as T;
+    } catch (error) {
+      // JSON parsing error or other processing error
+      throw AppErrorFactory.fromGenericError(error instanceof Error ? error : new Error('Response processing failed'), context);
+    }
+  }
+
   public async post(endpoint: string, payload: any): Promise<Response> {
     return await fetch(this.buildUrl(endpoint), {
       method: "POST",
@@ -219,10 +268,69 @@ export class SDK {
       headers: this.getHeaders(),
     });
   }
+
+  // Enhanced methods with error handling and parsing
+  public async postWithErrorHandling<T>(endpoint: string, payload: any, context?: ErrorContext): Promise<T> {
+    const responsePromise = fetch(this.buildUrl(endpoint), {
+      method: "POST",
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
+    
+    return this.handleResponse<T>(responsePromise, {
+      operation: `POST ${endpoint}`,
+      ...context
+    });
+  }
+
+  public async patchWithErrorHandling<T>(endpoint: string, payload: any, context?: ErrorContext): Promise<T> {
+    const responsePromise = fetch(this.buildUrl(endpoint), {
+      method: "PATCH",
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    return this.handleResponse<T>(responsePromise, {
+      operation: `PATCH ${endpoint}`,
+      ...context
+    });
+  }
+
+  public async getWithErrorHandling<T>(
+    endpoint: string,
+    params: Record<string, any>,
+    context?: ErrorContext
+  ): Promise<T> {
+    const queryString = new URLSearchParams(params).toString();
+    const responsePromise = fetch(
+      `${this.buildUrl(endpoint)}?${queryString}`,
+      {
+        method: "GET",
+        headers: this.getHeaders(),
+      }
+    );
+
+    return this.handleResponse<T>(responsePromise, {
+      operation: `GET ${endpoint}`,
+      ...context
+    });
+  }
+
+  public async deleteWithErrorHandling<T>(endpoint: string, context?: ErrorContext): Promise<T> {
+    const responsePromise = fetch(this.buildUrl(endpoint), {
+      method: "DELETE",
+      headers: this.getHeaders(),
+    });
+
+    return this.handleResponse<T>(responsePromise, {
+      operation: `DELETE ${endpoint}`,
+      ...context
+    });
+  }
 }
 
 export const sdk: SDK = new SDK({
-  baseUrl: "http://localhost:8080",
+  baseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
 });
 
 export const isAuthenticated = (): boolean => TokenService.isAuthenticated;

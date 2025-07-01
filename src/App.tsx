@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 
 import Header from "./shared/components/layout/Header";
 import Footer from "./shared/components/layout/Footer";
+import { ErrorProvider } from "./shared/providers/ErrorProvider";
 
 import StorePage from "./modules/store/StorePage";
 import LoginPage from "./modules/user/login/LoginPage";
@@ -36,7 +37,7 @@ const App: React.FC = () => {
   const showLayout = !noLayoutPaths.includes(pathname);
 
   return (
-    <>
+    <ErrorProvider>
       {showLayout && <Header />}
       <Box sx={{ overflowY: "auto" }}>
         <Routes>
@@ -73,7 +74,7 @@ const App: React.FC = () => {
         </Routes>
       </Box>
       {showLayout && <Footer />}
-    </>
+    </ErrorProvider>
   );
 };
 

@@ -5,51 +5,49 @@ const cartsController = "carts";
 const productsController = "products";
 
 export async function getCart(this: SDK): Promise<CartDto> {
-  const response = await this.get(`${cartsController}`, {});
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Get cart failed: ${err}`);
-  }
-
-  return (await response.json()) as CartDto;
+  return await this.getWithErrorHandling<CartDto>(
+    `${cartsController}`, 
+    {},
+    { 
+      operation: 'Get Cart',
+      component: 'CartService'
+    }
+  );
 }
 
 export async function addProductToCart(this: SDK, productId: string, payload: { quantity: number }): Promise<CartDto> {
-  const response = await this.post(
+  return await this.postWithErrorHandling<CartDto>(
     `${cartsController}/${productsController}/${productId}`,
-    payload
+    payload,
+    { 
+      operation: 'Add Product to Cart',
+      component: 'CartService',
+      resourceId: productId,
+      additionalData: { quantity: payload.quantity }
+    }
   );
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Add product to cart failed: ${err}`);
-  }
-
-  return (await response.json()) as CartDto;
 }
 
 export async function removeProductFromCart(this: SDK, productId: string): Promise<void> {
-  const response = await this.delete(
-    `${cartsController}/${productsController}/${productId}`
+  return await this.deleteWithErrorHandling<void>(
+    `${cartsController}/${productsController}/${productId}`,
+    { 
+      operation: 'Remove Product from Cart',
+      component: 'CartService',
+      resourceId: productId
+    }
   );
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Remove product from cart failed: ${err}`);
-  }
 }
 
 export async function updateProductInCart(this: SDK, productId: string, payload: { quantity: number }): Promise<CartDto> {
-  const response = await this.patch(
+  return await this.patchWithErrorHandling<CartDto>(
     `${cartsController}/${productsController}/${productId}`,
-    payload
+    payload,
+    { 
+      operation: 'Update Product in Cart',
+      component: 'CartService',
+      resourceId: productId,
+      additionalData: { quantity: payload.quantity }
+    }
   );
-
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(`Update product quantity failed: ${err}`);
-  }
-  
-  return (await response.json()) as CartDto;
 }

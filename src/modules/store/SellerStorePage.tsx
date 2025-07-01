@@ -202,7 +202,7 @@ const SellerStoreLayout: React.FC = () => {
               }}
             />
             <Typography variant="h6" mt={1}>
-              {store.rating > 0 ? `(${store.rating.toFixed(1)})` : ""}
+              {(store.rating ?? 0) > 0 ? `(${store.rating!.toFixed(1)})` : ""}
             </Typography>
           </Box>
         )}
