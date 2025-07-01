@@ -99,7 +99,7 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
   
   const handleOnEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setAuctionEnd(value);
+    setAuctionEnd(new Date(value).toISOString());
   };
 
   const isSaveDisabled =
