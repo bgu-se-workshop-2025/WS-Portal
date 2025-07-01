@@ -11,8 +11,13 @@ const calculateProductTotal = (product: any): number => {
   return product.price * product.quantity;
 };
 
+
 const hasDiscount = (product: any): boolean => {
   return product.discountPrice && product.discountPrice < product.price * product.quantity;
+};
+
+const hasStoreDiscount = (store: any): boolean => {
+  return typeof store.discount === 'number' && store.discount > 0;
 };
 
 const getProductDisplayPrice = (product: any): React.ReactNode => {
@@ -35,19 +40,29 @@ const getProductDisplayPrice = (product: any): React.ReactNode => {
   return <span>{regularTotal.toFixed(2)}₪</span>;
 };
 
-const calculateStoreTotal = (products: any[]): number => {
-  return products.reduce((sum: number, product: any) => {
+
+// Calculates the store total after product discounts and store-level discount
+const calculateStoreTotal = (store: any): number => {
+  const products = Array.isArray(store.products) ? store.products : [];
+  const discountedSum = products.reduce((sum: number, product: any) => {
     if (hasDiscount(product)) {
       return sum + product.discountPrice;
     }
     return sum + calculateProductTotal(product);
   }, 0);
+  if (hasStoreDiscount(store)) {
+    const afterDiscount = store.price - store.discount;
+    // Only apply store discount if afterDiscount < discountedSum
+    if (afterDiscount < discountedSum) {
+      return afterDiscount;
+    }
+  }
+  return discountedSum;
 };
 
 const calculateOrderTotal = (storeSnapshots: any[]): number => {
   return storeSnapshots.reduce((orderSum: number, store: any) => {
-    const products = Array.isArray(store.products) ? store.products : [];
-    const storeTotal = calculateStoreTotal(products);
+    const storeTotal = calculateStoreTotal(store);
     return orderSum + storeTotal;
   }, 0);
 };
@@ -143,14 +158,14 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                               onChange={async (newValue) => {
                                 try {
                                   await sdk.createStoreReview({
-                                    id: null,
-                                    productId: null,
+                                    id: undefined,
+                                    productId: undefined,
                                     storeId: store.storeId,
-                                    writerId: null,
+                                    writerId: undefined,
                                     title: '',
                                     body: '',
                                     rating: Math.round(newValue),
-                                    date: null,
+                                    date: undefined,
                                   });
                                   if (typeof setLiveStoreNames === 'function') {
                                     const updated = await sdk.getStore(store.storeId);
@@ -186,14 +201,14 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                                       onChange={async (newValue) => {
                                         try {
                                           await sdk.createProductReview({
-                                            id: null,
+                                            id: undefined,
                                             productId: product.productId || product.id,
                                             storeId: store.storeId,
-                                            writerId: null,
+                                            writerId: undefined,
                                             title: '',
                                             body: '',
                                             rating: Math.round(newValue),
-                                            date: null,
+                                            date: undefined,
                                           });
                                           if (typeof setOrders === 'function') {
                                             const updatedOrders = await sdk.getUserOrders({ page: 0, size: PAGE_SIZE });
@@ -212,7 +227,28 @@ const PurchaseHistoryTab: React.FC<UserProfileTabProps> = ({ orders, ordersLoadi
                             <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>No products found.</Typography>
                           )}
                           <Typography variant="body2" sx={{ fontWeight: 500, color: 'gray', mt: 1 }}>
-                            Store total: {totalOrderPrice.toFixed(2)}₪
+                            Store total: {(() => {
+                              // Sum of green (discounted) prices of products
+                              const discountedSum = products.reduce((sum: number, product: any) => {
+                                if (hasDiscount(product)) {
+                                  return sum + product.discountPrice;
+                                }
+                                return sum + calculateProductTotal(product);
+                              }, 0);
+                              if (!hasStoreDiscount(store)) {
+                                return <span>{discountedSum.toFixed(2)}₪</span>;
+                              }
+                              const afterDiscount = store.price - store.discount;
+                              // Only show both prices if afterDiscount < discountedSum
+                              if (afterDiscount < discountedSum) {
+                                return <>
+                                  <span style={{ textDecoration: "line-through", color: "#888", marginRight: "6px" }}>{discountedSum.toFixed(2)}₪</span>
+                                  <span style={{ color: "#388e3c", fontWeight: "bold" }}>{afterDiscount.toFixed(2)}₪</span>
+                                </>;
+                              }
+                              // Otherwise, show only the gray price
+                              return <span>{discountedSum.toFixed(2)}₪</span>;
+                            })()}
                           </Typography>
                           <Divider sx={{ mt: 1, mb: 1, opacity: 0.2 }} />
                         </Box>
