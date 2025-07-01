@@ -78,23 +78,13 @@ const NotificationMenu: React.FC = () => {
                     <ListItem alignItems="flex-start">
                       <ListItemText
                         primary={
-                          <>
-                            <Typography
-                              component="span"
-                              variant="body2"
-                              color="text.primary"
-                            >
-                              {n.content}
-                            </Typography>
-                            <Typography
-                              component="span"
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ display: "block" }}
-                            >
-                              {new Date(n.createdAt).toLocaleString()}
-                            </Typography>
-                          </>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            color="text.primary"
+                          >
+                            {n.content}
+                          </Typography>
                         }
                       />
                     </ListItem>

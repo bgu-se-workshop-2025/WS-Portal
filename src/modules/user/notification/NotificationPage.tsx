@@ -71,7 +71,36 @@ const NotificationPage: React.FC = () => {
                       color="text.secondary"
                       sx={{ mt: 0.5 }}
                     >
-                      {new Date(n.createdAt).toLocaleString()}
+                      {(() => {
+                        console.log('Full notification object (page):', n);
+                        console.log('Notification page timestamp:', n.createdAt, typeof n.createdAt);
+                        
+                        if (!n.createdAt) {
+                          return 'No timestamp';
+                        }
+                        
+                        let date;
+                        if (typeof n.createdAt === 'string') {
+                          date = new Date(n.createdAt);
+                        } else if (typeof n.createdAt === 'number') {
+                          // Check if it's in seconds (Unix timestamp) or milliseconds
+                          date = n.createdAt > 1000000000000 
+                            ? new Date(n.createdAt) 
+                            : new Date(n.createdAt * 1000);
+                        } else {
+                          return `Invalid timestamp type: ${typeof n.createdAt}`;
+                        }
+                        
+                        // Format date in Israeli format (Hebrew locale)
+                        return date.toLocaleString('he-IL', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false // 24-hour format
+                        });
+                      })()}
                     </Typography>
                   </Box>
                 }
