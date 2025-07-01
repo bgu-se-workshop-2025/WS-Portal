@@ -25,6 +25,7 @@ const SellerAuctionProductCard: React.FC<SellerAuctionProductCardProps> = ({ pro
   const [currentTopOffer, setCurrentTopOffer] = useState<number | null>(null);
   const [bidHistoryOpen, setBidHistoryOpen] = useState(false);
   const [bidHistory, setBidHistory] = useState<AuctionBidDto[]>([]);
+  const [bidderMap, setBidderMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -39,17 +40,29 @@ const SellerAuctionProductCard: React.FC<SellerAuctionProductCardProps> = ({ pro
     setLoading(true);
     setBidHistoryOpen(true);
     try {
-        const pageable = { page: 0, size: 25 }; 
-        const bids = await sdk.getBids(product.id, pageable);
-        console.log("Fetched bids:", bids);
-        setBidHistory([...bids].sort((a, b) => b.bidPrice - a.bidPrice));
+      const pageable = { page: 0, size: 25 };
+      const bids = await sdk.getBids(product.id, pageable);
+      setBidHistory([...bids].sort((a, b) => b.bidPrice - a.bidPrice));
+
+      const uniqueIds = Array.from(new Set(bids.map(b => b.bidderId)));
+      const entries = await Promise.all(
+        uniqueIds.map(async (id) => {
+          try {
+            const user = await sdk.getPublicUserProfileDetails(id);
+            return [id, user.username || id];
+          } catch {
+            return [id, id];
+          }
+        })
+      );
+      setBidderMap(Object.fromEntries(entries));
     } catch {
-        setBidHistory([]);
+      setBidHistory([]);
+      setBidderMap({});
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
-
   return (
       <Box>
           <Typography variant="body2">
@@ -81,24 +94,30 @@ const SellerAuctionProductCard: React.FC<SellerAuctionProductCardProps> = ({ pro
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Bidder</TableCell>
-                  <TableCell>Bid Amount</TableCell>
-                  <TableCell>Time</TableCell>
+                  <TableCell>
+                    Bidder
+                  </TableCell>
+                  <TableCell>
+                    Bid Amount
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {bidHistory.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={3} align="center">
+                    <TableCell colSpan={2} align="center">
                       No bids yet.
                     </TableCell>
                   </TableRow>
                 ) : (
                   bidHistory.map((bid) => (
                     <TableRow key={bid.id}>
-                      <TableCell>{bid.bidderId}</TableCell>
-                      <TableCell>${bid.bidPrice.toFixed(2)}</TableCell>
-                      <TableCell>{new Date(product.auctionEndDate).toLocaleString()}</TableCell>
+                      <TableCell>
+                        {bidderMap[bid.bidderId] || bid.bidderId}
+                      </TableCell>
+                      <TableCell>
+                        ${bid.bidPrice.toFixed(2)}
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
