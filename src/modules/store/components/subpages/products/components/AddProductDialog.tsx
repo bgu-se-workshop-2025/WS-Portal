@@ -85,6 +85,11 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
       setAdding(false);
     }
   };
+  
+  const handleOnEndDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setNewAuctionEnd(value);
+  };
 
   const isAddDisabled =
     adding || newName.trim().length === 0 || newPrice === undefined;
@@ -187,7 +192,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 type="datetime-local"
                 InputLabelProps={{ shrink: true }}
                 value={newAuctionEnd}
-                onChange={(e) => setNewAuctionEnd(e.target.value)}
+                onChangeCapture={handleOnEndDateChange}
                 fullWidth
                 disabled={adding}
               />
