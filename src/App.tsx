@@ -19,6 +19,7 @@ import PaymentPage from "./modules/order/PaymentPage";
 import StoreProductsPage from "./modules/store/components/subpages/products/StoreProductsPage";
 import StoreSellersPage from "./modules/store/components/subpages/StoreSellers";
 import StoreSettingsPage from "./modules/store/components/subpages/StoreSettings";
+import StoreMessages from "./modules/store/components/subpages/StoreMessages";
 import CartMainPage from "./modules/cart/CartMainPage";
 
 const App: React.FC = () => {
@@ -44,6 +45,7 @@ const App: React.FC = () => {
             <Route path="sellers" element={<StoreSellersPage />} />
             <Route path="settings" element={<StoreSettingsPage />} />
             <Route path="discounts" element={<StoreDiscountsPage />} />
+            <Route path="messages" element={<StoreMessages />} />
           </Route>
 
           <Route path="/payment" element={<PaymentPage />} />

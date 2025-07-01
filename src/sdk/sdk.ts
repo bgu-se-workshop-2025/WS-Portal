@@ -11,6 +11,7 @@ import * as publicReview from "./modules/store/publicReview";
 import * as publicStore from "./modules/store/publicStore";
 import * as review from "./modules/store/review";
 import * as store from "./modules/store/store";
+import * as storeRequest from "./modules/store/storeRequest";
 
 import * as admin from "./modules/user/admin";
 import * as cart from "./modules/user/cart";
@@ -58,6 +59,13 @@ export class SDK {
   public getMessageById!: (messageId: string) => Promise<dtos.MessageDto>;
   public updateMessage!: (messageId: string, payload: dtos.MessageDto) => Promise<dtos.MessageDto>;
   public deleteMessage!: (messageId: string) => Promise<void>;
+
+  // Store Request SDK
+  public getStoreRequests!: (storeId: string, page?: number, size?: number) => Promise<dtos.MessageDto[]>;
+  public getStoreResponses!: (storeId: string, page?: number, size?: number) => Promise<dtos.MessageDto[]>;
+  public respondToStoreRequest!: (storeId: string, messageId: string, response: dtos.MessageDto) => Promise<dtos.MessageDto>;
+  public updateStoreResponse!: (storeId: string, responseId: string, response: dtos.MessageDto) => Promise<dtos.MessageDto>;
+  public deleteStoreResponse!: (storeId: string, responseId: string) => Promise<void>;
 
   // Product SDK
   public getProduct!: (id: string) => Promise<dtos.ProductDto>;
@@ -149,6 +157,7 @@ export class SDK {
       ...publicStore,
       ...review,
       ...store,
+      ...storeRequest,
       ...admin,
       ...cart,
       ...message,

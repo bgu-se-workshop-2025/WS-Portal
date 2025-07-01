@@ -13,13 +13,16 @@ import {
   Chip,
   Divider,
   useTheme,
+  Button,
 } from "@mui/material";
 import StoreIcon from "@mui/icons-material/Store";
+import MessageIcon from "@mui/icons-material/Message";
 import { Link, Outlet, useParams, useLocation, Navigate } from "react-router-dom";
 import { sdk } from "../../sdk/sdk";
 import { StoreDto } from "../../shared/types/dtos";
 import RatingComponent from "../../shared/components/RatingComponent";
 import { isAuthenticated } from "../../sdk/sdk";
+import ContactStoreDialog from "./components/subpages/ContactStoreDialog";
 
 const UserStorePage: React.FC = () => {
   const theme   = useTheme();
@@ -30,6 +33,7 @@ const UserStorePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError]         = useState<string | null>(null);
   const [isSeller, setIsSeller] = useState<boolean>(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (!storeId) return;
@@ -87,7 +91,7 @@ const UserStorePage: React.FC = () => {
               underline="hover"
               color="inherit"
               component={Link}
-              to="/user/dashboard"
+              to="/profile"
             >
               My Stores
             </MuiLink>
@@ -145,6 +149,17 @@ const UserStorePage: React.FC = () => {
               precision={0.1}
               key={`readonly-store-rating-${store.rating}`}
             />
+            {/* Contact Store Button - only show for non-sellers and authenticated users */}
+            {!isSeller && isAuthenticated() && (
+              <Button
+                variant="contained"
+                startIcon={<MessageIcon />}
+                onClick={() => setContactDialogOpen(true)}
+                sx={{ mt: 2 }}
+              >
+                Contact Store
+              </Button>
+            )}
           </Box>
         )}
 
@@ -199,6 +214,16 @@ const UserStorePage: React.FC = () => {
           </Paper>
         )}
       </Container>
+
+      {/* Contact Store Dialog */}
+      {store && (
+        <ContactStoreDialog
+          open={contactDialogOpen}
+          onClose={() => setContactDialogOpen(false)}
+          storeId={storeId!}
+          storeName={store.name}
+        />
+      )}
     </Box>
   );
 };
