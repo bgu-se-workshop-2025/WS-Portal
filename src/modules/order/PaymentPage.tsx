@@ -187,19 +187,7 @@ const PaymentPage: React.FC = () => {
       paymentDetails: paymentDetails,
       shippingAddress: shippingAddress
       };
-
-    try {
-      const order = await orderHook.createOrder(createOrderRequest);
-      let possibleError = await orderHook.error;
-      if (possibleError) {
-        setErrorMessage(possibleError ?? "Unexpected error occurred");
-        return;
-      }
-      setSuccessMessage(order);
-    } catch (error: any) {
-      setErrorMessage(error.msg ?? "Unexpected error occurred");
-    } finally {
-      setLoading(false);
+      
       try {
         const order = await orderHook.createOrder(createOrderRequest);
         setSuccess(order);
@@ -397,9 +385,6 @@ const PaymentPage: React.FC = () => {
         </Stack>
 
         {success && (
-            <Alert severity="success" sx={{ mt: 3 }}>
-              Purchase successful! Transaction ID: {success.id}
-            </Alert>
           <Alert severity="success" sx={{ mt: 3 }}>
             Purchase {(bidId ? "from bid " : "")}successful! Transaction ID: {success.id}
           </Alert>

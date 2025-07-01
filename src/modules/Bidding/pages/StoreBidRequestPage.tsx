@@ -51,7 +51,7 @@ const StoreBidRequestPage: React.FC = () => {
 
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Store Bid Requests</Typography>
+      <Typography variant="h4" gutterBottom>Bid Requests</Typography>
 
       {loading.list && page === 0 && (
         <Box textAlign="center" my={2}>

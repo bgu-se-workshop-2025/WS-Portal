@@ -290,12 +290,6 @@ const SellerStoreLayout: React.FC = () => {
                 to={`/store/${id}/products`}
               />
               <Tab
-                value="discounts"
-                label="Discounts"
-                component={Link}
-                to={`/store/${id}/discounts`}
-              />
-              <Tab
                 value="sellers"
                 label="Sellers"
                 component={Link}

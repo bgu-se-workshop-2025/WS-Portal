@@ -147,43 +147,39 @@ const UserProductCard: React.FC<{
         )}
       </CardContent>
 
-      {!product.auctionEndDate && <CardActions
-        sx={{
-          justifyContent: "center",
-          alignItems: "center",
-          px: theme.spacing(2),
-          pb: theme.spacing(2),
-        }}
-      >
-        <Button
-          size="small"
-          variant="outlined"
-          onClick={handleDecrement}
-          disabled={cartLoading || currentQty === 0}
-          sx={{ minWidth: 32, p: 0 }}
+      {!product.auctionEndDate && (
+        <CardActions
+          sx={{
+            justifyContent: "center",
+            alignItems: "center",
+            px: theme.spacing(2),
+            pb: theme.spacing(2),
+          }}
         >
-          –
-        </Button>
-
-            <Box sx={{ width: 32, textAlign: "center", mx: theme.spacing(1) }}>
-              <Typography variant="body2">{currentQty}</Typography>
-            </Box>
-
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={handleIncrement}
-              disabled={cartLoading}
-              sx={{ minWidth: 32, p: 0 }}
-            >
-              +
-            </Button>
-
-            {cartLoading && (
-              <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
-            )}
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleDecrement}
+            disabled={cartLoading || currentQty === 0}
+            sx={{ minWidth: 32, p: 0 }}
+          >
+            –
+          </Button>
+          <Box sx={{ width: 32, textAlign: "center", mx: theme.spacing(1) }}>
+            <Typography variant="body2">{currentQty}</Typography>
           </Box>
-
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={handleIncrement}
+            disabled={cartLoading}
+            sx={{ minWidth: 32, p: 0 }}
+          >
+            +
+          </Button>
+          {cartLoading && (
+            <CircularProgress size={20} sx={{ ml: theme.spacing(1) }} />
+          )}
           {isUserAuthenticated && (
             <>
               <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
@@ -198,18 +194,19 @@ const UserProductCard: React.FC<{
             </>
           )}
         </CardActions>
-      </Card>
-
-      {storeId && (
-        <CreateBidRequestDialog
-          open={bidDialogOpen}
-          onClose={() => setBidDialogOpen(false)}
-          productId={product.id}
-          storeId={storeId}
-        />
       )}
-    </>
-  );
+    </Card>
+
+    {storeId && (
+      <CreateBidRequestDialog
+        open={bidDialogOpen}
+        onClose={() => setBidDialogOpen(false)}
+        productId={product.id}
+        storeId={storeId}
+      />
+    )}
+  </>
+);
 };
 
 export default UserProductCard;

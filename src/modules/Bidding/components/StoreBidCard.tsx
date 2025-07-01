@@ -56,7 +56,7 @@ const StoreBidCard: React.FC<StoreBidCardProps> = ({ bid }) => {
         </Typography>
         {bid.isPurchased && (
           <Alert severity="success" sx={{ mt: 2 }}>
-            Purchased ✅
+            Purchased
           </Alert>
         )}
       </CardContent>
@@ -64,7 +64,7 @@ const StoreBidCard: React.FC<StoreBidCardProps> = ({ bid }) => {
       <Box sx={{ px: 2, pb: 2 }}>
         {bid.isPurchased ? (
           <Typography variant="body2" color="text.secondary" textAlign="center" width="100%">
-            ✅ Purchase completed
+            Purchase completed
           </Typography>
         ) : (
           <Typography variant="body2" color="text.secondary" textAlign="center" width="100%">

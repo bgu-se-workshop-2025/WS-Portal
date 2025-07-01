@@ -65,7 +65,7 @@ const StoreBidsPage: React.FC = () => {
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Store Bids
+        Bids
       </Typography>
 
       {loadingList && page === 0 && (

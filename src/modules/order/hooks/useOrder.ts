@@ -76,25 +76,6 @@ const useOrder = (): UseOrderReturn => {
         []
     );
 
-
-    const placeBid = useCallback(
-        async (productId: string, auctionBid: AuctionBidDto) => {
-            setLoading(true);
-            setError(null);
-            try {
-                const bid = await sdk.placeBid(productId, auctionBid);
-                return bid;
-            } catch (err: any) {
-                console.error("Error placing bid:", err);
-                setError(err.message || "Failed to place bid");
-                return undefined;
-            } finally {
-                setLoading(false);
-            }
-        },
-        []
-    );
-
     return {
         loading,
         error,

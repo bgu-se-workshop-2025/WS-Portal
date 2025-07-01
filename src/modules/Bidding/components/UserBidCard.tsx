@@ -66,7 +66,7 @@ const UserBidCard: React.FC<UserBidCardProps> = ({ bid, onAction }) => {
         </Typography>
         {bid.isPurchased && (
           <Alert sx={{ mt: 2 }} severity="success">
-            Purchased ✅
+            Purchased
           </Alert>
         )}
       </CardContent>
