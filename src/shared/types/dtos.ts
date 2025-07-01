@@ -10,18 +10,18 @@ export interface SuspensionTicketDto {
 }
 
 export interface PublicUserDto {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
+    id: string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
 }
 
 export interface UpdatePublicUserDto {
-  username?: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
+    username?: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
 }
 
 export interface StoreDto {
@@ -55,11 +55,10 @@ export interface SellerDto {
 }
 
 export enum SellerType {
-  OWNER = 0,
-  MANAGER = 1,
-  UNKNOWN = 2,
+    OWNER = 0,
+    MANAGER = 1,
+    UNKNOWN = 2,
 }
-
 
 export interface MessageDto {
     recipientId: string;
@@ -73,10 +72,10 @@ export interface Pageable {
 }
 
 export interface PublicUserDto {
-  id: string;
-  email: string;
-  username: string;
-  profilePictureUri: string;
+    id: string;
+    email: string;
+    username: string;
+    profilePictureUri: string;
 }
 
 export interface UserOrderDto {
@@ -106,14 +105,14 @@ export interface ShippingAddressDto {
 }
 
 export interface ReviewDto {
-    id: string | null;
-    productId: string | null;  
-    storeId: string;
-    writerId: string | null;
-    title: string;
-    body: string;
-    rating: number;
-    date: string | null;
+    id?: string;
+    productId?: string;  
+    storeId?: string;
+    writerId?: string;
+    title?: string;
+    body?: string;
+    rating?: number;
+    date?: string;
 }
 
 export interface OrderRequestDetails {
@@ -138,11 +137,26 @@ export interface CartProductEntryDto {
 }
 
 export interface PaymentDetails {
-    paymentMethod: PaymentMethod;
+    /**
+     * @deprecated
+     */
+    paymentMethod?: PaymentMethod;
+
     externalId: string;
     payerEmail: string;
     payerId: string;
+
+    paymentData: { [key: string]: string };
 }
+
+export type paymentDataKeys =
+    | "currency"
+    | "card_number"
+    | "month"
+    | "year"
+    | "holder"
+    | "cvv"
+    | "id";
 
 export enum PaymentMethod {
     CREDIT_CARD = 0,
@@ -163,7 +177,7 @@ export enum BidRequestStatus {
     ACCEPTED = 1,
     APPROVED = 2,
     RECEIVED_ALTERNATIVE_PRICE = 3,
-    REJECTED = 4
+    REJECTED = 4,
 }
 
 export interface BidDto {
@@ -171,4 +185,35 @@ export interface BidDto {
     userId: string;
     productId: string;
     price: number;
+}
+
+export interface AuctionBidDto {
+  id?: string;
+  productId: string;
+  bidderId: string;
+  bidPrice: number;
+  paymentDetails: PaymentDetails;
+  shippingAddress: ShippingAddressDto;
+}
+
+export interface ProductSnapshotDto {
+  id: string;
+  productId: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  totalPrice: number;
+  discountPrice: number;
+  auctionEndDate?: string;
+}
+
+export interface StoreSnapshotDto {
+  id: string;
+  storeId: string;
+  name: string;
+  description: string;
+  products: ProductSnapshotDto[];
+  price: number;
+  discount: number;
 }
