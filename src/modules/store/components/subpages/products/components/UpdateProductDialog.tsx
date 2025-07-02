@@ -39,17 +39,25 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
     if (!existingProduct.auctionEndDate) return "";
     
     try {
-      // Backend format: "HH:mm:ss dd/MM/yyyy"
+      // Try to parse as ISO format first (new format)
+      const date = new Date(existingProduct.auctionEndDate);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().slice(0, 16);
+      }
+      
+      // Fallback: try old format "HH:mm:ss dd/MM/yyyy" for backward compatibility
       const parts = existingProduct.auctionEndDate.split(' ');
-      if (parts.length !== 2) return "";
+      if (parts.length === 2) {
+        const [timePart, datePart] = parts;
+        const [hours, minutes] = timePart.split(':');
+        const [day, month, year] = datePart.split('/');
+        
+        // Convert to ISO format for datetime-local input
+        const fallbackDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
+        return fallbackDate.toISOString().slice(0, 16);
+      }
       
-      const [timePart, datePart] = parts;
-      const [hours, minutes] = timePart.split(':');
-      const [day, month, year] = datePart.split('/');
-      
-      // Convert to ISO format for datetime-local input
-      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes));
-      return date.toISOString().slice(0, 16);
+      return "";
     } catch {
       return "";
     }
@@ -103,21 +111,16 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
     setSaveError(undefined);
 
     try {
-      // Convert auction date to backend format if provided
+      // Use ISO format for auction date if provided
       let formattedAuctionDate: string | undefined = undefined;
       if (auctionEnd) {
-        const date = new Date(auctionEnd);
-        // Format as "HH:mm:ss dd/MM/yyyy" to match backend expectation
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const seconds = '00';
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        formattedAuctionDate = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+        // Send the date in ISO format that the backend can parse
+        formattedAuctionDate = new Date(auctionEnd).toISOString();
+        console.log("🔍 DEBUG: Sending auction date:", formattedAuctionDate);
       } else if (existingProduct.auctionEndDate) {
         // Keep existing auction date if user didn't change it
         formattedAuctionDate = existingProduct.auctionEndDate;
+        console.log("🔍 DEBUG: Keeping existing auction date:", formattedAuctionDate);
       }
 
       const toUpdate: ProductDto = {

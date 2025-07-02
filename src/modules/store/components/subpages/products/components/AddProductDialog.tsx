@@ -87,18 +87,12 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
     setAddError(undefined);
 
     try {
-      // Convert auction date to backend format if provided
+      // Use ISO format for auction date if provided
       let formattedAuctionDate: string | undefined = undefined;
       if (newAuctionEnd) {
-        const date = new Date(newAuctionEnd);
-        // Format as "HH:mm:ss dd/MM/yyyy" to match backend expectation
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const seconds = '00';
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
-        formattedAuctionDate = `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+        // Send the date in ISO format that the backend can parse
+        formattedAuctionDate = new Date(newAuctionEnd).toISOString();
+        console.log("🔍 DEBUG: Sending auction date:", formattedAuctionDate);
       }
 
       const toCreate: Partial<ProductDto> = {
@@ -238,7 +232,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
                 onChangeCapture={handleOnEndDateChange}
                 fullWidth
                 disabled={adding}
-                error={newAuctionEnd && new Date(newAuctionEnd) <= new Date() && !!addError}
+                error={!!newAuctionEnd && new Date(newAuctionEnd) <= new Date() && !!addError}
                 helperText={newAuctionEnd && new Date(newAuctionEnd) <= new Date() && !!addError ? "The product's auction date needs to be set in the future" : "Leave empty for regular product"}
               />
             </Grid>
