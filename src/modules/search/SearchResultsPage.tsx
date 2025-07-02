@@ -82,7 +82,7 @@ const SearchResultsPage: React.FC = () => {
 
   // Fetch store data for products
   const fetchStoreData = useCallback(async (products: ProductDto[]) => {
-    const storeIds = [...new Set(products.map(p => p.storeId))];
+    const storeIds = [...new Set(products.map(p => p.storeId).filter((id): id is string => id != null))];
     const storeDataMap: Record<string, { name: string; rating: number }> = {};
 
     await Promise.all(
@@ -91,7 +91,7 @@ const SearchResultsPage: React.FC = () => {
           const store = await sdk.getStore(storeId);
           storeDataMap[storeId] = {
             name: store.name,
-            rating: store.rating
+            rating: store.rating ?? 0
           };
         } catch (err) {
           console.error(`Failed to fetch store ${storeId}:`, err);
@@ -142,8 +142,8 @@ const SearchResultsPage: React.FC = () => {
       
       // Filter by ratings on client side since API doesn't support it yet
       const filteredItems = items.filter(product => {
-        const productRatingMatch = product.rating >= filters.minProductRating;
-        const storeRatingMatch = (currentStoreData[product.storeId]?.rating || 0) >= filters.minStoreRating;
+        const productRatingMatch = (product.rating ?? 0) >= filters.minProductRating;
+        const storeRatingMatch = product.storeId ? (currentStoreData[product.storeId]?.rating || 0) >= filters.minStoreRating : false;
         return productRatingMatch && storeRatingMatch;
       });
       
@@ -352,8 +352,8 @@ const ProductsGridWithStoreNames: React.FC<ProductsGridWithStoreNamesProps> = ({
   // Create enhanced products with store names for display
   const enhancedProducts = products.map(product => ({
     ...product,
-    storeName: storeData[product.storeId]?.name || 'Unknown Store',
-    storeRating: storeData[product.storeId]?.rating || 0,
+    storeName: product.storeId ? storeData[product.storeId]?.name || 'Unknown Store' : 'Unknown Store',
+    storeRating: product.storeId ? storeData[product.storeId]?.rating || 0 : 0,
   }));
 
   return (
