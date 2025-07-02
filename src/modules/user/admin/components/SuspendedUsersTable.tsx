@@ -20,7 +20,7 @@ const SuspendedUsersTable = ({ useAdminResponse }: SuspendedUsersTableProps) => 
         getSuspensions(page, 25).then((value) => {
             setSuspensions(value);
         })
-    }, [page, loading]);
+    }, [page]);
 
     const handleCancel = async (username: string) => {
         await cancelSuspensionUser(username);
