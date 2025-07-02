@@ -45,7 +45,13 @@ const UserProductCard: React.FC<{
   const isUserAuthenticated = isAuthenticated();
   
   // Use product's storeId (always available), fallback to URL parameter for backward compatibility
-  const storeId = product.storeId || urlStoreId;
+  // Enhanced to handle cases where store discounts might affect storeId availability
+  const storeId = product.storeId || urlStoreId || 
+    (typeof window !== 'undefined' && window.location.pathname.includes('/store/') 
+      ? window.location.pathname.split('/store/')[1]?.split('/')[0] 
+      : undefined);
+
+
 
   // Check if current user is a seller of this product's store
   useEffect(() => {
@@ -82,14 +88,7 @@ const UserProductCard: React.FC<{
     if (!storeId) return;
     if (currentQty === product.quantity) return;
     
-    // Debug logging to check store ID
-    console.log('Adding to cart:', {
-      productName: product.name,
-      productStoreId: product.storeId,
-      urlStoreId,
-      effectiveStoreId: storeId,
-      storeName: product.storeName
-    });
+  
     
     if (currentQty === 0) {
       await addToCart(storeId, product.id!, 1);
@@ -180,9 +179,12 @@ const UserProductCard: React.FC<{
                 isUserAuthenticated={isUserAuthenticated}
               />
             ) : (
-              <Typography variant="body2">
-                <strong>Price:</strong> ${product.price.toFixed(2)}
-              </Typography>
+              <>
+                <Typography variant="body2">
+                  <strong>Price:</strong> ${product.price.toFixed(2)}
+                </Typography>
+
+              </>
             )}
             <Typography variant="body2">
               <strong>Available:</strong> {product.quantity}
@@ -266,6 +268,7 @@ const UserProductCard: React.FC<{
                   variant="contained"
                   color="primary"
                   onClick={() => setBidDialogOpen(true)}
+                  title="Make an offer for this product"
                 >
                   Bid
                 </Button>
@@ -298,7 +301,7 @@ const UserProductCard: React.FC<{
         )}
       </Card>
 
-      {storeId && !isSellerOfStore && (
+      {storeId && !isSellerOfStore && product.id && (
         <CreateBidRequestDialog
           open={bidDialogOpen}
           onClose={() => setBidDialogOpen(false)}

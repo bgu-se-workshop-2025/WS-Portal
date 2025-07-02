@@ -116,11 +116,11 @@ const UpdateProductDialog: React.FC<UpdateProductDialogProps> = ({
       if (auctionEnd) {
         // Send the date in ISO format that the backend can parse
         formattedAuctionDate = new Date(auctionEnd).toISOString();
-        console.log("🔍 DEBUG: Sending auction date:", formattedAuctionDate);
+
       } else if (existingProduct.auctionEndDate) {
         // Keep existing auction date if user didn't change it
         formattedAuctionDate = existingProduct.auctionEndDate;
-        console.log("🔍 DEBUG: Keeping existing auction date:", formattedAuctionDate);
+
       }
 
       const toUpdate: ProductDto = {
