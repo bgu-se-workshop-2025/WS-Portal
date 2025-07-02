@@ -92,7 +92,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({
       if (newAuctionEnd) {
         // Send the date in ISO format that the backend can parse
         formattedAuctionDate = new Date(newAuctionEnd).toISOString();
-        console.log("🔍 DEBUG: Sending auction date:", formattedAuctionDate);
+
       }
 
       const toCreate: Partial<ProductDto> = {

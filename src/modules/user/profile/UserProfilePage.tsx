@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 const PAGE_SIZE = 25;
 
-const bombardilloEnabled = false; //-----------
+const bombardilloEnabled = true; //-----------
 
 const UserProfilePage: React.FC = () => {
   const [user, setUser] = React.useState<PublicUserDto | null>(null);
